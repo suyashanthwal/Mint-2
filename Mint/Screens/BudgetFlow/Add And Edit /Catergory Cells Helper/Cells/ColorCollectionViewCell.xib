@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ColorCell" id="gTV-IL-0wX" customClass="ColorCollectionViewCell" customModule="Mint">
+            <rect key="frame" x="0.0" y="0.0" width="42" height="42"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="42" height="42"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zE6-BS-mwY" userLabel="SelectionRing">
+                        <rect key="frame" x="-1" y="-1" width="44" height="44"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3ud-7l-Yf8" userLabel="ColorView" customClass="ColorCollectionViewCell" customModule="BudgetPage">
+                                <rect key="frame" x="2" y="2" width="40" height="40"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="40" id="SfF-YC-e4I"/>
+                                    <constraint firstAttribute="width" secondItem="3ud-7l-Yf8" secondAttribute="height" multiplier="1:1" id="cCK-ol-k7c"/>
+                                    <constraint firstAttribute="height" constant="40" id="fl2-YG-rCY"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="44" id="IOj-0o-3eK"/>
+                            <constraint firstItem="3ud-7l-Yf8" firstAttribute="centerY" secondItem="zE6-BS-mwY" secondAttribute="centerY" id="VaC-4k-UP1"/>
+                            <constraint firstAttribute="height" constant="44" id="m6W-zu-GnL"/>
+                            <constraint firstItem="3ud-7l-Yf8" firstAttribute="centerX" secondItem="zE6-BS-mwY" secondAttribute="centerX" id="oI4-9C-fTc"/>
+                            <constraint firstAttribute="width" secondItem="zE6-BS-mwY" secondAttribute="height" multiplier="1:1" id="s4z-Mw-4iu"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="zE6-BS-mwY" firstAttribute="centerY" secondItem="gTV-IL-0wX" secondAttribute="centerY" id="9l2-kY-8Qf"/>
+                <constraint firstItem="zE6-BS-mwY" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="nAC-pi-Ids"/>
+            </constraints>
+            <size key="customSize" width="42" height="42"/>
+            <connections>
+                <outlet property="colorView" destination="3ud-7l-Yf8" id="UoN-zt-qPy"/>
+                <outlet property="selectionRing" destination="zE6-BS-mwY" id="a7F-rD-DGP"/>
+            </connections>
+            <point key="canvasLocation" x="-242.74809160305344" y="130.28169014084509"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

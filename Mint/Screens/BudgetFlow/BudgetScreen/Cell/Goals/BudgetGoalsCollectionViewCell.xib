@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="BudgetGoalsCell" id="gTV-IL-0wX" customClass="BudgetGoalsCollectionViewCell" customModule="Mint">
+            <rect key="frame" x="0.0" y="0.0" width="322" height="93"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="322" height="93"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HN6-z9-LTF">
+                        <rect key="frame" x="8" y="8" width="35" height="16"/>
+                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="13"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="grA-Dw-U9U">
+                        <rect key="frame" x="278" y="8" width="36" height="16"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="13"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="ih7-VK-2rr">
+                        <rect key="frame" x="8" y="44" width="306" height="4"/>
+                    </progressView>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="ih7-VK-2rr" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="8" id="13n-ho-bpp"/>
+                <constraint firstItem="HN6-z9-LTF" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="8" id="EY4-Fl-hWD"/>
+                <constraint firstAttribute="trailing" secondItem="ih7-VK-2rr" secondAttribute="trailing" constant="8" id="Yb2-je-7uv"/>
+                <constraint firstAttribute="trailing" secondItem="grA-Dw-U9U" secondAttribute="trailing" constant="8" id="jR0-H6-2nF"/>
+                <constraint firstItem="grA-Dw-U9U" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="8" id="kOX-Id-Vcd"/>
+                <constraint firstItem="HN6-z9-LTF" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="8" id="njK-h3-tqj"/>
+                <constraint firstItem="ih7-VK-2rr" firstAttribute="top" secondItem="HN6-z9-LTF" secondAttribute="bottom" constant="20" id="pAh-h9-RPt"/>
+            </constraints>
+            <size key="customSize" width="322" height="93"/>
+            <connections>
+                <outlet property="GoalsAmountLabel" destination="grA-Dw-U9U" id="s0t-Fr-U8Y"/>
+                <outlet property="GoalsProgressView" destination="ih7-VK-2rr" id="X3Z-ei-vxH"/>
+                <outlet property="GoalsTitleLabel" destination="HN6-z9-LTF" id="7Rh-FA-JUG"/>
+            </connections>
+            <point key="canvasLocation" x="345" y="166"/>
+        </collectionViewCell>
+    </objects>
+</document>

@@ -1,0 +1,731 @@
+//
+//  BudgetViewController.swift
+//  BudgetPage
+//
+
+import UIKit
+
+// MARK: - Unified item for the SubsAndBills collection view
+enum SubsOrBillItem {
+    case subscription(RecurringPayment)
+    case bill(Bill)
+}
+
+class BudgetViewController: UIViewController, UICollectionViewDelegate {
+
+    private enum LayoutMetrics {
+        static let compactListSpacing: CGFloat = 12
+        static let compactCellHeight: CGFloat = 56
+        static let compactGoalCellHeight: CGFloat = 88
+    }
+
+    // MARK: - Outlets
+
+    private var hasCheckedOnboarding = false
+
+    @IBOutlet var AllViewCards: [UIView]!
+
+    @IBOutlet weak var monthlyBudgetView: UIView!
+    @IBOutlet weak var MonthlyBudgetLabel: UILabel!
+    @IBOutlet weak var BudgetAmountLabel: UILabel!
+    @IBOutlet weak var BudgetEditButton: UIButton!
+
+    @IBOutlet weak var goalsStackView: UIStackView!
+    @IBOutlet weak var subsAndBillsStackView: UIStackView!
+    @IBOutlet weak var categoriesStackView: UIStackView!
+    @IBOutlet weak var CardsHeadingView: UIView!
+    @IBOutlet weak var CardsTitleLabel: UILabel!
+    @IBOutlet weak var AddCategoryButton: UIButton!
+
+    @IBOutlet weak var AddSubsandBillsButton: UIButton!
+    @IBOutlet weak var AddGoalsButton: UIButton!
+
+    @IBOutlet weak var CategoriesCollectionView: UICollectionView!
+    @IBOutlet weak var SubsandBillsCollectionView: UICollectionView!
+    @IBOutlet weak var GoalsCollectionView: UICollectionView!
+
+    @IBOutlet weak var CategoriesPageControl: UIPageControl!
+    @IBOutlet weak var SubsandBillsPageControl: UIPageControl!
+    @IBOutlet weak var GoalsPageControl: UIPageControl!
+
+    @IBOutlet weak var scrollView: UIScrollView!
+
+    // MARK: - Data
+
+    private var categories:        [Category]         = []
+    private var goals:             [Goal]              = []
+    private var recurringPayments: [RecurringPayment]  = []
+    private var bills:             [Bill]              = []
+    private var currentBudget:     Budget?
+
+    // MARK: - Derived list for SubsAndBills collection view
+
+    private var subsAndBillsItems: [SubsOrBillItem] = []
+
+    // MARK: - Onboarding State
+
+    private let itemsPerPage = 4
+    private let goalsItemsPerPage = 2
+    private var spotlightView: OnboardingSpotlightView?
+    private var currentOnboardingStep = 0
+    private var onboardingSteps: [OnboardingStep] = []
+
+    // MARK: - Lifecycle
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = true
+        // reloadAll fetches fresh data AND tells every collection view to redraw
+        reloadAll()
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+        setupPageControls()
+        setupCollectionViews()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleCategoryDataChange),
+            name: .categoryDataDidChange,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTransactionDataChange),
+            name: .transactionDataDidChange,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleBudgetDataChange),
+            name: .goalDataDidChange,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleBudgetDataChange),
+            name: .budgetDataDidChange,
+            object: nil
+        )
+
+        onboardingSteps = [
+            OnboardingStep(
+                view: monthlyBudgetView,
+                title: "Monthly Budget",
+                message: "This is your total budget for the month. Tap edit to adjust it anytime.",
+                tooltipBelow: true
+            ),
+            OnboardingStep(
+                view: categoriesStackView,
+                title: "Spending Categories",
+                message: "Organise your spending into categories to see where your money goes.",
+                tooltipBelow: true
+            ),
+            OnboardingStep(
+                view: subsAndBillsStackView,
+                title: "Subscriptions & Bills",
+                message: "Track all your recurring payments and upcoming bills in one place.",
+                tooltipBelow: false
+            ),
+            OnboardingStep(
+                view: goalsStackView,
+                title: "Savings Goals",
+                message: "Set goals and watch your progress grow over time.",
+                tooltipBelow: false
+            ),
+        ]
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateCollectionLayouts()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard !hasCheckedOnboarding else { return }
+        hasCheckedOnboarding = true
+
+        if OnboardingHelper.shouldShow(key: OnboardingKeys.budget) {
+            showBudgetOnboarding()
+            OnboardingHelper.markSeen(key: OnboardingKeys.budget)
+        }
+    }
+
+    // MARK: - Data Loading
+
+    private func loadDataFromDatabase() {
+        let db = DatabaseManager.shared
+
+        categories        = db.fetchCategories()
+        goals             = db.fetchGoals()
+        recurringPayments = db.fetchRecurringPayments()
+        bills             = db.fetchUpcomingBills()   // reuse existing method
+        currentBudget     = db.fetchCurrentBudget()
+
+        buildSubsAndBillsList()
+        updateBudgetLabel()
+    }
+
+    private func updateBudgetLabel() {
+        if let budget = currentBudget {
+            BudgetAmountLabel.text = currencyFormatter.string(
+                from: NSNumber(value: budget.allocatedBudget)
+            ) ?? "₹0"
+        } else {
+            BudgetAmountLabel.text = "₹0"
+        }
+    }
+
+    // MARK: - Reload
+
+    private func reloadAll() {
+        loadDataFromDatabase()
+        setupPageControls()
+        updateCollectionLayouts()
+        CategoriesCollectionView.reloadData()
+        SubsandBillsCollectionView.reloadData()
+        GoalsCollectionView.reloadData()
+    }
+
+    // MARK: - Build SubsAndBills List
+
+    private func buildSubsAndBillsList() {
+        let calendar     = Calendar.current
+        let now          = Date()
+        let currentMonth = calendar.component(.month, from: now)
+        let currentYear  = calendar.component(.year,  from: now)
+     
+        var items: [SubsOrBillItem] = []
+     
+        // Newest subscription first — reverse the DB fetch order here
+        // so you don't need a schema change or a separate sort column.
+        for payment in recurringPayments.reversed() {
+            items.append(.subscription(payment))
+        }
+     
+        // Bills whose billDate falls in the current month+year
+        for bill in bills {
+            let billMonth = calendar.component(.month, from: bill.billDate)
+            let billYear  = calendar.component(.year,  from: bill.billDate)
+            guard billMonth == currentMonth && billYear == currentYear else { continue }
+            items.append(.bill(bill))
+        }
+     
+        subsAndBillsItems = items
+    }
+
+    // MARK: - prepare(for:sender:)
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let nav = segue.destination as? UINavigationController else { return }
+
+        switch segue.identifier {
+
+        case "showAddCategory":
+            if let vc = nav.viewControllers.first as? AddCategoryViewController {
+                vc.onCategorySaved = { [weak self] in self?.reloadAll() }
+            }
+
+        case "showAddSubsAndBills":
+            if let vc = nav.viewControllers.first as? AddSubsAndBillsViewController {
+                vc.onEntrySaved = { [weak self] in self?.reloadAll() }
+            }
+
+        case "showAddGoals":
+            if let vc = nav.viewControllers.first as? AddGoalsViewController {
+                vc.onGoalSaved = { [weak self] in self?.reloadAll() }
+            }
+
+        default:
+            break
+        }
+    }
+
+    // MARK: - Open Edit VCs
+
+    private func openEditCategory(category: Category) {
+        guard
+            let nav = storyboard?.instantiateViewController(withIdentifier: "EditCategoryNav") as? UINavigationController,
+            let vc  = nav.viewControllers.first as? EditCategoryViewController
+        else { return }
+
+        vc.category          = category
+        vc.onCategoryUpdated = { [weak self] in self?.reloadAll() }
+        nav.modalPresentationStyle = .pageSheet
+        present(nav, animated: true)
+    }
+
+    private func openEditSubscription(payment: RecurringPayment) {
+        guard
+            let nav = storyboard?.instantiateViewController(withIdentifier: "EditSubsAndBillsNav") as? UINavigationController,
+            let vc  = nav.viewControllers.first as? EditSubsAndBillsViewController
+        else { return }
+
+        vc.mode             = .subscription
+        vc.recurringPayment = payment
+        vc.onEntryUpdated   = { [weak self] in self?.reloadAll() }
+        nav.modalPresentationStyle = .pageSheet
+        present(nav, animated: true)
+    }
+
+    private func openEditBill(bill: Bill) {
+        guard
+            let nav = storyboard?.instantiateViewController(withIdentifier: "EditSubsAndBillsNav") as? UINavigationController,
+            let vc  = nav.viewControllers.first as? EditSubsAndBillsViewController
+        else { return }
+
+        vc.mode           = .bill
+        vc.bill           = bill
+        vc.onEntryUpdated = { [weak self] in self?.reloadAll() }
+        nav.modalPresentationStyle = .pageSheet
+        present(nav, animated: true)
+    }
+
+    private func openEditGoal(goal: Goal) {
+        guard
+            let nav = storyboard?.instantiateViewController(withIdentifier: "EditGoalsNav") as? UINavigationController,
+            let vc  = nav.viewControllers.first as? EditGoalsViewController
+        else { return }
+
+        vc.goal          = goal
+        vc.onGoalUpdated = { [weak self] in self?.reloadAll() }
+        nav.modalPresentationStyle = .pageSheet
+        present(nav, animated: true)
+    }
+
+    // MARK: - Helpers
+
+    private func confirmDelete(title: String, onConfirm: @escaping () -> Void) {
+        let alert = UIAlertController(
+            title: "Delete \"\(title)\"?",
+            message: "This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in onConfirm() })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
+
+    // MARK: - Onboarding
+
+    private func showBudgetOnboarding() { startOnboarding() }
+
+    private func startOnboarding() {
+        let overlay = OnboardingSpotlightView(frame: view.bounds)
+        overlay.configure(totalSteps: onboardingSteps.count)
+        overlay.onTap = { [weak self] in self?.advanceOnboarding() }
+        view.addSubview(overlay)
+        spotlightView = overlay
+
+        currentOnboardingStep = 0
+
+        overlay.alpha = 0
+        UIView.animate(withDuration: 0.25) {
+            overlay.alpha = 1
+        } completion: { _ in
+            self.showCurrentStep(animated: false)
+        }
+    }
+
+    private func advanceOnboarding() {
+        currentOnboardingStep += 1
+        if currentOnboardingStep < onboardingSteps.count {
+            showCurrentStep(animated: true)
+        } else {
+            finishOnboarding()
+        }
+    }
+
+    private func showCurrentStep(animated: Bool) {
+        guard currentOnboardingStep < onboardingSteps.count else { return }
+        let step = onboardingSteps[currentOnboardingStep]
+
+        let frameInView  = step.view.convert(step.view.bounds, to: self.view)
+        let screenHeight = self.view.bounds.height
+        let topPadding: CGFloat    = 60
+        let bottomPadding: CGFloat = 60
+
+        let isFullyVisible = frameInView.minY >= topPadding &&
+                             frameInView.maxY <= screenHeight - bottomPadding
+
+        if isFullyVisible {
+            spotlightView?.spotlight(
+                on: step.view,
+                title: step.title,
+                message: step.message,
+                stepIndex: currentOnboardingStep,
+                tooltipBelow: step.tooltipBelow,
+                animated: animated
+            )
+        } else {
+            spotlightView?.isUserInteractionEnabled = false
+
+            let frameInScroll       = step.view.convert(step.view.bounds, to: scrollView)
+            let idealOffset         = frameInScroll.midY - (screenHeight / 2)
+            let maxOffset           = max(0, scrollView.contentSize.height - scrollView.bounds.height)
+            var finalOffset         = max(0, min(idealOffset, maxOffset))
+
+            let viewBottomInContent = frameInScroll.maxY
+            let visibleBottomAtOffset = finalOffset + screenHeight - bottomPadding
+            if viewBottomInContent > visibleBottomAtOffset {
+                finalOffset = min(viewBottomInContent - screenHeight + bottomPadding + 20, maxOffset)
+            }
+
+            scrollView.setContentOffset(CGPoint(x: 0, y: finalOffset), animated: true)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                self.spotlightView?.isUserInteractionEnabled = true
+                self.spotlightView?.spotlight(
+                    on: step.view,
+                    title: step.title,
+                    message: step.message,
+                    stepIndex: self.currentOnboardingStep,
+                    tooltipBelow: step.tooltipBelow,
+                    animated: animated
+                )
+            }
+        }
+    }
+
+    private func finishOnboarding() {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.spotlightView?.alpha = 0
+        }, completion: { _ in
+            self.spotlightView?.removeFromSuperview()
+            self.spotlightView = nil
+            self.scrollView.setContentOffset(.zero, animated: true)
+        })
+    }
+
+    // MARK: - Page Controls
+
+    private func setupPageControls() {
+            let categoriesPages = categories.isEmpty ? 0 : Int(ceil(Double(categories.count) / Double(itemsPerPage)))
+            let paymentsPages   = subsAndBillsItems.isEmpty ? 0 : Int(ceil(Double(subsAndBillsItems.count) / Double(itemsPerPage)))
+            let goalsPages      = goals.isEmpty ? 0 : Int(ceil(Double(goals.count) / Double(goalsItemsPerPage)))
+     
+            CategoriesPageControl.numberOfPages   = categoriesPages
+            SubsandBillsPageControl.numberOfPages = paymentsPages
+            GoalsPageControl.numberOfPages        = goalsPages
+     
+            [CategoriesPageControl, SubsandBillsPageControl, GoalsPageControl].forEach {
+                $0?.currentPage                   = 0
+                $0?.currentPageIndicatorTintColor = AppColors.brand
+                $0?.pageIndicatorTintColor        = AppColors.brand.withAlphaComponent(0.3)
+                $0?.isUserInteractionEnabled      = false
+            }
+
+            CategoriesPageControl.isHidden = categoriesPages <= 1
+            SubsandBillsPageControl.isHidden = paymentsPages <= 1
+            GoalsPageControl.isHidden = goalsPages <= 1
+        }
+
+    // MARK: - Collection View Setup
+
+    private func setupCollectionViews() {
+            CategoriesCollectionView.register(
+                UINib(nibName: "BudgetCategoriesCollectionViewCell", bundle: nil),
+                forCellWithReuseIdentifier: "BudgetCategoriesCell"
+            )
+            CategoriesCollectionView.delegate   = self
+            CategoriesCollectionView.dataSource = self
+     
+            SubsandBillsCollectionView.register(
+                UINib(nibName: "BudgetSubsandBillsCollectionViewCell", bundle: nil),
+                forCellWithReuseIdentifier: "BudgetSubsandBillsCell"
+            )
+            SubsandBillsCollectionView.delegate   = self
+            SubsandBillsCollectionView.dataSource = self
+     
+            GoalsCollectionView.register(
+                UINib(nibName: "BudgetGoalsCollectionViewCell", bundle: nil),
+                forCellWithReuseIdentifier: "BudgetGoalsCell"
+            )
+            GoalsCollectionView.delegate   = self
+            GoalsCollectionView.dataSource = self
+
+            updateCollectionLayouts()
+        }
+
+        private func updateCollectionLayouts() {
+            CategoriesCollectionView.collectionViewLayout = makeDynamicLayout(
+                itemCount: categories.count,
+                cellHeight: LayoutMetrics.compactCellHeight,
+                pageControl: CategoriesPageControl
+            )
+            SubsandBillsCollectionView.collectionViewLayout = makeDynamicLayout(
+                itemCount: subsAndBillsItems.count,
+                cellHeight: LayoutMetrics.compactCellHeight,
+                pageControl: SubsandBillsPageControl
+            )
+            GoalsCollectionView.collectionViewLayout = makeDynamicLayout(
+                itemCount: goals.count,
+                cellHeight: LayoutMetrics.compactGoalCellHeight,
+                pageControl: GoalsPageControl,
+                itemsPerPage: goalsItemsPerPage
+            )
+        }
+
+        private func makeDynamicLayout(itemCount: Int,
+                                       cellHeight: CGFloat,
+                                       pageControl: UIPageControl,
+                                       itemsPerPage: Int? = nil) -> UICollectionViewLayout {
+            let perPage = itemsPerPage ?? self.itemsPerPage
+            if itemCount <= perPage {
+                return makeStaticVerticalLayout(itemCount: itemCount, cellHeight: cellHeight)
+            }
+
+            return generateHorizontalPageLayout(
+                itemsPerPage: perPage,
+                cellHeight: cellHeight,
+                pageControl: pageControl
+            )
+        }
+
+        private func makeStaticVerticalLayout(itemCount: Int,
+                                              cellHeight: CGFloat) -> UICollectionViewLayout {
+            if itemCount == 0 {
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(0.1)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let group = NSCollectionLayoutGroup.vertical(
+                    layoutSize: itemSize,
+                    subitems: [item]
+                )
+                let section = NSCollectionLayoutSection(group: group)
+                return UICollectionViewCompositionalLayout(section: section)
+            }
+
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(cellHeight)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+            let estimatedHeight = (CGFloat(itemCount) * cellHeight) + (CGFloat(max(itemCount - 1, 0)) * LayoutMetrics.compactListSpacing)
+
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(estimatedHeight)
+            )
+            let group = NSCollectionLayoutGroup.vertical(
+                layoutSize: groupSize,
+                repeatingSubitem: item,
+                count: itemCount
+            )
+            group.interItemSpacing = .fixed(LayoutMetrics.compactListSpacing)
+
+            let section = NSCollectionLayoutSection(group: group)
+            return UICollectionViewCompositionalLayout(section: section)
+        }
+
+        private func generateHorizontalPageLayout(itemsPerPage: Int,
+                                                   cellHeight: CGFloat,
+                                                   pageControl: UIPageControl) -> UICollectionViewLayout {
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(cellHeight)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+     
+            let spacing: CGFloat     = LayoutMetrics.compactListSpacing
+            let groupHeight: CGFloat = (cellHeight * CGFloat(itemsPerPage)) + (spacing * CGFloat(itemsPerPage - 1))
+     
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(groupHeight)
+            )
+            let group = NSCollectionLayoutGroup.vertical(
+                layoutSize: groupSize,
+                repeatingSubitem: item,
+                count: itemsPerPage
+            )
+            group.interItemSpacing = .fixed(spacing)
+     
+            let section = NSCollectionLayoutSection(group: group)
+            section.orthogonalScrollingBehavior = .groupPaging
+            section.visibleItemsInvalidationHandler = { _, contentOffset, environment in
+                let pageWidth    = environment.container.effectiveContentSize.width
+                let currentPage  = Int(round(contentOffset.x / pageWidth))
+                pageControl.currentPage = currentPage
+            }
+     
+            return UICollectionViewCompositionalLayout(section: section)
+        }
+     
+        // MARK: - UI Setup
+     
+
+    // MARK: - UI Setup
+
+    func setupUI() {
+        view.backgroundColor = AppColors.background
+        AllViewCards.forEach { $0.backgroundColor = AppColors.background }
+        MonthlyBudgetLabel.textColor = AppColors.textSecondary
+        BudgetAmountLabel.textColor  = AppColors.textPrimary
+
+        CardsHeadingView.backgroundColor = AppColors.background
+        CardsTitleLabel.textColor        = AppColors.textSecondary
+        BudgetEditButton.tintColor       = AppColors.brand
+        BudgetEditButton.setTitleColor(AppColors.brandText, for: .normal)
+        AddCategoryButton.tintColor      = AppColors.brand
+        AddCategoryButton.setTitleColor(AppColors.brandText, for: .normal)
+        AddSubsandBillsButton.tintColor  = AppColors.brand
+        AddSubsandBillsButton.setTitleColor(AppColors.brandText, for: .normal)
+        AddGoalsButton.tintColor         = AppColors.brand
+        AddGoalsButton.setTitleColor(AppColors.brandText, for: .normal)
+
+        CategoriesCollectionView.backgroundColor   = AppColors.background
+        SubsandBillsCollectionView.backgroundColor = AppColors.background
+        GoalsCollectionView.backgroundColor        = AppColors.background
+    }
+    // MARK: - Notification Handler
+
+    @objc private func handleCategoryDataChange() {
+        reloadAll()
+    }
+
+    @objc private func handleTransactionDataChange() {
+        reloadAll()
+    }
+
+    @objc private func handleBudgetDataChange() {
+        reloadAll()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+
+extension BudgetViewController: UICollectionViewDataSource {
+ 
+    func collectionView(_ collectionView: UICollectionView,
+                        numberOfItemsInSection section: Int) -> Int {
+        if collectionView == CategoriesCollectionView {
+            return categories.count
+        } else if collectionView == SubsandBillsCollectionView {
+            return subsAndBillsItems.count
+        } else {
+            return goals.count
+        }
+    }
+ 
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+ 
+        if collectionView == CategoriesCollectionView {
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "BudgetCategoriesCell", for: indexPath
+            ) as! BudgetCategoriesCollectionViewCell
+            cell.configureCategoryCell(category: categories[indexPath.item])
+            return cell
+ 
+        } else if collectionView == SubsandBillsCollectionView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BudgetSubsandBillsCell", for: indexPath) as! BudgetSubsandBillsCollectionViewCell
+ 
+            switch subsAndBillsItems[indexPath.item] {
+            case .subscription(let payment):
+                cell.configure(RecurringPayment: payment)
+            case .bill(let bill):
+                cell.configureBill(bill: bill)
+            }
+            return cell
+ 
+        } else {
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "BudgetGoalsCell", for: indexPath
+            ) as! BudgetGoalsCollectionViewCell
+            cell.configure(goal: goals[indexPath.item])
+            return cell
+        }
+    }
+}
+// MARK: - Context Menus
+
+extension BudgetViewController {
+ 
+    func collectionView(_ collectionView: UICollectionView,
+                        contextMenuConfigurationForItemAt indexPath: IndexPath,
+                        point: CGPoint) -> UIContextMenuConfiguration? {
+ 
+        if collectionView == CategoriesCollectionView {
+            let category = categories[indexPath.item]
+            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+                let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
+                    self?.openEditCategory(category: category)
+                }
+                let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"),
+                                      attributes: .destructive) { [weak self] _ in
+                    self?.confirmDelete(title: category.name) {
+                        DatabaseManager.shared.deleteCategory(id: category.id)
+                        NotificationCenter.default.post(name: .categoryDataDidChange, object: nil)
+                        NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+                        self?.reloadAll()
+                    }
+                }
+                return UIMenu(title: category.name, children: [edit, delete])
+            }
+ 
+        } else if collectionView == SubsandBillsCollectionView {
+            let item = subsAndBillsItems[indexPath.item]
+            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+                switch item {
+                case .subscription(let payment):
+                    let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
+                        self?.openEditSubscription(payment: payment)
+                    }
+                    let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"),
+                                          attributes: .destructive) { [weak self] _ in
+                        self?.confirmDelete(title: payment.name) {
+                            DatabaseManager.shared.deleteRecurringPayment(id: payment.id)
+                            NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+                            self?.reloadAll()
+                        }
+                    }
+                    return UIMenu(title: payment.name, children: [edit, delete])
+ 
+                case .bill(let bill):
+                    let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
+                        self?.openEditBill(bill: bill)
+                    }
+                    let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"),
+                                          attributes: .destructive) { [weak self] _ in
+                        self?.confirmDelete(title: bill.name) {
+                            DatabaseManager.shared.deleteBill(id: bill.id)
+                            NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+                            self?.reloadAll()
+                        }
+                    }
+                    return UIMenu(title: bill.name, children: [edit, delete])
+                }
+            }
+ 
+        } else {
+            let goal = goals[indexPath.item]
+            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+                let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
+                    self?.openEditGoal(goal: goal)
+                }
+                let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"),
+                                      attributes: .destructive) { [weak self] _ in
+                    self?.confirmDelete(title: goal.name) {
+                        DatabaseManager.shared.deleteGoal(id: goal.id)
+                        NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
+                        NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+                        self?.reloadAll()
+                    }
+                }
+                return UIMenu(title: goal.name, children: [edit, delete])
+            }
+        }
+    }
+}

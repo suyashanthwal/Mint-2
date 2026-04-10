@@ -1,0 +1,278 @@
+import Foundation
+import SQLite3
+
+final class DatabaseManager {
+
+    static let shared = DatabaseManager()
+    static let defaultAdminUserId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+    static let currentDefaultAdminSeedVersion = 5
+
+    private static let currentUserIdKey = "current_user_id"
+    private static let setupCompletedUserIdsKey = "setup_completed_user_ids"
+    private static let defaultAdminSeedVersionKey = "default_admin_seed_version"
+    private static let databaseDateTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .autoupdatingCurrent
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        return formatter
+    }()
+    private static let databaseDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .autoupdatingCurrent
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+    private static let iso8601Formatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+    private static let iso8601FractionalFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+    var db: OpaquePointer?
+
+    private init() {
+        openDatabase()
+        setupDatabase()
+    }
+
+    // MARK: - DB Path
+
+    private func getDBPath() -> String {
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return url.appendingPathComponent("mint.sqlite").path
+    }
+
+    // MARK: - Open DB
+
+    private func openDatabase() {
+        if sqlite3_open(getDBPath(), &db) != SQLITE_OK {
+            print("❌ Error opening DB")
+        } else {
+            sqlite3_exec(db, "PRAGMA foreign_keys = ON;", nil, nil, nil)
+            sqlite3_exec(db, "PRAGMA journal_mode = WAL;", nil, nil, nil)
+            print("✅ DB opened at \(getDBPath())")
+        }
+    }
+
+    // MARK: - Setup DB
+
+    private func setupDatabase() {
+        let isFirstLaunch = !UserDefaults.standard.bool(forKey: "db_initialized")
+        if isFirstLaunch {
+            runSQLFile(named: "schema")
+            runSQLFile(named: "seed")
+            UserDefaults.standard.set(true, forKey: "db_initialized")
+            UserDefaults.standard.set(
+                Self.currentDefaultAdminSeedVersion,
+                forKey: Self.defaultAdminSeedVersionKey
+            )
+        }
+        ensureBufferTransactionsTableExists()
+        ensureOnboardingStatesTableExists()
+        ensureDefaultAdminAccountState()
+        ensureDefaultAdminSeedDataIsCurrent()
+        // On every launch: roll over the budget if the month has changed.
+        checkAndResetMonthlyExpenseIfNeeded()
+    }
+
+    // MARK: - Reset DB
+
+    /// Deletes the database file and rebuilds it from schema + seed.
+    func resetDatabase() {
+        sqlite3_close(db)
+        db = nil
+
+        try? FileManager.default.removeItem(atPath: getDBPath())
+
+        openDatabase()
+        runSQLFile(named: "schema")
+        runSQLFile(named: "seed")
+        ensureDefaultAdminAccountState()
+
+        UserDefaults.standard.set(true, forKey: "db_initialized")
+        UserDefaults.standard.set(
+            Self.currentDefaultAdminSeedVersion,
+            forKey: Self.defaultAdminSeedVersionKey
+        )
+        print("✅ DB reset complete")
+    }
+
+    // MARK: - Run SQL File
+
+    func runSQLFile(named fileName: String) {
+        guard let path = Bundle.main.path(forResource: fileName, ofType: "sql") else {
+            print("❌ SQL file not found: \(fileName).sql")
+            return
+        }
+        do {
+            let sql = try String(contentsOfFile: path, encoding: .utf8)
+            if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
+                print("❌ SQL error in \(fileName): \(String(cString: sqlite3_errmsg(db)))")
+            } else {
+                print("✅ Executed \(fileName).sql")
+            }
+        } catch {
+            print("❌ Could not read \(fileName).sql: \(error)")
+        }
+    }
+
+    func executeStatements(_ sql: String) {
+        if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
+            print("❌ SQL exec failed: \(String(cString: sqlite3_errmsg(db)))")
+        }
+    }
+
+    // MARK: - Generic Write Helper
+    // `internal` so all same-module extensions can use it.
+
+    func execute(_ sql: String, args: [String]) {
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
+            print("❌ Prepare failed: \(String(cString: sqlite3_errmsg(db)))")
+            return
+        }
+        for (i, arg) in args.enumerated() {
+            sqlite3_bind_text(stmt, Int32(i + 1), (arg as NSString).utf8String, -1, nil)
+        }
+        if sqlite3_step(stmt) != SQLITE_DONE {
+            print("❌ Execute failed: \(String(cString: sqlite3_errmsg(db)))")
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    var currentUserId: UUID? {
+        guard let id = UserDefaults.standard.string(forKey: Self.currentUserIdKey) else { return nil }
+        return UUID(uuidString: id)
+    }
+
+    var currentUserIdString: String? {
+        currentUserId?.uuidString
+    }
+
+    var hasActiveSession: Bool {
+        currentUserId != nil
+    }
+
+    func setCurrentUser(id: UUID?) {
+        if let id {
+            UserDefaults.standard.set(id.uuidString, forKey: Self.currentUserIdKey)
+            checkAndResetMonthlyExpenseIfNeeded()
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.currentUserIdKey)
+        }
+    }
+
+    func markSetupComplete(for userId: UUID, isComplete: Bool) {
+        var ids = Set(UserDefaults.standard.stringArray(forKey: Self.setupCompletedUserIdsKey) ?? [])
+        if isComplete {
+            ids.insert(userId.uuidString)
+        } else {
+            ids.remove(userId.uuidString)
+        }
+        UserDefaults.standard.set(Array(ids), forKey: Self.setupCompletedUserIdsKey)
+    }
+
+    func isSetupComplete(for userId: UUID) -> Bool {
+        let ids = Set(UserDefaults.standard.stringArray(forKey: Self.setupCompletedUserIdsKey) ?? [])
+        return ids.contains(userId.uuidString)
+    }
+
+    func isCurrentUserSetupComplete() -> Bool {
+        guard let currentUserId else { return false }
+        return isSetupComplete(for: currentUserId)
+    }
+
+    func storedDefaultAdminSeedVersion() -> Int {
+        UserDefaults.standard.integer(forKey: Self.defaultAdminSeedVersionKey)
+    }
+
+    func markDefaultAdminSeedVersionCurrent() {
+        UserDefaults.standard.set(
+            Self.currentDefaultAdminSeedVersion,
+            forKey: Self.defaultAdminSeedVersionKey
+        )
+    }
+
+    func databaseTimestampString(from date: Date) -> String {
+        Self.databaseDateTimeFormatter.string(from: date)
+    }
+
+    func databaseDateOnlyString(from date: Date) -> String {
+        Self.databaseDateFormatter.string(from: date)
+    }
+
+    func databaseDate(from rawValue: String) -> Date? {
+        let value = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return nil }
+
+        if let parsed = Self.iso8601FractionalFormatter.date(from: value) {
+            return parsed
+        }
+        if let parsed = Self.iso8601Formatter.date(from: value) {
+            return parsed
+        }
+        if let parsed = Self.databaseDateTimeFormatter.date(from: value) {
+            return parsed
+        }
+        return Self.databaseDateFormatter.date(from: value)
+    }
+
+    private func ensureBufferTransactionsTableExists() {
+        executeStatements(
+            """
+            CREATE TABLE IF NOT EXISTS buffer_transactions (
+                id                  TEXT    PRIMARY KEY,
+                user_id             TEXT    NOT NULL,
+                name                TEXT    NOT NULL,
+                amount              REAL    NOT NULL,
+                timestamp           TEXT    NOT NULL,
+                note                TEXT,
+                created_at          TEXT    NOT NULL,
+                source              TEXT    NOT NULL
+                                            CHECK(source IN ('upi','manual','receipt','ecommerce')),
+                type                TEXT    NOT NULL
+                                            CHECK(type IN ('income','expense')),
+                source_name         TEXT,
+                category_id         TEXT,
+                status              INTEGER,
+                expense_type        TEXT,
+                upi_transaction_id  TEXT,
+                upi_merchant_name   TEXT,
+                upi_currency_type   TEXT,
+                FOREIGN KEY (user_id)     REFERENCES users(id)      ON DELETE CASCADE,
+                FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_buffer_txn_user       ON buffer_transactions(user_id);
+            CREATE INDEX IF NOT EXISTS idx_buffer_txn_created_at ON buffer_transactions(created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_buffer_txn_type       ON buffer_transactions(type);
+            """
+        )
+    }
+
+    private func ensureOnboardingStatesTableExists() {
+        executeStatements(
+            """
+            CREATE TABLE IF NOT EXISTS onboarding_states (
+                user_id         TEXT    NOT NULL,
+                onboarding_key  TEXT    NOT NULL,
+                is_seen         INTEGER NOT NULL DEFAULT 1,
+                created_at      TEXT    NOT NULL,
+                updated_at      TEXT    NOT NULL,
+                PRIMARY KEY (user_id, onboarding_key),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_onboarding_states_user ON onboarding_states(user_id);
+            """
+        )
+    }
+}

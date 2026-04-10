@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="CategoryCell" reuseIdentifier="CategoryCell" id="gTV-IL-0wX" customClass="CategoryCell" customModule="QrAndReceiptReading" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="80" height="90"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="80" height="90"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M55-Q8-HKy" userLabel="CardView">
+                        <rect key="frame" x="4" y="8" width="72" height="74"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="fork.knife" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="dVx-fU-eSe" userLabel="iconImageView">
+                                <rect key="frame" x="0.0" y="9" width="72" height="37"/>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="36" id="lYL-Eg-M3f"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YBV-eQ-Mwa">
+                                <rect key="frame" x="4" y="45" width="64" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="dVx-fU-eSe" firstAttribute="leading" secondItem="M55-Q8-HKy" secondAttribute="leading" id="2TS-dp-uCg"/>
+                            <constraint firstAttribute="trailing" secondItem="dVx-fU-eSe" secondAttribute="trailing" id="BtG-34-59d"/>
+                            <constraint firstItem="dVx-fU-eSe" firstAttribute="top" secondItem="M55-Q8-HKy" secondAttribute="top" constant="10" id="Ifx-xP-91s"/>
+                            <constraint firstAttribute="trailing" secondItem="YBV-eQ-Mwa" secondAttribute="trailing" constant="4" id="dgH-W5-yov"/>
+                            <constraint firstAttribute="bottom" secondItem="YBV-eQ-Mwa" secondAttribute="bottom" constant="8" id="eaS-J6-j5V"/>
+                            <constraint firstItem="dVx-fU-eSe" firstAttribute="centerX" secondItem="M55-Q8-HKy" secondAttribute="centerX" id="uN6-3F-bK9"/>
+                            <constraint firstItem="YBV-eQ-Mwa" firstAttribute="top" secondItem="dVx-fU-eSe" secondAttribute="bottom" constant="-1" id="uUI-Yt-G5g"/>
+                            <constraint firstItem="YBV-eQ-Mwa" firstAttribute="leading" secondItem="M55-Q8-HKy" secondAttribute="leading" constant="4" id="z3q-SD-65k"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="14"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.clipToBounds" value="YES"/>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="M55-Q8-HKy" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="4" id="JVz-sz-tM4"/>
+                <constraint firstAttribute="trailing" secondItem="M55-Q8-HKy" secondAttribute="trailing" constant="4" id="Lca-XO-slY"/>
+                <constraint firstItem="M55-Q8-HKy" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="8" id="LsZ-T4-gAz"/>
+                <constraint firstAttribute="bottom" secondItem="M55-Q8-HKy" secondAttribute="bottom" constant="8" id="TKU-jR-hI3"/>
+            </constraints>
+            <connections>
+                <outlet property="cardView" destination="M55-Q8-HKy" id="GMr-sh-VrG"/>
+                <outlet property="iconImageView" destination="dVx-fU-eSe" id="Hcf-4y-uIJ"/>
+                <outlet property="nameLabel" destination="YBV-eQ-Mwa" id="aMn-ZF-BsN"/>
+            </connections>
+            <point key="canvasLocation" x="138.93129770992365" y="153.52112676056339"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="fork.knife" catalog="system" width="94" height="128"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
