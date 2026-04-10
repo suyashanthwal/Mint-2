@@ -27,13 +27,12 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet private weak var billsCollectionView: UICollectionView!
     @IBOutlet weak var confirmCollectionView: UICollectionView!
     
-    @IBOutlet weak var dailyAverageTarget: UILabel!
+    @IBOutlet weak var AverageUpAndDownLabel: UILabel!
     @IBOutlet weak var dailyAverage: UILabel!
     // MARK: - Properties
 
-    @IBOutlet weak var percentCompleted: UILabel!
-    @IBOutlet weak var goalName: UILabel!
-    @IBOutlet weak var averageIndicator: UIImageView!
+    @IBOutlet weak var GoalNameLabel: UILabel!
+    @IBOutlet weak var SavedSoFarLabel: UILabel!
     
     private var hasCheckedOnboarding = false
     let circularProgress = CircularProgressView()
@@ -339,29 +338,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let daysInMonth = calendar.range(of: .day, in: .month, for: Date())?.count ?? 30
         let targetDailyAverage = max(totalBudget - fixedExpenses, 0) / Double(daysInMonth)
 
-        dailyAverageTarget.text = "Target \(currencyFormatter.string(from: NSNumber(value: targetDailyAverage)) ?? "₹0")"
-        updateAverageIndicator(actual: actualDailyAverage, target: targetDailyAverage)
-    }
-
-    private func updateAverageIndicator(actual: Double, target: Double) {
-        let configuration = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
-        let symbolName: String
-        let tintColor: UIColor
-
-        if actual == 0 && target == 0 {
-            symbolName = "minus.circle.fill"
-            tintColor = AppColors.textSecondary
-        } else if actual <= target {
-            symbolName = "arrow.down.circle.fill"
-            tintColor = AppColors.brand
-        } else {
-            symbolName = "arrow.up.circle.fill"
-            tintColor = AppColors.error
+        AverageUpAndDownLabel.text = "Target \(currencyFormatter.string(from: NSNumber(value: targetDailyAverage)) ?? "₹0")"
         }
-
-        averageIndicator.image = UIImage(systemName: symbolName, withConfiguration: configuration)
-        averageIndicator.tintColor = tintColor
-    }
 
     private func updateGoalCard() {
         let mostCompletedActiveGoal = goals
@@ -370,17 +348,17 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         if let goal = mostCompletedActiveGoal {
             let progressPercent = Int(goal.progress * 100)
-            percentCompleted.text = "\(progressPercent)%"
-            goalName.text = goal.name
+            GoalNameLabel.text = "\(progressPercent)%"
+            SavedSoFarLabel.text = goal.name
             return
         }
 
         if goals.contains(where: { $0.isCompleted || $0.progress >= 1 }) {
-            percentCompleted.text = "100%"
-            goalName.text = "All goals completed"
+            GoalNameLabel.text = "100%"
+            SavedSoFarLabel.text = "All goals completed"
         } else {
-            percentCompleted.text = "—"
-            goalName.text = "No goals yet"
+            GoalNameLabel.text = "—"
+            SavedSoFarLabel.text = "No goals yet"
         }
     }
 
