@@ -956,14 +956,14 @@ with our effortless categorization.</string>
                                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="J7N-7h-og9">
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="192"/>
                                                                         <subviews>
-                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="This Month" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SaD-3y-Plj">
-                                                                                <rect key="frame" x="147.33333333333337" y="64" width="98.666666666666657" height="24"/>
+                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="This Month" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SaD-3y-Plj">
+                                                                                <rect key="frame" x="127.33333333333334" y="64" width="98.666666666666657" height="24"/>
                                                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
                                                                                 <color key="textColor" red="0.603515625" green="0.619140625" blue="0.6123046875" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
-                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="₹12,450.00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="afv-lC-4jC">
-                                                                                <rect key="frame" x="101" y="80" width="151.66666666666663" height="33.666666666666657"/>
+                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="₹12,450.00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="afv-lC-4jC">
+                                                                                <rect key="frame" x="100.66666666666667" y="79.333333333333314" width="151.66666666666663" height="33.666666666666657"/>
                                                                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                                                                 <nil key="textColor"/>
                                                                                 <nil key="highlightedColor"/>
@@ -971,11 +971,11 @@ with our effortless categorization.</string>
                                                                         </subviews>
                                                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                                         <constraints>
+                                                                            <constraint firstItem="SaD-3y-Plj" firstAttribute="centerY" secondItem="J7N-7h-og9" secondAttribute="centerY" constant="-20" id="7sH-ja-vzF"/>
                                                                             <constraint firstItem="afv-lC-4jC" firstAttribute="centerX" secondItem="J7N-7h-og9" secondAttribute="centerX" id="XF5-hM-41d"/>
-                                                                            <constraint firstItem="afv-lC-4jC" firstAttribute="centerY" secondItem="J7N-7h-og9" secondAttribute="centerY" constant="4" id="XPT-YF-H8F"/>
+                                                                            <constraint firstItem="afv-lC-4jC" firstAttribute="centerY" secondItem="J7N-7h-og9" secondAttribute="centerY" id="XPT-YF-H8F"/>
                                                                             <constraint firstAttribute="height" constant="192" id="b3N-d0-SUo"/>
-                                                                            <constraint firstItem="SaD-3y-Plj" firstAttribute="centerX" secondItem="J7N-7h-og9" secondAttribute="centerX" id="rFo-ZP-7Sk"/>
-                                                                            <constraint firstItem="SaD-3y-Plj" firstAttribute="centerY" secondItem="J7N-7h-og9" secondAttribute="centerY" constant="-20" id="uUB-gq-SFz"/>
+                                                                            <constraint firstItem="SaD-3y-Plj" firstAttribute="centerX" secondItem="J7N-7h-og9" secondAttribute="centerX" id="kCC-kr-Z7Z"/>
                                                                         </constraints>
                                                                     </view>
                                                                 </subviews>
@@ -1017,8 +1017,8 @@ with our effortless categorization.</string>
                                                                                         <nil key="highlightedColor"/>
                                                                                     </label>
                                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="12% less than your daily average" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bCn-Oc-Ld6">
-                                                                                        <rect key="frame" x="8" y="67" width="129.66666666666666" height="9.6666666666666714"/>
-                                                                                        <fontDescription key="fontDescription" type="system" pointSize="8"/>
+                                                                                        <rect key="frame" x="8" y="67" width="157.66666666666666" height="12"/>
+                                                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                                                         <nil key="textColor"/>
                                                                                         <nil key="highlightedColor"/>
                                                                                     </label>
@@ -1063,8 +1063,8 @@ with our effortless categorization.</string>
                                                                                         <nil key="textColor"/>
                                                                                         <nil key="highlightedColor"/>
                                                                                     </label>
-                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tokyo Trip 2024" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DeO-eg-8XO">
-                                                                                        <rect key="frame" x="8" y="63.666666666666622" width="98" height="15.666666666666664"/>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="42% saved so far" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DeO-eg-8XO">
+                                                                                        <rect key="frame" x="8" y="63.666666666666622" width="105.33333333333333" height="15.666666666666664"/>
                                                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
                                                                                         <color key="textColor" red="0.3549804688" green="0.3793945312" blue="0.3728027344" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                                         <nil key="highlightedColor"/>
@@ -1286,9 +1286,12 @@ with our effortless categorization.</string>
                                                                                                 <nil key="highlightedColor"/>
                                                                                             </label>
                                                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="O1A-RG-6dY">
-                                                                                                <rect key="frame" x="273.33333333333331" y="0.0" width="79.666666666666686" height="40"/>
+                                                                                                <rect key="frame" x="287.33333333333331" y="0.0" width="65.666666666666686" height="40"/>
                                                                                                 <state key="normal" title="Button"/>
-                                                                                                <buttonConfiguration key="configuration" style="plain" title="view all"/>
+                                                                                                <buttonConfiguration key="configuration" style="plain" title="View All">
+                                                                                                    <fontDescription key="titleFontDescription" type="system" pointSize="11"/>
+                                                                                                    <color key="baseForegroundColor" red="0.28627450980000002" green="0.4038085938" blue="0.2829589844" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                                                                </buttonConfiguration>
                                                                                                 <connections>
                                                                                                     <segue destination="53D-CP-tB7" kind="show" id="vSo-tk-ZbO"/>
                                                                                                 </connections>
@@ -1944,7 +1947,7 @@ with our effortless categorization.</string>
                                                                                 <rect key="frame" x="0.0" y="5" width="40" height="50"/>
                                                                                 <subviews>
                                                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="moon" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="Vfa-DO-Ree">
-                                                                                        <rect key="frame" x="5" y="15.666666666666666" width="30" height="19"/>
+                                                                                        <rect key="frame" x="5" y="15.666666666666664" width="30" height="19"/>
                                                                                         <color key="tintColor" red="0.2260742188" green="0.3195800781" blue="0.2231445312" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                                         <constraints>
                                                                                             <constraint firstAttribute="width" constant="30" id="ZGA-ZM-g9z"/>
@@ -4344,7 +4347,7 @@ spend on?</string>
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="dumbbell.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="MMa-bp-bZU">
-                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333407" width="24" height="20.666666666666671"/>
+                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333409" width="24" height="20.666666666666671"/>
                                                         <color key="tintColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="24" id="Gek-ve-aqQ"/>
@@ -4748,7 +4751,7 @@ spend on?</string>
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="dumbbell.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="zfa-hM-wzR">
-                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333407" width="24" height="20.666666666666671"/>
+                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333409" width="24" height="20.666666666666671"/>
                                                         <color key="tintColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="24" id="Ui5-V1-TtH"/>
@@ -8365,22 +8368,22 @@ spend on?</string>
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="separatorColor">
-            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray4Color">
-            <color red="0.81960784310000001" green="0.81960784310000001" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.81960784313725488" green="0.81960784313725488" blue="0.83921568627450982" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGray6Color">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

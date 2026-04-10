@@ -316,50 +316,138 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func renderMonthlyProgress() {
-        guard MonthlyView.bounds.width > 0, MonthlyView.bounds.height > 0 else { return }
+            guard MonthlyView.bounds.width > 0, MonthlyView.bounds.height > 0 else { return }
 
-        circularProgress.setupCircularProgress(
-            on: MonthlyView,
-            progress: monthlyProgressValue,
-            lineWidth: 10.0
-        )
-    }
+            let monthlyExpense = currentMonthExpenseTransactions().reduce(0) { $0 + $1.amount }
+            let budgetAmount = currentBudget?.allocatedBudget ?? 0
+
+            guard budgetAmount > 0 else {
+                circularProgress.setupCircularProgress(
+                    on: MonthlyView,
+                    progress: 0,
+                    trackColor: UIColor.lightGray.withAlphaComponent(0.22),
+                    progressColor: AppColors.error,
+                    lineWidth: 10.0
+                )
+                return
+            }
+
+            let spentRatio = min(max(CGFloat(monthlyExpense / budgetAmount), 0), 1)
+            let remainingRatio = 1 - spentRatio
+
+            func mix(_ from: UIColor, _ to: UIColor, ratio: CGFloat) -> UIColor {
+                let t = min(max(ratio, 0), 1)
+
+                var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
+                var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
+
+                from.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+                to.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+
+                return UIColor(
+                    red: r1 + (r2 - r1) * t,
+                    green: g1 + (g2 - g1) * t,
+                    blue: b1 + (b2 - b1) * t,
+                    alpha: a1 + (a2 - a1) * t
+                )
+            }
+
+            let darkGreen = AppColors.brand
+            let softGreen = UIColor(hex: "#7FA487")   // lighter, but still visible on your background
+            let softRed   = UIColor(hex: "#D96B66")   // red starts gently
+            let darkRed   = AppColors.error
+
+            let progressColor: UIColor
+
+            if remainingRatio > 0.5 {
+                progressColor = darkGreen
+            } else if remainingRatio > 0.25 {
+                let t = (0.5 - remainingRatio) / 0.25
+                progressColor = mix(darkGreen, softGreen, ratio: t)
+            } else {
+                let t = (0.25 - remainingRatio) / 0.25
+                progressColor = mix(softRed, darkRed, ratio: t)
+            }
+
+            circularProgress.setupCircularProgress(
+                on: MonthlyView,
+                progress: remainingRatio,
+                trackColor: UIColor.lightGray.withAlphaComponent(0.22),
+                progressColor: progressColor,
+                lineWidth: 12.0
+            )
+        }
 
     private func updateDailyAverageCard() {
         let calendar = Calendar.current
         let monthlyExpense = currentMonthExpenseTransactions().reduce(0) { $0 + $1.amount }
         let daysElapsed = max(calendar.component(.day, from: Date()), 1)
         let actualDailyAverage = monthlyExpense / Double(daysElapsed)
+        let todaysSpending = todaysExpenseTransactions().reduce(0) { $0 + $1.amount }
 
         dailyAverage.text = currencyFormatter.string(from: NSNumber(value: actualDailyAverage)) ?? "₹0"
-
-        let fixedExpenses = currentMonthFixedExpenses()
-        let totalBudget = currentBudget?.allocatedBudget ?? 0
-        let daysInMonth = calendar.range(of: .day, in: .month, for: Date())?.count ?? 30
-        let targetDailyAverage = max(totalBudget - fixedExpenses, 0) / Double(daysInMonth)
-
-        AverageUpAndDownLabel.text = "Target \(currencyFormatter.string(from: NSNumber(value: targetDailyAverage)) ?? "₹0")"
+        
+        if todaysSpending == 0 {
+            AverageUpAndDownLabel.attributedText = nil
+            AverageUpAndDownLabel.text = "You haven’t spent anything today"
+            return
         }
+        
+        guard actualDailyAverage > 0 else {
+            AverageUpAndDownLabel.attributedText = nil
+            AverageUpAndDownLabel.text = todaysSpending > 0
+                ? "No daily average available yet"
+                : "No spending yet today"
+            return
+        }
+        
+        let differencePercent = Int(round((abs(todaysSpending - actualDailyAverage) / actualDailyAverage) * 100))
+        
+        if todaysSpending > actualDailyAverage {
+            AverageUpAndDownLabel.attributedText = highlightedPrefixText(
+                "\(differencePercent)%",
+                suffix: " more than your daily average",
+                color: AppColors.error,
+                in: AverageUpAndDownLabel
+            )
+        } else if todaysSpending < actualDailyAverage {
+            AverageUpAndDownLabel.attributedText = highlightedPrefixText(
+                "\(differencePercent)%",
+                suffix: " less than your daily average",
+                color: AppColors.brand,
+                in: AverageUpAndDownLabel
+            )
+        } else {
+            AverageUpAndDownLabel.attributedText = nil
+            AverageUpAndDownLabel.text = "On track with your daily average"
+        }
+    }
 
     private func updateGoalCard() {
         let mostCompletedActiveGoal = goals
             .filter { !$0.isCompleted && $0.progress < 1 }
             .max { $0.progress < $1.progress }
+        let latestCompletedGoal = goals
+            .filter { $0.isCompleted || $0.progress >= 1 }
+            .sorted { ($0.completedOn ?? .distantPast) > ($1.completedOn ?? .distantPast) }
+            .first
+        let displayedGoal = mostCompletedActiveGoal ?? latestCompletedGoal
 
-        if let goal = mostCompletedActiveGoal {
-            let progressPercent = Int(goal.progress * 100)
-            GoalNameLabel.text = "\(progressPercent)%"
-            SavedSoFarLabel.text = goal.name
+        if let goal = displayedGoal {
+            let progressPercent = Int(round(Double(goal.progress) * 100))
+            GoalNameLabel.text = goal.name
+            SavedSoFarLabel.attributedText = highlightedPrefixText(
+                "\(progressPercent)%",
+                suffix: " saved so far",
+                color: AppColors.brand,
+                in: SavedSoFarLabel
+            )
             return
         }
 
-        if goals.contains(where: { $0.isCompleted || $0.progress >= 1 }) {
-            GoalNameLabel.text = "100%"
-            SavedSoFarLabel.text = "All goals completed"
-        } else {
-            GoalNameLabel.text = "—"
-            SavedSoFarLabel.text = "No goals yet"
-        }
+        GoalNameLabel.text = "—"
+        SavedSoFarLabel.attributedText = nil
+        SavedSoFarLabel.text = "No goals yet"
     }
 
     private func currentMonthExpenseTransactions() -> [Transaction] {
@@ -369,6 +457,16 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         return allTransactions.filter {
             $0.type == .expense &&
             calendar.isDate($0.timestamp, equalTo: now, toGranularity: .month)
+        }
+    }
+
+    private func todaysExpenseTransactions() -> [Transaction] {
+        let calendar = Calendar.current
+        let now = Date()
+
+        return allTransactions.filter {
+            $0.type == .expense &&
+            calendar.isDate($0.timestamp, inSameDayAs: now)
         }
     }
 
@@ -387,6 +485,27 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
             .reduce(0) { $0 + $1.amount }
 
         return recurringTotal + currentMonthBillsTotal
+    }
+
+    func highlightedPrefixText(
+        _ prefix: String,
+        suffix: String,
+        color: UIColor,
+        in label: UILabel
+    ) -> NSAttributedString {
+        
+        let fullText = prefix + suffix
+        let attributedString = NSMutableAttributedString(string: fullText)
+        
+        let prefixRange = NSRange(location: 0, length: prefix.count)
+        
+        // Style ONLY the percentage
+        attributedString.addAttributes([
+            .foregroundColor: color,
+            .font: UIFont.boldSystemFont(ofSize: label.font.pointSize)
+        ], range: prefixRange)
+        
+        return attributedString
     }
 
     private func toggleBillPaymentState(for billId: UUID) {
