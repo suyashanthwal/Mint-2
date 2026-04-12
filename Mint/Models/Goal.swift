@@ -19,6 +19,14 @@ struct Goal: Identifiable, Codable {
     let imageName: String?
     var isCompleted: Bool
     var completedOn: Date?
+    var pickedImageURL: URL? = nil //Not to be saved directly On Db but using function reattachSavedImages()
+    
+    enum CodingKeys: String, CodingKey {
+           case id, name, targetAmount, currentlySaved,
+                targetDate, monthlyGoal, iconName,
+                imageName, isCompleted, completedOn
+       } //This excludes pickedImageURL from Codable conformance since it's not stored in the DB.
+
     
     init(
         id: UUID = UUID(),
