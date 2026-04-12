@@ -179,17 +179,52 @@ class GoalsViewController: UIViewController {
     }
 
     private func reloadGoals() {
+        
         let goals = DatabaseManager.shared.fetchGoals()
         ongoingGoals = goals.filter { !$0.isCompleted }
         completedGoals = goals.filter { $0.isCompleted }
+        reattachSavedImages(to: &ongoingGoals)
+        reattachSavedImages(to: &completedGoals)
         updateSummaryLabels()
 
         guard isViewLoaded else { return }
+        //
         updateCollectionLayouts()
+        //
         ActiveGoalsCollectionView.reloadData()
+        //
         ReachedGoalsCollectionView.reloadData()
     }
+    
+  
+    private func saveImageToDisk(_ image: UIImage, for goal: Goal) -> URL? {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
+        let url = imageURL(for: goal)
+        do {
+            try data.write(to: url)
+            return url
+        } catch {
+            print("Failed to save goal image:", error)
+            return nil
+        }
+    }
 
+    // Same filename formula used everywhere — single source of truth
+    private func imageURL(for goal: Goal) -> URL {
+        FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("goal_\(goal.id.uuidString)_photo.jpg")
+    }
+
+    // Called after every fetch — re-links disk files back to model objects
+    private func reattachSavedImages(to goals: inout [Goal]) {
+        for i in goals.indices {
+            let url = imageURL(for: goals[i])
+            if FileManager.default.fileExists(atPath: url.path) {
+                goals[i].pickedImageURL = url
+            }
+        }
+    }
     private func updateSummaryLabels() {
         TotalSavingLabel?.text = formatCurrency(totalSaved)
         TotalSavingStatsLabel?.text = "\(ongoingGoals.count) active • \(completedGoals.count) reached"
@@ -338,7 +373,18 @@ extension GoalsViewController: UICollectionViewDataSource {
                 guard let self else { return }
                 self.handleDetail(for: self.ongoingGoals[indexPath.item])
             }
-
+            // Image picking callback
+            // Called when user picks a photo from the library 
+            // save it to disk so it survives reloads, then update
+            // the in-memory model so configure() can find it immediately
+            let goal = ongoingGoals[indexPath.item]
+            cell.onImagePicked = { [weak self] image in
+                guard let self else { return }
+                if let url = self.saveImageToDisk(image, for: goal) {
+                    self.ongoingGoals[indexPath.item].pickedImageURL = url
+                }
+            }
+            
             return cell
 
         } else {
