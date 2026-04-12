@@ -65,7 +65,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        showHomeOnboarding()
         todaycardview.applyShadow()
         goalcardview.applyShadow()
         MonthlyView.backgroundColor = .clear
