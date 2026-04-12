@@ -30,6 +30,8 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var BudgetAmountLabel: UILabel!
     @IBOutlet weak var BudgetEditButton: UIButton!
 
+    @IBOutlet weak var sumOfCategories: UILabel!
+    @IBOutlet weak var totalBudget: UILabel!
     @IBOutlet weak var goalsStackView: UIStackView!
     @IBOutlet weak var subsAndBillsStackView: UIStackView!
     @IBOutlet weak var categoriesStackView: UIStackView!
@@ -40,6 +42,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var AddSubsandBillsButton: UIButton!
     @IBOutlet weak var AddGoalsButton: UIButton!
 
+    @IBOutlet weak var newBudgetTextField: UITextField!
     @IBOutlet weak var CategoriesCollectionView: UICollectionView!
     @IBOutlet weak var SubsandBillsCollectionView: UICollectionView!
     @IBOutlet weak var GoalsCollectionView: UICollectionView!
@@ -48,6 +51,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var SubsandBillsPageControl: UIPageControl!
     @IBOutlet weak var GoalsPageControl: UIPageControl!
 
+    @IBOutlet weak var newBudgetView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
 
     // MARK: - Data
@@ -81,6 +85,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        newBudgetView.isHidden = true
         setupUI()
         setupPageControls()
         setupCollectionViews()
@@ -138,6 +143,68 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         ]
     }
 
+    var isExpanded = false
+        private var hasEdited = false
+
+        /// Sets the button title correctly for both plain and UIButton.Configuration buttons.
+        private func setBudgetButtonTitle(_ title: String) {
+            if BudgetEditButton.configuration != nil {
+                BudgetEditButton.configuration?.title = title
+            } else {
+                BudgetEditButton.setTitle(title, for: .normal)
+            }
+        }
+     
+        @IBAction func editButtonTapped(_ sender: UIButton) {
+            let currentTitle = sender.configuration?.title ?? sender.title(for: .normal)
+     
+            if currentTitle == "Save" {
+                // SAVE: persist to DB, then collapse
+                guard let text = newBudgetTextField.text,
+                      let amount = Double(text), amount > 0 else {
+                    collapseEditView()
+                    return
+                }
+                DatabaseManager.shared.updateBudgetSettings(allocatedBudget: amount)
+                NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+                collapseEditView()
+     
+            } else if currentTitle == "Cancel" {
+                collapseEditView()
+     
+            } else {
+                // EDIT: expand
+                isExpanded = true
+                hasEdited = false
+                newBudgetView.isHidden = false
+                setBudgetButtonTitle("Cancel")
+                newBudgetTextField.text = ""
+                newBudgetTextField.becomeFirstResponder()
+            }
+        }
+     
+        private func collapseEditView() {
+            isExpanded = false
+            hasEdited = false
+            newBudgetView.isHidden = true
+            newBudgetTextField.text = ""
+            newBudgetTextField.resignFirstResponder()
+            setBudgetButtonTitle("Edit")
+        }
+     
+        @objc private func budgetTextFieldChanged(_ sender: UITextField) {
+            let hasText = !(sender.text?.trimmingCharacters(in: .whitespaces).isEmpty ?? true)
+            if hasText && !hasEdited {
+                hasEdited = true
+                setBudgetButtonTitle("Save")
+            } else if !hasText && hasEdited {
+                hasEdited = false
+                setBudgetButtonTitle("Cancel")
+            }
+        }
+     
+        @IBAction func newBudetInput(_ sender: Any) {}
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateCollectionLayouts()
@@ -178,6 +245,23 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         } else {
             BudgetAmountLabel.text = "₹0"
         }
+        updateCategoryBudgetSummary()
+    }
+
+    // MARK: - Category Budget Summary
+
+    /// Sums every category's allocated budget and compares it against the
+    /// total monthly budget. Turns `sumOfCategories` red when over budget.
+    private func updateCategoryBudgetSummary() {
+        let categorySum    = categories.reduce(0) { $0 + $1.budget }
+        let allocatedTotal = currentBudget?.allocatedBudget ?? 0
+
+        sumOfCategories.text = currencyFormatter.string(from: NSNumber(value: categorySum)) ?? "₹0"
+        totalBudget.text     = currencyFormatter.string(from: NSNumber(value: allocatedTotal)) ?? "₹0"
+
+        // Turn red when the sum of category budgets exceeds the total monthly budget
+        totalBudget.textColor = AppColors.textSecondary
+        sumOfCategories.textColor = categorySum > allocatedTotal ? .systemRed : AppColors.textSecondary
     }
 
     // MARK: - Reload
@@ -574,6 +658,26 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         CardsTitleLabel.textColor        = AppColors.textSecondary
         BudgetEditButton.tintColor       = AppColors.brand
         BudgetEditButton.setTitleColor(AppColors.brandText, for: .normal)
+
+        // Footnote font — handles both UIButton.Configuration (iOS 15+) and plain buttons
+        let footnoteFont = UIFont.preferredFont(forTextStyle: .footnote)
+        if var config = BudgetEditButton.configuration {
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var attrs = incoming
+                attrs.font = footnoteFont
+                return attrs
+            }
+            BudgetEditButton.configuration = config
+        } else {
+            BudgetEditButton.titleLabel?.font = footnoteFont
+        }
+        
+        // Number-only keyboard + programmatic text-change detection
+        newBudgetTextField.keyboardType = .decimalPad
+        newBudgetTextField.addTarget(self,
+                                     action: #selector(budgetTextFieldChanged(_:)),
+                                     for: .editingChanged)
+
         AddCategoryButton.tintColor      = AppColors.brand
         AddCategoryButton.setTitleColor(AppColors.brandText, for: .normal)
         AddSubsandBillsButton.tintColor  = AppColors.brand
