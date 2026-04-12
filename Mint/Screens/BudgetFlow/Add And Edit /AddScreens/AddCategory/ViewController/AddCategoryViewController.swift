@@ -31,6 +31,7 @@ class AddCategoryViewController: UIViewController {
     private let expandedHeight: CGFloat = 400
 
     private var selectedIconName: String?
+    
     // Tracks the currently chosen icon tint — defaults to brand color
     private var selectedIconColor: UIColor = AppColors.brand
 
@@ -73,10 +74,7 @@ class AddCategoryViewController: UIViewController {
         limitTextField.textColor       = AppColors.textPrimary
         limitTextField.keyboardType    = .numberPad
 
-        // ── Icon Picker row ───────────────────────────────────
-        iconPickerImageView.backgroundColor = .clear
         iconPickerImageView.tintColor       = selectedIconColor
-        iconPickerLabel.backgroundColor     = .clear
 
         // ── Icon Collection View ──────────────────────────────
         iconCollectionView.backgroundColor = AppColors.card

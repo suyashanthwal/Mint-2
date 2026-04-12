@@ -17,8 +17,6 @@ extension UIView {
     }
 }
 
-// MARK: - Circular Progress Bar
-
 class CircularProgressView {
     
     private var progressLayer = CAShapeLayer()
@@ -75,7 +73,6 @@ class CircularProgressView {
     }
 }
 
-// MARK: - Currency Formatter
 
 let currencyFormatter: NumberFormatter = {
     let f            = NumberFormatter()
@@ -84,12 +81,8 @@ let currencyFormatter: NumberFormatter = {
     f.locale         = Locale(identifier: "en_IN")
     return f
 }()
-
-// MARK: - Card Icon View Style
-// Styles the round icon background seen on every report card
-
 extension UIView {
-    /// Applies the green tinted circular background used for card icons
+    
     func applyCardIconStyle() {
         self.backgroundColor    = AppColors.brandLight.withAlphaComponent(0.4)
         self.layer.cornerRadius = self.bounds.width / 2
@@ -97,8 +90,6 @@ extension UIView {
     }
 }
 
-// MARK: - Progress Bar Style
-// Two flavours: brand green (income / budget) and red (expense / over-budget)
 
 extension UIProgressView {
     func applyBrandStyle() {
@@ -116,11 +107,8 @@ extension UIProgressView {
     }
 }
 
-// MARK: - Pill / Chip Badge
-// Creates the grey rounded pill labels seen on the Subscriptions & Bills card
 
 extension UIView {
-    /// Wraps the view in a pill-shaped badge style (used for "4 Active", "₹2,400 Monthly")
     func applyPillStyle() {
         self.backgroundColor    = AppColors.sectionBackground
         self.layer.cornerRadius = 14
@@ -128,12 +116,8 @@ extension UIView {
     }
 }
 
-// MARK: - Calendar Styles
-// Used by SubsCalendarView and SubsCalenderCollectionViewCell
-
 extension UIView {
 
-    /// The outer card container for the calendar (white card, rounded, shadow).
     func applyCalendarCardStyle() {
         backgroundColor    = AppColors.card
         layer.cornerRadius = 16
@@ -145,21 +129,19 @@ extension UIView {
         clipsToBounds       = false
     }
 
-    /// Today's date cell — brand-green filled rounded square.
+    
     func applyCalendarTodayStyle() {
         backgroundColor    = AppColors.brand
         layer.cornerRadius = 12
         clipsToBounds      = true
     }
-
-    /// Empty or padding cell — transparent, no rounding.
+    
     func applyCalendarEmptyStyle() {
         backgroundColor    = .clear
         layer.cornerRadius = 0
         clipsToBounds      = false
     }
 
-    /// Small circular dot indicator — used under dates that have a bill.
     func applyDotStyle() {
         backgroundColor    = AppColors.brand
         layer.cornerRadius = bounds.height / 2
@@ -167,13 +149,8 @@ extension UIView {
     }
 }
 
-// MARK: - Attributed description helpers
-// Used for the subtitle lines inside cards that mix normal + coloured text
-
 extension NSMutableAttributedString {
 
-    /// Appends a run of text in the brand green colour — used to highlight
-    /// values like "Food & Dining" in the Category Breakdown subtitle.
     @discardableResult
     func appendBrand(_ text: String, font: UIFont? = nil) -> NSMutableAttributedString {
         var attrs: [NSAttributedString.Key: Any] = [.foregroundColor: AppColors.brand]
@@ -182,7 +159,6 @@ extension NSMutableAttributedString {
         return self
     }
 
-    /// Appends a normal secondary-coloured run of text.
     @discardableResult
     func appendSecondary(_ text: String, font: UIFont? = nil) -> NSMutableAttributedString {
         var attrs: [NSAttributedString.Key: Any] = [.foregroundColor: AppColors.textSecondary]
