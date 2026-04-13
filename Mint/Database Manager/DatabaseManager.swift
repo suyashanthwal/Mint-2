@@ -39,6 +39,7 @@ final class DatabaseManager {
     var db: OpaquePointer?
 
     private init() {
+        resetDatabase()
         openDatabase()
         setupDatabase()
     }
