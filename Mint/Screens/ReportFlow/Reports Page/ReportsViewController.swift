@@ -150,6 +150,14 @@ class ReportsViewController: UIViewController {
         )
     }
 
+    @IBAction func crossTappedOnInsight(_ sender: UIButton) {
+        switch sender.tag {
+            case 1: summaryInsightVIew.isHidden = true
+            case 2: categoryInsightView.isHidden = true
+            case 3: subsAndBillsInsightView.isHidden = true
+            default: break
+            }
+    }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
