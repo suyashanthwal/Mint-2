@@ -1,9 +1,3 @@
-//
-//  EditCategoryViewController.swift
-//  EditPages
-//
-//  Created by Anushk Barmola on 07/02/26.
-//
 
 import UIKit
 
@@ -20,17 +14,11 @@ class EditCategoryViewController: UIViewController {
     @IBOutlet weak var IconColorWheelSelector: UIColorWell!
     @IBOutlet var AllView: [UIView]!
     @IBOutlet var InsideViews: [UIView]!
-  //  @IBOutlet var InsideStackView: [UIStackView]!
 
-    // Edit-only outlet — shows the calculated remaining amount (read-only)
     @IBOutlet weak var remainingAmountTextField: UITextField!
-
-    // MARK: - Edit-only Properties
 
     var category: Category?
     var onCategoryUpdated: (() -> Void)?
-
-    // MARK: - Shared Private Properties
 
     private var isIconPickerExpanded = false
     private let collapsedHeight: CGFloat = 0
@@ -41,8 +29,6 @@ class EditCategoryViewController: UIViewController {
 
     private let iconCategories: [String: [String]] = CategoryData.iconCategories
 
-    // MARK: - Lifecycle
-
     override func viewDidLoad() {
         super.viewDidLoad()
         enableKeyboardDismissOnBackgroundTapAndSwipe()
@@ -52,8 +38,6 @@ class EditCategoryViewController: UIViewController {
         setupIconCollectionView()
         loadCategory()
     }
-
-    // MARK: - Setup
 
     private func setupUI() {
         view.backgroundColor = AppColors.background
@@ -66,11 +50,6 @@ class EditCategoryViewController: UIViewController {
             v.applyShadow()
         }
 
-//        for eachStack in InsideStackView {
-//            eachStack.backgroundColor = AppColors.card
-//        }
-
-        // ── Text Fields ───────────────────────────────────────
         nameTextField.backgroundColor = AppColors.card
         nameTextField.textColor       = AppColors.textPrimary
 
@@ -78,31 +57,25 @@ class EditCategoryViewController: UIViewController {
         limitTextField.textColor       = AppColors.textPrimary
         limitTextField.keyboardType    = .numberPad
 
-        // ── Remaining Amount (read-only display) ──────────────
         remainingAmountTextField.backgroundColor          = AppColors.card
         remainingAmountTextField.textColor                = AppColors.textPrimary
         remainingAmountTextField.isUserInteractionEnabled = false
 
-        // ── Icon Picker row ───────────────────────────────────
         iconPickerImageView.backgroundColor = .clear
         iconPickerImageView.tintColor       = selectedIconColor
         iconPickerLabel.backgroundColor     = .clear
 
-        // ── Icon Collection View ──────────────────────────────
         iconCollectionView.backgroundColor = AppColors.card
         iconCollectionView.clipsToBounds   = true
 
-        // ── Notes Text View ───────────────────────────────────
         notesTextView.backgroundColor    = AppColors.card
         notesTextView.layer.borderColor  = UIColor.systemGray5.cgColor
         notesTextView.layer.borderWidth  = 1
         notesTextView.layer.cornerRadius = 8
 
-        // ── Icon Picker Collapse State ────────────────────────
         iconCollectionViewHeightConstraint.constant = collapsedHeight
         iconCollectionView.isHidden = true
 
-        // ── Icon Picker tap gesture ───────────────────────────
         let tap = UITapGestureRecognizer(target: self, action: #selector(iconPickerTapped))
         iconPickerStackView.addGestureRecognizer(tap)
         iconPickerStackView.isUserInteractionEnabled = true
@@ -136,8 +109,6 @@ class EditCategoryViewController: UIViewController {
         iconCollectionView.collectionViewLayout = layout
     }
 
-    // MARK: - Load Existing Category (Edit-only)
-
     private func loadCategory() {
         guard let category = category else { return }
 
@@ -151,22 +122,17 @@ class EditCategoryViewController: UIViewController {
         iconPickerImageView.image = UIImage(systemName: category.icon)
         iconPickerLabel.text      = formatIconName(category.icon)
 
-        // Restore the saved icon color, falling back to brand
         let savedColor = UIColor(hex: category.color)
         selectedIconColor                    = savedColor
         iconPickerImageView.tintColor        = savedColor
         IconColorWheelSelector.selectedColor = savedColor
     }
 
-    // MARK: - Color Well Action
-
     @objc private func colorWellChanged(_ sender: UIColorWell) {
         guard let color = sender.selectedColor else { return }
         selectedIconColor             = color
         iconPickerImageView.tintColor = color
     }
-
-    // MARK: - IBActions
 
     @IBAction func cancelButton(_ sender: Any) {
         dismiss(animated: true)
@@ -215,8 +181,6 @@ class EditCategoryViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    // MARK: - Icon Picker Expand / Collapse
-
     @objc private func iconPickerTapped() {
         isIconPickerExpanded.toggle()
         UIView.animate(withDuration: 0.3) {
@@ -236,8 +200,6 @@ class EditCategoryViewController: UIViewController {
         return words.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")
     }
 }
-
-// MARK: - UICollectionViewDataSource
 
 extension EditCategoryViewController: UICollectionViewDataSource {
 
@@ -276,8 +238,6 @@ extension EditCategoryViewController: UICollectionViewDataSource {
     }
 }
 
-// MARK: - UICollectionViewDelegate
-
 extension EditCategoryViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -287,11 +247,9 @@ extension EditCategoryViewController: UICollectionViewDelegate {
         iconPickerImageView.image     = UIImage(systemName: iconName)
         iconPickerImageView.tintColor = selectedIconColor
         iconPickerLabel.text          = formatIconName(iconName)
-        iconPickerTapped() // collapse the picker
+        iconPickerTapped()
     }
 }
-
-// MARK: - UICollectionViewDelegateFlowLayout
 
 extension EditCategoryViewController: UICollectionViewDelegateFlowLayout {
 
@@ -311,8 +269,6 @@ extension EditCategoryViewController: UICollectionViewDelegateFlowLayout {
         UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 16)
     }
 }
-
-// MARK: - UIColor toHex
 
 private extension UIColor {
     func toHex() -> String? {

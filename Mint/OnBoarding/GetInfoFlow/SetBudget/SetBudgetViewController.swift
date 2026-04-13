@@ -1,9 +1,3 @@
-//
-//  SetBudgetViewController.swift
-//  Mint
-//
-//  Created by AnushkB on 01/04/26.
-//
 
 import UIKit
 

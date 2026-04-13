@@ -1,14 +1,8 @@
-//
-//  TPCViewController.swift
-//  Mint
-//
 
 import UIKit
 import DGCharts
 
 class TPCViewController: UIViewController {
-
-    // MARK: - Outlets
 
     @IBOutlet weak var pieChartView: PieChartView!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -17,8 +11,6 @@ class TPCViewController: UIViewController {
 
     @IBOutlet var AllBackgroundVIews: [UIView]!
     @IBOutlet var AllCardVIews: [UIView]!
-
-    // MARK: - State
 
     private enum DisplayMode {
         case summary
@@ -34,12 +26,8 @@ class TPCViewController: UIViewController {
     private var reportYear = Calendar.current.component(.year, from: Date())
     private var hasInitializedMonthSelection = false
 
-    // MARK: - Cell identifiers
-
     private let cellId = "TPCcell"
     private let monthCellId = "MonthStripCollectionViewCell"
-
-    // MARK: - Month data
 
     private let allMonths = [
         "January", "February", "March", "April",
@@ -57,8 +45,6 @@ class TPCViewController: UIViewController {
     }
 
     private var selectedMonthIndex: Int = Calendar.current.component(.month, from: Date()) - 1
-
-    // MARK: - Data helpers
 
     private var expenseTransactions: [Transaction] {
         let calendar = Calendar.current
@@ -98,8 +84,6 @@ class TPCViewController: UIViewController {
         expenseTransactions.reduce(0) { $0 + $1.amount }
     }
 
-    // MARK: - Lifecycle
-
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -115,8 +99,6 @@ class TPCViewController: UIViewController {
         reloadFromDatabase(animateChart: false, preserveSelection: true)
     }
 
-    // MARK: - UI Setup
-
     private func setupUI() {
         for view in AllBackgroundVIews { view.backgroundColor = AppColors.background }
         for card in AllCardVIews {
@@ -129,8 +111,6 @@ class TPCViewController: UIViewController {
         collectionView.backgroundColor = .clear
         view.backgroundColor = AppColors.background
     }
-
-    // MARK: - Data Loading
 
     private func reloadFromDatabase(animateChart: Bool, preserveSelection: Bool) {
         allTransactions = db.fetchTransactions()
@@ -172,8 +152,6 @@ class TPCViewController: UIViewController {
         }
     }
 
-    // MARK: - Month strip
-
     private func setupMonthCollectionView() {
         MonthCollectionView.delegate = self
         MonthCollectionView.dataSource = self
@@ -184,8 +162,6 @@ class TPCViewController: UIViewController {
         )
     }
 
-    // MARK: - Category / transaction collection view
-
     private func setupCollectionView() {
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -194,8 +170,6 @@ class TPCViewController: UIViewController {
             forCellWithReuseIdentifier: cellId
         )
     }
-
-    // MARK: - Donut chart
 
     private func setupDonutChart() {
         pieChartView.drawHoleEnabled = true
@@ -276,8 +250,6 @@ class TPCViewController: UIViewController {
     }
 }
 
-// MARK: - ChartViewDelegate
-
 extension TPCViewController: ChartViewDelegate {
 
     func chartValueSelected(_ chartView: ChartViewBase,
@@ -306,8 +278,6 @@ extension TPCViewController: ChartViewDelegate {
         collectionView.reloadData()
     }
 }
-
-// MARK: - UICollectionViewDataSource
 
 extension TPCViewController: UICollectionViewDataSource {
 
@@ -366,8 +336,6 @@ extension TPCViewController: UICollectionViewDataSource {
     }
 }
 
-// MARK: - UICollectionViewDelegate
-
 extension TPCViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -395,8 +363,6 @@ extension TPCViewController: UICollectionViewDelegate {
         self.collectionView.reloadData()
     }
 }
-
-// MARK: - UICollectionViewDelegateFlowLayout
 
 extension TPCViewController: UICollectionViewDelegateFlowLayout {
 

@@ -3,8 +3,6 @@ import SQLite3
 
 extension DatabaseManager {
 
-    // MARK: - Fetch Bills
-
     func fetchBills() -> [Bill] {
         var result: [Bill] = []
         guard let userId = currentUserIdString else { return result }
@@ -62,16 +60,12 @@ extension DatabaseManager {
         fetchBills().first { $0.id == id }
     }
 
-    // MARK: - Fetch Upcoming Bills
-
     func fetchUpcomingBills() -> [Bill] {
         let startOfToday = Calendar.current.startOfDay(for: Date())
         return fetchBills()
             .filter { !$0.isPaid && $0.billDate >= startOfToday }
             .sorted { $0.billDate < $1.billDate }
     }
-
-    // MARK: - Insert Bill
 
     @discardableResult
     func insertBill(
@@ -134,8 +128,6 @@ extension DatabaseManager {
         }
     }
 
-    // MARK: - Update Bill
-
     func updateBill(
         id: UUID,
         name: String,
@@ -183,8 +175,6 @@ extension DatabaseManager {
             args: [isPaid ? "1" : "0", id.uuidString]
         )
     }
-
-    // MARK: - Delete Bill
 
     func deleteBill(id: UUID) {
         execute("DELETE FROM bills WHERE id = ?;", args: [id.uuidString])

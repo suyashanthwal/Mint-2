@@ -1,9 +1,5 @@
 import Foundation
 
-// MARK: - ReceiptScanData
-// Produced by IndianReceiptParserService after parsing OCR text.
-// All fields are optional because OCR is imperfect.
-
 struct ReceiptScanData {
     var merchantName: String?
     var invoiceNumber: String?
@@ -30,8 +26,6 @@ struct ReceiptScanData {
     
 }
 
-// ReceiptLineItem
-
 struct ReceiptLineItem {
     var name: String
     var quantity: Double?
@@ -44,14 +38,10 @@ struct ReceiptTaxLine {
     var amount: Double
 }
 
-// ReceiptScanResult
-
 enum ReceiptScanResult {
     case success(ReceiptScanData)
     case failure(ReceiptOCRError)
 }
-
-// ReceiptOCRError
 
 enum ReceiptOCRError: Error, LocalizedError {
     case noImageProvided

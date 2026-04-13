@@ -1,7 +1,3 @@
-//
-//  SubsandBillsCollectionViewCell.swift
-//  BudgetPage
-//
 
 import UIKit
 
@@ -23,8 +19,6 @@ class BudgetSubsandBillsCollectionViewCell: UICollectionViewCell {
         SubsandBillsIconView.layer.cornerRadius = 10
     }
 
-    // MARK: - Subscription
-
     func configure(RecurringPayment payment: RecurringPayment) {
         SubsandBillsTitle.text      = payment.name
         SubsandBillsTitle.textColor = AppColors.textPrimary
@@ -38,7 +32,6 @@ class BudgetSubsandBillsCollectionViewCell: UICollectionViewCell {
 
         SubsandBillsIconView.backgroundColor = AppColors.brandLight
 
-        // Pill shows Active / Inactive for subscriptions
         PillView.isHidden = false
         PillView.layer.cornerRadius  = 8
         PillView.layer.masksToBounds = true
@@ -57,8 +50,6 @@ class BudgetSubsandBillsCollectionViewCell: UICollectionViewCell {
             PillView.backgroundColor = AppColors.sectionBackground
         }
     }
-
-    // MARK: - Bill
 
     func configureBill(bill: Bill) {
         SubsandBillsTitle.text      = bill.name
@@ -79,11 +70,8 @@ class BudgetSubsandBillsCollectionViewCell: UICollectionViewCell {
         configurePill(for: bill)
     }
 
-    // MARK: - Pill Logic
-
     private func configurePill(for bill: Bill) {
         if bill.isPaid {
-            // ── Paid ──────────────────────────────────────────
             PillIcon.image           = UIImage(systemName: "checkmark.circle.fill")
             PillIcon.tintColor       = AppColors.brand
             PillStatus.text          = "Paid"
@@ -91,7 +79,6 @@ class BudgetSubsandBillsCollectionViewCell: UICollectionViewCell {
             PillView.backgroundColor = AppColors.brandLight.withAlphaComponent(0.4)
 
         } else if bill.billDate < Calendar.current.startOfDay(for: Date()) {
-            // ── Overdue ───────────────────────────────────────
             PillIcon.image           = UIImage(systemName: "exclamationmark.triangle.fill")
             PillIcon.tintColor       = AppColors.error
             PillStatus.text          = "Overdue"
@@ -99,7 +86,6 @@ class BudgetSubsandBillsCollectionViewCell: UICollectionViewCell {
             PillView.backgroundColor = AppColors.errorBackground
 
         } else {
-            // ── Due ───────────────────────────────────────────
             PillIcon.image           = UIImage(systemName: "info.circle.fill")
             PillIcon.tintColor       = UIColor(hex: "#A07800")
             PillStatus.text          = "Due"

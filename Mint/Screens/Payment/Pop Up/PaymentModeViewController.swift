@@ -1,9 +1,3 @@
-//
-//  PaymentModeViewController.swift
-//  BudgetPage
-//
-//  Created by Suyash Anthwal on 01/04/26.
-//
 
 import UIKit
 

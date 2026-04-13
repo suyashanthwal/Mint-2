@@ -1,9 +1,3 @@
-//
-//  UPIAppCell.swift
-//  QrAndReceiptReading
-//
-//  Created by Ayush Singh Bhandari on 07/04/26.
-//
 
 import UIKit
 

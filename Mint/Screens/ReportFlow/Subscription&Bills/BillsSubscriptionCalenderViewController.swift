@@ -28,14 +28,10 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         Calendar.current.dateComponents([.year, .month, .day], from: Date())
     }
 
-    // MARK: - Calendar state
-
     private var currentYear: Int = Calendar.current.component(.year, from: Date())
     private var currentMonth: Int = Calendar.current.component(.month, from: Date())
     private var calendarCells: [CalendarDay] = []
     private var selectedDay: Int? = Calendar.current.component(.day, from: Date())
-
-    // MARK: - Data
 
     private var allBills: [Bill] = []
     private var allSubscriptions: [RecurringPayment] = []
@@ -47,13 +43,9 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         }
     }
 
-    // MARK: - Reuse IDs
-
     private let calendarCellId = "CalendarDayCell"
     private let billCellId = "SubsAndBillsCell"
     private let subsCellId = "SubsAndBillsCell"
-
-    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,8 +66,6 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         UpcomingcollectionViewHeight.constant = UpcomingBillsCollectionView.contentSize.height
         ActivecollectionViewHeight.constant = ActiveSubscriptionCollectionView.contentSize.height
     }
-
-    // MARK: - Setup
 
     private func setupUI() {
         view.backgroundColor = AppColors.background
@@ -164,8 +154,6 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         return UICollectionViewCompositionalLayout(section: section)
     }
 
-    // MARK: - Data Loading
-
     private func reloadFromDatabase() {
         allBills = db.fetchBills()
         allSubscriptions = db.fetchRecurringPayments().filter { $0.isActive && !$0.isIncome }
@@ -190,8 +178,6 @@ class BillsSubscriptionCalenderViewController: UIViewController {
             relayoutDynamicViews()
         }
     }
-
-    // MARK: - Calendar reload
 
     private func reloadCalendar() {
         let dataSource = CalendarDataSource(year: currentYear, month: currentMonth)
@@ -221,8 +207,6 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         previousMonthButton.alpha = 1.0
     }
 
-    // MARK: - Month navigation
-
     @IBAction
     @objc func previousMonthTapped(_ sender: UIButton) {
         if currentMonth == 1 {
@@ -250,8 +234,6 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         reloadCalendar()
         refreshSelectedDayContent()
     }
-
-    // MARK: - Bill filtering
 
     private func filterBills(for date: Date) {
         let calendar = Calendar.current
@@ -345,8 +327,6 @@ class BillsSubscriptionCalenderViewController: UIViewController {
     }
 }
 
-// MARK: - UICollectionViewDataSource
-
 extension BillsSubscriptionCalenderViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -411,8 +391,6 @@ extension BillsSubscriptionCalenderViewController: UICollectionViewDataSource {
         }
     }
 }
-
-// MARK: - UICollectionViewDelegate
 
 extension BillsSubscriptionCalenderViewController: UICollectionViewDelegate {
 

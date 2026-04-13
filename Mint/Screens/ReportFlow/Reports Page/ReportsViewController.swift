@@ -1,9 +1,3 @@
-//
-//  ViewController.swift
-//  Mint
-//
-//  Created by Suyash Anthwal on 25/03/26.
-//
 
 import UIKit
 
@@ -104,8 +98,6 @@ class ReportsViewController: UIViewController {
     private var subsBillsCalendarData: SubsBillsCalendarData?
     private var insightTask: URLSessionDataTask?
     private var hasLoadedOnce = false
-
-    // MARK: - Onboarding State
 
     private var spotlightView: OnboardingSpotlightView?
     private var currentOnboardingStep = 0
@@ -214,8 +206,6 @@ class ReportsViewController: UIViewController {
         }
     }
 
-    // MARK: - Onboarding
-
     private func showReportsOnboarding() { startOnboarding() }
 
     private func startOnboarding() {
@@ -323,8 +313,6 @@ class ReportsViewController: UIViewController {
         CategoryBreakdown.reloadData()
         SubsAndBillsCard?.reloadData()
     }
-
-    // MARK: - Build data from database
 
     private func buildData() {
         let calendar = Calendar.current
@@ -461,8 +449,6 @@ class ReportsViewController: UIViewController {
             nextBillText: nextBillText
         )
     }
-
-    // MARK: - Setup
 
     private func setupCollectionViews() {
         SummaryCard.dataSource = self
@@ -837,8 +823,6 @@ class ReportsViewController: UIViewController {
         }
     }
 }
-
-// MARK: - UICollectionView DataSource & Delegate
 
 extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDelegate {
 

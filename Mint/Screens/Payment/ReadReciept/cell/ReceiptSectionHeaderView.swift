@@ -1,9 +1,3 @@
-//
-//  ReceiptSectionHeaderView.swift
-//  QrAndReceiptReading
-//
-//  Created by Ayush Singh Bhandari on 01/04/26.
-//
 
 import UIKit
 
@@ -17,8 +11,6 @@ class ReceiptSectionHeaderView: UICollectionReusableView {
 
         override func awakeFromNib() {
             super.awakeFromNib()
-            // Basic styling done in XIB
-            // Only AppColors and frame-dependent stuff here
         }
         override func layoutSubviews() {
             super.layoutSubviews()

@@ -1,9 +1,3 @@
-//
-//  GoalsViewController.swift
-//  BudgetApp
-//
-//  Created by Suyash Anthwal on 02/04/26.
-//
 
 import UIKit
 
@@ -15,8 +9,6 @@ class GoalsViewController: UIViewController {
         static let sectionSpacing: CGFloat = 16
     }
 
-    // MARK: - Outlets
-
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var totalSavingsView: UIView!
     @IBOutlet weak var activeGoalsSectionView: UIView!
@@ -26,19 +18,13 @@ class GoalsViewController: UIViewController {
     @IBOutlet weak var ActiveGoalsCollectionView: UICollectionView!
     @IBOutlet weak var ReachedGoalsCollectionView: UICollectionView!
 
-    // MARK: - Data
-
     private var hasCheckedOnboarding = false
     private var ongoingGoals: [Goal] = []
     private var completedGoals: [Goal] = []
 
-    // MARK: - Onboarding State
-
     private var spotlightView: OnboardingSpotlightView?
     private var currentOnboardingStep = 0
     private var onboardingSteps: [OnboardingStep] = []
-
-    // MARK: - Lifecycle
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -101,7 +87,6 @@ class GoalsViewController: UIViewController {
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    // MARK: - UI Setup
 
     private func setupUI() {
         view.backgroundColor = AppColors.background
@@ -111,8 +96,6 @@ class GoalsViewController: UIViewController {
         TotalSavingStatsLabel.textColor = AppColors.textSecondary
         updateSummaryLabels()
     }
-
-    // MARK: - Register Cells
 
     private func registerCells() {
         ActiveGoalsCollectionView.register(
@@ -125,8 +108,6 @@ class GoalsViewController: UIViewController {
         )
     }
 
-    // MARK: - Delegates & Data Sources
-
     private func setupDelegatesAndDataSources() {
         ActiveGoalsCollectionView.delegate   = self
         ActiveGoalsCollectionView.dataSource = self
@@ -138,8 +119,6 @@ class GoalsViewController: UIViewController {
         ReachedGoalsCollectionView.isScrollEnabled = false
         ReachedGoalsCollectionView.showsVerticalScrollIndicator = false
     }
-
-    // MARK: - Layouts
 
     private func setupLayouts() {
         updateCollectionLayouts()
@@ -154,7 +133,6 @@ class GoalsViewController: UIViewController {
         )
     }
 
-    /// Vertical list — one full-width card per ongoing goal
     private func makeOngoingLayout(width: CGFloat) -> UICollectionViewFlowLayout {
         let layout                   = UICollectionViewFlowLayout()
         layout.itemSize              = CGSize(width: max(width, 0), height: LayoutMetrics.activeGoalHeight)
@@ -163,7 +141,6 @@ class GoalsViewController: UIViewController {
         return layout
     }
 
-    /// Vertical list — one full-width row per completed goal
     private func makeReachedLayout(width: CGFloat) -> UICollectionViewFlowLayout {
         let layout                   = UICollectionViewFlowLayout()
         layout.itemSize              = CGSize(width: max(width, 0), height: LayoutMetrics.reachedGoalHeight)
@@ -171,8 +148,6 @@ class GoalsViewController: UIViewController {
         layout.scrollDirection       = .vertical
         return layout
     }
-
-    // MARK: - Helpers
 
     private var totalSaved: Double {
         (ongoingGoals + completedGoals).reduce(0) { $0 + $1.currentlySaved }
@@ -188,11 +163,8 @@ class GoalsViewController: UIViewController {
         updateSummaryLabels()
 
         guard isViewLoaded else { return }
-        //
         updateCollectionLayouts()
-        //
         ActiveGoalsCollectionView.reloadData()
-        //
         ReachedGoalsCollectionView.reloadData()
     }
     
@@ -209,14 +181,12 @@ class GoalsViewController: UIViewController {
         }
     }
 
-    // Same filename formula used everywhere — single source of truth
     private func imageURL(for goal: Goal) -> URL {
         FileManager.default
             .urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("goal_\(goal.id.uuidString)_photo.jpg")
     }
 
-    // Called after every fetch — re-links disk files back to model objects
     private func reattachSavedImages(to goals: inout [Goal]) {
         for i in goals.indices {
             let url = imageURL(for: goals[i])
@@ -241,8 +211,6 @@ class GoalsViewController: UIViewController {
         formatter.maximumFractionDigits = 0
         return formatter.string(from: NSNumber(value: amount)) ?? "₹0"
     }
-
-    // MARK: - Onboarding
 
     private func showGoalsOnboarding() { startOnboarding() }
 
@@ -297,7 +265,7 @@ class GoalsViewController: UIViewController {
             spotlightView?.isUserInteractionEnabled = false
 
             let frameInScroll = step.view.convert(step.view.bounds, to: scrollView)
-            let idealOffset = frameInScroll.midY - (screenHeight / 2)
+            let idealOffset = frameInScroll.midY - (scrollView.bounds.height / 2)
             let maxOffset = max(0, scrollView.contentSize.height - scrollView.bounds.height)
             var finalOffset = max(0, min(idealOffset, maxOffset))
 
@@ -333,14 +301,9 @@ class GoalsViewController: UIViewController {
         })
     }
 
-    // MARK: - Actions
-
     @objc private func addGoalTapped() {
-        // TODO: present Add Goal sheet
     }
 }
-
-// MARK: - UICollectionViewDataSource
 
 extension GoalsViewController: UICollectionViewDataSource {
 
@@ -362,9 +325,11 @@ extension GoalsViewController: UICollectionViewDataSource {
                 for: indexPath
             ) as! OngoingGoalCollectionViewCell
 
+            cell.layer.cornerRadius  = 22
+            cell.layer.masksToBounds = true
+
             cell.configure(with: ongoingGoals[indexPath.item])
 
-            // Wire up buttons with closures / callbacks
             cell.onAddMoney = { [weak self] in
                 guard let self else { return }
                 self.handleAddMoney(for: self.ongoingGoals[indexPath.item])
@@ -373,10 +338,6 @@ extension GoalsViewController: UICollectionViewDataSource {
                 guard let self else { return }
                 self.handleDetail(for: self.ongoingGoals[indexPath.item])
             }
-            // Image picking callback
-            // Called when user picks a photo from the library 
-            // save it to disk so it survives reloads, then update
-            // the in-memory model so configure() can find it immediately
             let goal = ongoingGoals[indexPath.item]
             cell.onImagePicked = { [weak self] image in
                 guard let self else { return }
@@ -384,7 +345,7 @@ extension GoalsViewController: UICollectionViewDataSource {
                     self.ongoingGoals[indexPath.item].pickedImageURL = url
                 }
             }
-            
+
             return cell
 
         } else {
@@ -393,13 +354,14 @@ extension GoalsViewController: UICollectionViewDataSource {
                 for: indexPath
             ) as! ReachedGoalsCollectionViewCell
 
+            cell.layer.cornerRadius  = 22
+            cell.layer.masksToBounds = true
+
             cell.configure(with: completedGoals[indexPath.item])
             return cell
         }
     }
 }
-
-// MARK: - UICollectionViewDelegate
 
 extension GoalsViewController: UICollectionViewDelegate {
 
@@ -410,8 +372,6 @@ extension GoalsViewController: UICollectionViewDelegate {
         }
     }
 }
-
-// MARK: - Navigation Helpers
 
 private extension GoalsViewController {
 
@@ -429,7 +389,7 @@ private extension GoalsViewController {
         if let sheet = vc.sheetPresentationController {
             sheet.detents = [
                 .custom { context in
-                    return context.maximumDetentValue * 0.5   // 50% height
+                    return context.maximumDetentValue * 0.5
                 }
             ]
             sheet.prefersGrabberVisible = true

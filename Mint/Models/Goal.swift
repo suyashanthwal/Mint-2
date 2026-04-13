@@ -1,12 +1,5 @@
-//
-//  Goal.swift
-//  DataModel
-//
-//  Created by Anushk on 04/02/26.
-//
 
 import Foundation
-
 
 struct Goal: Identifiable, Codable {
     let id: UUID
@@ -19,13 +12,13 @@ struct Goal: Identifiable, Codable {
     let imageName: String?
     var isCompleted: Bool
     var completedOn: Date?
-    var pickedImageURL: URL? = nil //Not to be saved directly On Db but using function reattachSavedImages()
+    var pickedImageURL: URL? = nil
     
     enum CodingKeys: String, CodingKey {
            case id, name, targetAmount, currentlySaved,
                 targetDate, monthlyGoal, iconName,
                 imageName, isCompleted, completedOn
-       } //This excludes pickedImageURL from Codable conformance since it's not stored in the DB.
+       }
 
     
     init(

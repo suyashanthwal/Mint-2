@@ -1,9 +1,3 @@
-//
-//  SelectSubsViewController.swift
-//  Mint
-//
-//  Created by AnushkB on 01/04/26.
-//
 
 import UIKit
 
@@ -20,7 +14,7 @@ class SelectSubsViewController: UIViewController {
 
     @IBOutlet var categoryIcons: [UIImageView]!
     @IBOutlet var categoryViews: [UIView]!
-    @IBOutlet var categoryLabels: [UILabel]! // connect labels separately
+    @IBOutlet var categoryLabels: [UILabel]!
 
     @IBOutlet weak var skip: UIButton!
     private var selectedViews: Set<Int> = []

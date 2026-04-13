@@ -1,7 +1,5 @@
 import UIKit
 
-// MARK: - Tab Definition
-
 enum AppTab: Int {
     case home = 0
     case budget
@@ -26,8 +24,6 @@ enum AppTab: Int {
         }
     }
 }
-
-// MARK: - Custom Tab Bar Controller
 
 final class CustomTabBarController: UITabBarController {
 
@@ -57,8 +53,6 @@ final class CustomTabBarController: UITabBarController {
         layoutBar()
     }
 
-    // MARK: VC Setup
-
     private func setupVCs() {
         let sb = UIStoryboard(name: "Main", bundle: nil)
 
@@ -74,8 +68,6 @@ final class CustomTabBarController: UITabBarController {
             UINavigationController(rootViewController: goals)
         ]
     }
-
-    // MARK: UI Setup
 
     private func setupBar() {
         barView.backgroundColor    = AppColors.card
@@ -140,8 +132,6 @@ final class CustomTabBarController: UITabBarController {
         payButton.addTarget(self, action: #selector(payTapped), for: .touchUpInside)
     }
 
-    // MARK: Layout
-
     private func layoutBar() {
         let width = view.bounds.width - 32
         let x: CGFloat = 16
@@ -157,8 +147,6 @@ final class CustomTabBarController: UITabBarController {
             height: paySize
         )
     }
-
-    // MARK: Actions
 
     @objc private func tabTap(_ g: UITapGestureRecognizer) {
         guard let i = g.view?.tag else { return }
@@ -180,7 +168,6 @@ final class CustomTabBarController: UITabBarController {
                 }
             }
         )
-        // Instantiate fresh — storyboard already has a nav controller embedded
         let sb = UIStoryboard(name: "Main", bundle: nil)
         let payment = sb.instantiateViewController(withIdentifier: "paymentViewController")
         payment.modalPresentationStyle = .pageSheet
@@ -214,8 +201,6 @@ final class CustomTabBarController: UITabBarController {
         )
     }
 }
-
-// MARK: - Tab Item View
 
 final class TabItemView: UIView {
 
@@ -266,8 +251,6 @@ final class TabItemView: UIView {
         }
     }
 }
-
-// MARK: - Placeholder
 
 final class PlaceholderVC: UIViewController {
     init(title: String) {

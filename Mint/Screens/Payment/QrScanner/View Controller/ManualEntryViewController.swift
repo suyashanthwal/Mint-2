@@ -1,6 +1,3 @@
-//
-//  ManualEntryViewController.swift
-//  QrAndReceiptReading
 
 import UIKit
 
@@ -12,7 +9,6 @@ import UIKit
         static let fallbackExpenseCategoryIcon = "cube.box.fill"
     }
 
-    // these need outlets because their text changes at runtime
     @IBOutlet weak var amountValueTextField: UITextField!
     @IBOutlet weak var categoryValueLabel: UILabel!
     @IBOutlet weak var categoryIconImageView: UIImageView!
@@ -21,31 +17,22 @@ import UIKit
     @IBOutlet weak var noteValueLabel: UILabel!
     @IBOutlet weak var dateValueLabel: UILabel!
      @IBOutlet weak var currencySymbolLabel : UILabel!
-    // these rows need outlets so we can hide/show and add gestures
     @IBOutlet weak var categoryRowView: UIView!
     @IBOutlet weak var fromRowView: UIView!
     @IBOutlet weak var noteRowView: UIView!
     @IBOutlet weak var dateRowView: UIView!
 
-    // next button needs to be disabled when date reaches today
     @IBOutlet weak var nextDateButton: UIButton!
 
-    // segment drives expense vs income logic
     @IBOutlet weak var expenseIncomeSegment: UISegmentedControl!
 
-    // stack view needs layoutIfNeeded when category row hides/shows
     @IBOutlet weak var rowsStackView: UIStackView!
 
-    // collection outlet — all 4 icon circles need corner radius in code
-    // connect all 4 circles to this one outlet in storyboard
     @IBOutlet  var iconCircles : [UIView]!
 
-
-    //list of available categories, filtered based on mode (expense/income) when user taps category row
     var availableCategories: [Category] = []
     private let db = DatabaseManager.shared
 
-    // form state
     private var amount: Double = 0
     private var selectedCategory: Category?
     private var selectedDate: Date = Date()
@@ -56,7 +43,6 @@ import UIKit
 
     private let expenseSources = ["Cash", "UPI", "Card", "Net Banking", "Savings"]
     private let incomeSources  = ["Salary", "Freelance", "Business", "Gift", "Other"]
-
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,7 +56,6 @@ import UIKit
     }
      
     private func wireUpGestures() {
-        // each row is tappable — the whole row, not just the chevron
         let rows: [(UIView, Selector)] = [
             (categoryRowView, #selector(categoryTapped)),
             (fromRowView,     #selector(fromTapped)),
@@ -92,21 +77,15 @@ import UIKit
         amountValueTextField.addTarget(self, action: #selector(amountFieldChanged(_:)), for: .editingChanged)
     }
 
-    // syncs every label and state to the current form data
     private func updateScreen() {
         
-        // amount
         amountValueTextField.text = amount == 0 ? "" : formattedAmountText(amount)
 
-        // category row is hidden when the user switches to income
-        // because income transactions don't have an expense category
         categoryRowView.isHidden = !isExpense
 
-        // the from/to row label and value change based on mode
         fromTitleLabel.text = isExpense ? "FROM" : "TO"
         fromValueLabel.text = isExpense ? selectedExpenseSource : selectedIncomeSource
 
-        // reflect whatever category was picked
         if let cat = selectedCategory {
             categoryValueLabel.text     = cat.name
             categoryIconImageView.image = UIImage(systemName: cat.icon)
@@ -121,10 +100,8 @@ import UIKit
             ? AppColors.textSecondary
             : AppColors.textPrimary
 
-        // date — "Today", "Yesterday", or "4 Apr"
         dateValueLabel.text = readableDate(selectedDate)
         
-        // can't go past today
         let tomorrow = Calendar.current.date(byAdding: .day,
                                               value: 1,
                                               to: selectedDate) ?? selectedDate
@@ -144,7 +121,6 @@ import UIKit
         f.dateFormat = "d MMM"
         return f.string(from: date)
     }
-
 
     @IBAction func closeTapped(_ sender: UIButton) {
         dismiss(animated: true)
@@ -289,13 +265,11 @@ import UIKit
 
          currencySymbolLabel.textColor = AppColors.brand
          amountValueTextField.textAlignment = .left
-         //loop for each circle in the iconCircles collection and apply styling
          iconCircles?.prefix(2).forEach { circle in
                  circle.backgroundColor = AppColors.brandLight
                 
              }
          
-         //last two circles are coloured sectinBackground
          iconCircles?.suffix(from: 2).forEach { circle in
                  circle.backgroundColor = AppColors.sectionBackground
                  
@@ -305,7 +279,6 @@ import UIKit
              $0?.backgroundColor = .clear
          }
 
-         // segment — no Runtime Attribute support
          expenseIncomeSegment.backgroundColor          = AppColors.sectionBackground
          expenseIncomeSegment.selectedSegmentTintColor = AppColors.card
          expenseIncomeSegment.setTitleTextAttributes(

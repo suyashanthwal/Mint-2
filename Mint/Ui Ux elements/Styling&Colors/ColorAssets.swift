@@ -1,5 +1,3 @@
-//  ColorAssets.swift
-//  BudgetApp
 
 import UIKit
 
@@ -10,9 +8,7 @@ enum AppColors {
 
     static let sectionBackground = UIColor(hex: "#f1f4f2")
 
-
     static let inputBackground   = UIColor(hex: "#e4e9e7")
-
 
     static let brand             = UIColor(hex: "#406845")
 
@@ -22,11 +18,9 @@ enum AppColors {
 
     static let brandLightText    = UIColor(hex: "#1a3b1f")
 
-
     static let textPrimary       = UIColor(hex: "#2d3432")
 
     static let textSecondary     = UIColor(hex: "#59615f")
-
 
     static let error             = UIColor(hex: "#b3261e")
 

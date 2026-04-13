@@ -1,9 +1,3 @@
-//
-//  AddGoalsViewController.swift
-//  EditPages
-//
-//  Created by Anushk Barmola on 06/02/26.
-//
 
 import UIKit
 
@@ -62,7 +56,6 @@ class AddGoalsViewController: UIViewController {
             DatabaseManager.shared.linkGoalToCurrentBudget(goalId: id)
         }
 
-        // 🔥 IMPORTANT: call BEFORE dismiss
         dismiss(animated: true) {
             self.onGoalSaved?()
             NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
@@ -80,8 +73,6 @@ class AddGoalsViewController: UIViewController {
         present(alert, animated: true)
     }
 }
-
-// MARK: - UI Setup
 
 extension AddGoalsViewController {
 
@@ -113,8 +104,6 @@ extension AddGoalsViewController {
         targetDateRowStack.isUserInteractionEnabled = true
     }
 }
-
-// MARK: - Date Picker
 
 extension AddGoalsViewController {
 

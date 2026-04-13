@@ -1,15 +1,7 @@
-//
-//  HomeViewController.swift
-//  JustChecking
-//
-//  Created by Suyash Anthwal on 22/03/26.
-//
 
 import UIKit
 
 class HomeViewController: UIViewController, UICollectionViewDelegate {
-
-    // MARK: - Outlets
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var todaycardview: UIView!
@@ -29,7 +21,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     
     @IBOutlet weak var AverageUpAndDownLabel: UILabel!
     @IBOutlet weak var dailyAverage: UILabel!
-    // MARK: - Properties
 
     @IBOutlet weak var GoalNameLabel: UILabel!
     @IBOutlet weak var SavedSoFarLabel: UILabel!
@@ -49,14 +40,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private let contextMenuFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let actionFeedbackGenerator = UINotificationFeedbackGenerator()
 
-
-    // MARK: - Onboarding State
-
     private var spotlightView: OnboardingSpotlightView?
     private var currentOnboardingStep = 0
     private var onboardingSteps: [OnboardingStep] = []
 
-    // MARK: - Lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
@@ -156,12 +143,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         NotificationCenter.default.removeObserver(self)
     }
     
-    // MARK: - Data Loading
     
     private func loadDataFromDatabase() {
         let db = DatabaseManager.shared
 
-        // Categories must be loaded first — transactions cell uses them for icon lookup
         categories        = db.fetchCategories()
         allTransactions   = db.fetchTransactions()
         transactions      = db.fetchRecentTransactions(limit: 5)
@@ -212,7 +197,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         confirmCollectionView.isHidden = isHidden
     }
     
-    // MARK: - Onboarding
 
     private func showHomeOnboarding() {
         startOnboarding()
@@ -300,8 +284,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         })
     }
 
-    // MARK: - Home Cards
-
     private func updateMonthlyOverview() {
         let monthlyExpense = currentMonthExpenseTransactions().reduce(0) { $0 + $1.amount }
         amountLabel.text = currencyFormatter.string(from: NSNumber(value: monthlyExpense)) ?? "₹0"
@@ -352,8 +334,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
             }
 
             let darkGreen = AppColors.brand
-            let softGreen = UIColor(hex: "#7FA487")   // lighter, but still visible on your background
-            let softRed   = UIColor(hex: "#D96B66")   // red starts gently
+            let softGreen = UIColor(hex: "#7FA487")
+            let softRed   = UIColor(hex: "#D96B66")
             let darkRed   = AppColors.error
 
             let progressColor: UIColor
@@ -498,7 +480,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         
         let prefixRange = NSRange(location: 0, length: prefix.count)
         
-        // Style ONLY the percentage
         attributedString.addAttributes([
             .foregroundColor: color,
             .font: UIFont.boldSystemFont(ofSize: label.font.pointSize)
@@ -576,7 +557,17 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
     }
 
-    // MARK: - Collection View Setup
+    private func presentEditTransaction(_ transaction: Transaction) {
+        guard let nav = storyboard?.instantiateViewController(withIdentifier: "EditTransactionNav") as? UINavigationController,
+              let editViewController = nav.viewControllers.first as? EditTransactionViewController
+        else { return }
+
+        editViewController.transaction = transaction
+        editViewController.onTransactionUpdated = { [weak self] in
+            self?.loadDataFromDatabase()
+        }
+        present(nav, animated: true)
+    }
 
     private func setupConfirmCollectionView() {
         confirmCardView.backgroundColor = AppColors.card
@@ -616,8 +607,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         billsCollectionView.dataSource = self
         billsCollectionView.delegate   = self
     }
-
-    // MARK: - Layouts
 
     private func generateVerticalLayout() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(
@@ -686,8 +675,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
 }
 
-// MARK: - UICollectionViewDataSource
-
 extension HomeViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView,
@@ -752,6 +739,13 @@ extension HomeViewController {
             contextMenuFeedbackGenerator.impactOccurred()
 
             return UIContextMenuConfiguration(identifier: transaction.id.uuidString as NSString, previewProvider: nil) { [weak self] _ in
+                let editAction = UIAction(
+                    title: "Edit",
+                    image: UIImage(systemName: "square.and.pencil")
+                ) { _ in
+                    self?.presentEditTransaction(transaction)
+                }
+
                 let deleteAction = UIAction(
                     title: "Delete",
                     image: UIImage(systemName: "trash"),
@@ -760,7 +754,7 @@ extension HomeViewController {
                     self?.promptDeleteTransaction(transaction)
                 }
 
-                return UIMenu(title: transaction.name, children: [deleteAction])
+                return UIMenu(title: transaction.name, children: [editAction, deleteAction])
             }
         }
 

@@ -4,7 +4,6 @@ class AboutUsViewController: UIViewController{
 
     @IBOutlet weak var yellowCircle: UIVisualEffectView!
 
-
     @IBOutlet weak var navigatior: UIPageControl!
     @IBOutlet weak var infoLabel: UILabel!
     @IBOutlet weak var titleLabel: UILabel!
@@ -48,8 +47,6 @@ class AboutUsViewController: UIViewController{
         )
     ]
 
-    // MARK: - Lifecycle
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -66,7 +63,6 @@ class AboutUsViewController: UIViewController{
         }
     }
 
-    // MARK: - Continue
     @IBAction func skipTapped(_ sender: Any) {
         navigateToNextFlow()
     }
@@ -82,7 +78,6 @@ class AboutUsViewController: UIViewController{
         }
     }
 
-    // MARK: - Apply Page
  
     private func navigateToNextFlow() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -126,7 +121,6 @@ class AboutUsViewController: UIViewController{
         )
 
         if animated {
-            // Circles spring smoothly from current position to next
             UIView.animate(
                 withDuration: 0.7,
                 delay: 0,
@@ -138,7 +132,6 @@ class AboutUsViewController: UIViewController{
                 self.yellowCircle.center = yellowTarget
             }
 
-            // Content fades out → updates → fades in
             UIView.animate(withDuration: 0.15) {
                 self.titleLabel.alpha  = 0
                 self.infoLabel.alpha   = 0

@@ -3,7 +3,6 @@ import UIKit
 class EditSubsAndBillsViewController: UIViewController {
 
     var mode: EntryMode = .subscription
-    // Pass the full model objects (with their UUIDs) instead of array indices
     var recurringPayment: RecurringPayment?
     var bill: Bill?
     var onEntryUpdated: (() -> Void)?
@@ -111,8 +110,6 @@ class EditSubsAndBillsViewController: UIViewController {
         intervalPicker.reloadAllComponents()
     }
 
-    // MARK: - Load existing entry into UI
-
     func loadEntry() {
         switch mode {
         case .subscription:
@@ -151,8 +148,6 @@ class EditSubsAndBillsViewController: UIViewController {
             updateDateLabel(bill.billDate)
         }
     }
-
-    // MARK: - IBActions
 
     @IBAction func cancelButton(_ sender: Any) {
         dismiss(animated: true)
@@ -219,8 +214,6 @@ class EditSubsAndBillsViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    // MARK: - Picker / DatePicker toggle
-
     @objc func intervalTapped() {
         view.endEditing(true)
         if !pickerVisible {
@@ -252,8 +245,6 @@ class EditSubsAndBillsViewController: UIViewController {
         fmt.dateStyle = .medium
         selectedDateLabel.text = fmt.string(from: date)
     }
-
-    // MARK: - Enum Helpers
 
     private func paymentDuration(from string: String) -> PaymentDuration {
         switch string {
@@ -289,16 +280,12 @@ class EditSubsAndBillsViewController: UIViewController {
     }
 }
 
-// MARK: - UIPickerViewDataSource
-
 extension EditSubsAndBillsViewController: UIPickerViewDataSource {
     func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         intervals.count
     }
 }
-
-// MARK: - UIPickerViewDelegate
 
 extension EditSubsAndBillsViewController: UIPickerViewDelegate {
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {

@@ -139,8 +139,6 @@ extension DatabaseManager {
         return result
     }
 
-    // MARK: - Fetch Recent Transactions
-
     func fetchRecentTransactions(limit: Int = 5) -> [Transaction] {
         let sortedTransactions = fetchTransactions().sorted { lhs, rhs in
             if lhs.createdAt != rhs.createdAt {
@@ -583,6 +581,90 @@ extension DatabaseManager {
             "DELETE FROM transactions WHERE user_id = ? AND note = ?;",
             args: [userId, note]
         )
+    }
+
+    @discardableResult
+    func updateTransaction(
+        id: UUID,
+        amount: Double,
+        timestamp: Date,
+        categoryId: UUID? = nil,
+        sourceName: String? = nil
+    ) -> Bool {
+        guard let userId = currentUserIdString,
+              let existingTransaction = fetchTransactions().first(where: { $0.id == id })
+        else { return false }
+
+        let timestampString = databaseTimestampString(from: timestamp)
+        let query: String
+        let updatedName: String
+
+        if existingTransaction.type == .expense {
+            guard let categoryId else { return false }
+            let categoryName = fetchCategories().first(where: { $0.id == categoryId })?.name
+            updatedName = categoryName ?? existingTransaction.name
+            query = """
+            UPDATE transactions
+            SET name = ?, amount = ?, timestamp = ?, category_id = ?, source_name = NULL
+            WHERE id = ? AND user_id = ?;
+            """
+
+            var stmt: OpaquePointer?
+            guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
+                print("❌ updateTransaction: prepare failed")
+                return false
+            }
+            defer { sqlite3_finalize(stmt) }
+
+            sqlite3_bind_text(stmt, 1, (updatedName as NSString).utf8String, -1, nil)
+            sqlite3_bind_double(stmt, 2, amount)
+            sqlite3_bind_text(stmt, 3, (timestampString as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, 4, (categoryId.uuidString as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, 5, (id.uuidString as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, 6, (userId as NSString).utf8String, -1, nil)
+
+            guard sqlite3_step(stmt) == SQLITE_DONE else {
+                print("❌ updateTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+                return false
+            }
+        } else {
+            let resolvedSourceName = sourceName?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedName = (resolvedSourceName?.isEmpty == false ? resolvedSourceName : nil)
+                ?? existingTransaction.sourceName
+                ?? existingTransaction.name
+            query = """
+            UPDATE transactions
+            SET name = ?, amount = ?, timestamp = ?, source_name = ?, category_id = NULL
+            WHERE id = ? AND user_id = ?;
+            """
+
+            var stmt: OpaquePointer?
+            guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
+                print("❌ updateTransaction: prepare failed")
+                return false
+            }
+            defer { sqlite3_finalize(stmt) }
+
+            sqlite3_bind_text(stmt, 1, (updatedName as NSString).utf8String, -1, nil)
+            sqlite3_bind_double(stmt, 2, amount)
+            sqlite3_bind_text(stmt, 3, (timestampString as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, 4, (updatedName as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, 5, (id.uuidString as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(stmt, 6, (userId as NSString).utf8String, -1, nil)
+
+            guard sqlite3_step(stmt) == SQLITE_DONE else {
+                print("❌ updateTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+                return false
+            }
+        }
+
+        guard sqlite3_changes(db) > 0 else {
+            return false
+        }
+
+        resetMonthlyExpense()
+        return true
     }
 
     @discardableResult

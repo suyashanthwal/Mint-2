@@ -1,8 +1,3 @@
-//  styling.swift
-//  JustChecking
-//
-//  Created by Suyash Anthwal on 22/03/26.
-//
 
 import UIKit
 
@@ -73,7 +68,6 @@ class CircularProgressView {
     }
 }
 
-
 let currencyFormatter: NumberFormatter = {
     let f            = NumberFormatter()
     f.numberStyle    = .currency
@@ -90,7 +84,6 @@ extension UIView {
     }
 }
 
-
 extension UIProgressView {
     func applyBrandStyle() {
         self.progressTintColor = AppColors.brand
@@ -106,7 +99,6 @@ extension UIProgressView {
         self.clipsToBounds      = true
     }
 }
-
 
 extension UIView {
     func applyPillStyle() {

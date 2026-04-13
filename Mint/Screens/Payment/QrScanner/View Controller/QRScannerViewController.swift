@@ -1,14 +1,8 @@
-//
-//  QRScannerViewController.swift
-//  QrScanner
-//
-//  Created by Ayush Singh Bhandari on 12/02/26.
-//
 
 import UIKit
 import AVFoundation
 import Combine
-import PhotosUI //for PHPickerViewController
+import PhotosUI
 import CoreImage
 
 class QRScannerViewController: UIViewController {
@@ -27,15 +21,11 @@ class QRScannerViewController: UIViewController {
     private let viewModel = QRCodeScannerViewModel()
         private var cancellables = Set<AnyCancellable>()
 
-        /// Camera session used for QR scanning
         private var captureSession: AVCaptureSession?
 
-        /// Preview layer shown on screen
         private var previewLayer: AVCaptureVideoPreviewLayer?
 
-        /// Haptic feedback when scan succeeds
         private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
-
 
         
 
@@ -61,31 +51,24 @@ class QRScannerViewController: UIViewController {
         override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
 
-            // Stop camera when leaving screen
             stopCameraSession()
         }
 
         override func viewDidLayoutSubviews() {
             super.viewDidLayoutSubviews()
 
-            // Update preview layer frame on layout changes
             previewLayer?.frame = cameraPreviewView.bounds
             updateOverlayMask()
         }
     @IBAction func cancelTapped(_ sender: Any) {
         presentingViewController?.presentingViewController?.dismiss(animated: true)
-        //when clicked the x navbutton , it will close the qr scanner and the payment mode pop up and return to the home screen
     }
     
 
     
 
-        // MARK: - Bindings
-
-        /// Binds ViewModel outputs to UI updates
         private func setupBindings() {
 
-            // Handle successful scan
             viewModel.$scannedData
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] data in
@@ -94,7 +77,6 @@ class QRScannerViewController: UIViewController {
                 }
                 .store(in: &cancellables)
 
-            // Handle errors
             viewModel.$errorMessage
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] message in
@@ -104,16 +86,11 @@ class QRScannerViewController: UIViewController {
                 .store(in: &cancellables)
         }
 
-
-        // MARK: - Camera Handling
-
-        /// Checks and requests camera permission
         private func checkCameraPermission() {
 
             switch AVCaptureDevice.authorizationStatus(for: .video) {
 
             case .authorized:
-                // Setup or resume camera
                 if captureSession == nil {
                     setupCamera()
                 } else {
@@ -121,7 +98,6 @@ class QRScannerViewController: UIViewController {
                 }
 
             case .notDetermined:
-                // Ask user for permission
                 AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                     DispatchQueue.main.async {
                         guard let self = self else { return }
@@ -142,7 +118,6 @@ class QRScannerViewController: UIViewController {
             }
         }
 
-        /// Sets up camera session and preview layer
         private func setupCamera() {
 
             let session = AVCaptureSession()
@@ -165,13 +140,11 @@ class QRScannerViewController: UIViewController {
 
             session.addOutput(output)
 
-            // Configure QR detection
             output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             output.metadataObjectTypes = [.qr]
 
             captureSession = session
 
-            // Setup preview layer
             let preview = AVCaptureVideoPreviewLayer(session: session)
             preview.videoGravity = .resizeAspectFill
             preview.frame = cameraPreviewView.bounds
@@ -179,7 +152,6 @@ class QRScannerViewController: UIViewController {
             cameraPreviewView.layer.insertSublayer(preview, at: 0)
             previewLayer = preview
 
-            // Start session in background thread
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 session.startRunning()
                 DispatchQueue.main.async {
@@ -188,7 +160,6 @@ class QRScannerViewController: UIViewController {
             }
         }
 
-        /// Starts camera session if not running
         private func startCameraSession() {
             guard let session = captureSession, !session.isRunning else { return }
 
@@ -200,7 +171,6 @@ class QRScannerViewController: UIViewController {
             }
         }
 
-        /// Stops camera session if running
         private func stopCameraSession() {
             guard let session = captureSession, session.isRunning else { return }
 
@@ -211,10 +181,8 @@ class QRScannerViewController: UIViewController {
             }
         }
 
-
         
 
-        /// Creates cut-out mask for scanner box UI
         private func updateOverlayMask() {
 
             guard overlayView.bounds != .zero else { return }
@@ -236,14 +204,12 @@ class QRScannerViewController: UIViewController {
             overlayView.layer.mask = mask
         }
 
-        /// Called when QR scan succeeds
         private func handleSuccessfulScan(_ data: UPIQRCodeData) {
             stopCameraSession()
             feedbackGenerator.impactOccurred()
             navigateToAmountScreen(with: data)
         }
 
-        /// Navigates to amount screen after scan
         private func navigateToAmountScreen(with data: UPIQRCodeData) {
 
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -298,9 +264,6 @@ class QRScannerViewController: UIViewController {
             .first
     }
 
-
-        // MARK: - Error Handling
-
         private func showError(_ message: String) {
             let alert = UIAlertController(title: "Error",
                                           message: message,
@@ -326,9 +289,6 @@ class QRScannerViewController: UIViewController {
             present(alert, animated: true)
         }
     }
-
-
-    // MARK: - QR Delegate
 
     extension QRScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
 
@@ -363,6 +323,5 @@ extension QRScannerViewController: PHPickerViewControllerDelegate {
         }
     }
 }
-
 
    

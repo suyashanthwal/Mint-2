@@ -1,9 +1,3 @@
-//
-//  OnBoardingKeys.swift
-//  JustChecking
-//
-//  Created by Anushk Barmola on 31/03/26.
-//
 
 import Foundation
 

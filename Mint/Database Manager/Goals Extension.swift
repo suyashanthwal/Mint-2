@@ -3,8 +3,6 @@ import SQLite3
 
 extension DatabaseManager {
 
-    // MARK: - Fetch Goals
-
     func fetchGoals() -> [Goal] {
         var result: [Goal] = []
         guard let userId = currentUserIdString else { return result }
@@ -57,8 +55,6 @@ extension DatabaseManager {
         fetchGoals().first { $0.id == id }
     }
 
-    // MARK: - Insert Goal
-
     @discardableResult
     func insertGoal(
         name: String,
@@ -90,7 +86,7 @@ extension DatabaseManager {
             print("⚠️ insertGoal: no signed-in user")
             return nil
         }
-        let createdAt = iso.string(from: Date()) // 🔥 current time
+        let createdAt = iso.string(from: Date())
 
         sqlite3_bind_text(stmt, 1, (newId.uuidString as NSString).utf8String, -1, nil)
         sqlite3_bind_text(stmt, 2, (userId as NSString).utf8String, -1, nil)
@@ -107,9 +103,9 @@ extension DatabaseManager {
             sqlite3_bind_null(stmt, 9)
         }
 
-        sqlite3_bind_int(stmt, 10, 0) // is_completed
-        sqlite3_bind_null(stmt, 11)   // completed_on
-        sqlite3_bind_text(stmt, 12, (createdAt as NSString).utf8String, -1, nil) // 🔥 NEW
+        sqlite3_bind_int(stmt, 10, 0)
+        sqlite3_bind_null(stmt, 11)
+        sqlite3_bind_text(stmt, 12, (createdAt as NSString).utf8String, -1, nil)
 
         let success = sqlite3_step(stmt) == SQLITE_DONE
         sqlite3_finalize(stmt)
@@ -123,7 +119,6 @@ extension DatabaseManager {
             return nil
         }
     }
-    // MARK: - Link Goal to Budget
 
     func linkGoalToCurrentBudget(goalId: UUID) {
         guard let budget = fetchCurrentBudget() else {
@@ -131,13 +126,8 @@ extension DatabaseManager {
             return
         }
 
-        // Goals are currently scoped by user_id in the schema, and there is no
-        // budget_goals join table yet. Keep this as a harmless no-op so callers
-        // can continue saving goals without triggering SQL errors.
         print("ℹ️ Goal \(goalId) is available to budget \(budget.id) through the shared user scope")
     }
-
-    // MARK: - Update Goal
 
     func updateGoal(
         id: UUID,
@@ -231,8 +221,6 @@ extension DatabaseManager {
 
         return true
     }
-
-    // MARK: - Delete Goal
 
     func deleteGoal(id: UUID) {
         execute("DELETE FROM goals WHERE id = ?;", args: [id.uuidString])

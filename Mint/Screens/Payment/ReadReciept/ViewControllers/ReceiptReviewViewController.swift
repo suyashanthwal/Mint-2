@@ -1,7 +1,4 @@
 
-//
-//  ReceiptReviewViewController.swift
-//
 
 import UIKit
 
@@ -56,7 +53,6 @@ class ReceiptReviewViewController: UIViewController {
         }
     }
 
-
     @IBOutlet weak var saveButton: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
   
@@ -64,21 +60,17 @@ class ReceiptReviewViewController: UIViewController {
 
     var scanData: ReceiptScanData = ReceiptScanData()
     var receiptImage: UIImage?
-    var userCategories: [Category] = []   // pass User.categories here
+    var userCategories: [Category] = []
 
-    // lineItems is a mutable copy so user edits don't touch scanData directly
     private var lineItems: [ReceiptLineItem] = []
 
-    // Tracks which category the user picked per line item index
-    // key = lineItem index, value = Category
     private var assignedCategories: [Int: Category] = [:]
 
-    //Arrange order of the xib cells in the collection view using enum sections for better readability
     private enum Section: Int, CaseIterable {
-        case header = 0 // ReceiptHeaderCell
-        case summary = 2 // ReceiptBillBreakdownCell
-        case items  = 1 // ReceiptSectionHeaderView + ReceiptItemCell + ReceiptAddItemCell
-        case captureImage  = 3   // ReceiptCaptureImageCell
+        case header = 0
+        case summary = 2
+        case items  = 1
+        case captureImage  = 3
     }
 
     override func viewDidLoad() {
@@ -93,8 +85,6 @@ class ReceiptReviewViewController: UIViewController {
         setupCollectionView()
     }
 
-    // MARK: - Setup
-
     private func setupSaveButton() {
         saveButton.backgroundColor    = AppColors.brand
         saveButton.setTitleColor(AppColors.brandText, for: .normal)
@@ -106,7 +96,6 @@ class ReceiptReviewViewController: UIViewController {
 
     private func setupCollectionView() {
 
-        // Register all XIB cells
         collectionView.register(
             UINib(nibName: "ReceiptHeaderCell", bundle: nil),
             forCellWithReuseIdentifier: "ReceiptHeaderCell")
@@ -124,13 +113,11 @@ class ReceiptReviewViewController: UIViewController {
             forCellWithReuseIdentifier: ReceiptBillBreakdownCell.reuseID
         )
 
-
         collectionView.register(
             UINib(nibName: "ReceiptAddItemCell", bundle: nil),
             forCellWithReuseIdentifier: ReceiptAddItemCell.reuseID
         )
 
-        // Register section header
         collectionView.register(
             UINib(nibName: "ReceiptSectionHeaderView", bundle: nil),
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
@@ -142,7 +129,6 @@ class ReceiptReviewViewController: UIViewController {
         collectionView.collectionViewLayout = makeLayout()
     }
 
-
     private func makeLayout() -> UICollectionViewLayout {
 
         UICollectionViewCompositionalLayout { sectionIndex, _ in
@@ -151,7 +137,6 @@ class ReceiptReviewViewController: UIViewController {
             switch section {
 
             case .header:
-                // Self-sizing height, full width
                 let item = NSCollectionLayoutItem(
                     layoutSize: .init(widthDimension: .fractionalWidth(1),
                                       heightDimension: .estimated(160))
@@ -167,7 +152,6 @@ class ReceiptReviewViewController: UIViewController {
                 return section
 
             case .captureImage:
-                // Fixed height for the photo
                 let item = NSCollectionLayoutItem(
                     layoutSize: .init(widthDimension: .fractionalWidth(1),
                                       heightDimension: .absolute(260))
@@ -198,7 +182,6 @@ class ReceiptReviewViewController: UIViewController {
                 return section
 
             case .items:
-                // Self-sizing item rows
                 let item = NSCollectionLayoutItem(
                     layoutSize: .init(widthDimension: .fractionalWidth(1),
                                       heightDimension: .estimated(112))
@@ -212,7 +195,6 @@ class ReceiptReviewViewController: UIViewController {
                 section.contentInsets = .init(top: 8, leading: 0,
                                               bottom: 8, trailing: 0)
 
-                // Section header (Scanned Items + count pill)
                 let headerSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1),
                     heightDimension: .absolute(50)
@@ -228,8 +210,6 @@ class ReceiptReviewViewController: UIViewController {
             }
         }
     }
-
-    // MARK: - Helpers
 
     private func formattedDate(_ date: Date?) -> String {
         guard let date else { return "" }
@@ -441,7 +421,6 @@ class ReceiptReviewViewController: UIViewController {
         return rows
     }
 
-
     private func reloadReceiptContent() {
        
         collectionView.reloadSections(IndexSet([Section.header.rawValue,
@@ -449,8 +428,6 @@ class ReceiptReviewViewController: UIViewController {
                                                Section.items.rawValue]))
     }
 
-    /// Finds the first category whose name roughly matches the item name
-    /// Falls back to the first category or nil
     private func defaultCategory(for item: ReceiptLineItem) -> Category? {
         let name = item.name.lowercased()
         return userCategories.first {
@@ -475,8 +452,6 @@ class ReceiptReviewViewController: UIViewController {
             }
         }
     }
-
-    // MARK: - Actions
 
     @IBAction func backTapped(_ sender: UIBarButtonItem) {
         dismiss(animated: true)
@@ -656,7 +631,6 @@ class ReceiptReviewViewController: UIViewController {
     }
 }
 
-
 extension ReceiptReviewViewController: UICollectionViewDataSource {
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -669,7 +643,7 @@ extension ReceiptReviewViewController: UICollectionViewDataSource {
         case .header:       return 1
         case .summary:      return 1
         case .captureImage: return 1
-        case .items:        return lineItems.count + 1  // +1 for Add Item cell
+        case .items:        return lineItems.count + 1
         case .none:         return 0
         }
     }
@@ -701,8 +675,6 @@ extension ReceiptReviewViewController: UICollectionViewDataSource {
             cell.configure(rows: breakdownRows())
             return cell
 
-        // MARK: Capture Image
-        // MARK: Capture Image
         case .captureImage:
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "ReceiptCaptureImageCell",
@@ -711,9 +683,7 @@ extension ReceiptReviewViewController: UICollectionViewDataSource {
             cell.configure(image: receiptImage)
             return cell
 
-        // MARK: Items + Add
         case .items:
-            // Last row = Add Item cell
             if indexPath.item == lineItems.count {
                 let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: ReceiptAddItemCell.reuseID,
@@ -725,7 +695,6 @@ extension ReceiptReviewViewController: UICollectionViewDataSource {
                 return cell
             }
 
-            // Regular item row
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "ReceiptItemCell",
                 for: indexPath) as! ReceiptItemCell
@@ -748,9 +717,7 @@ extension ReceiptReviewViewController: UICollectionViewDataSource {
                 categoryIcon: UIImage(systemName: category?.icon ?? "tag")
             )
 
-            // Category pill tapped → show dropdown later
             cell.onCategoryTapped = {
-                // TODO: present CategoryDropdownView here (next step)
                 print("Category tapped for item \(indexPath.item)")
             }
 
@@ -760,8 +727,6 @@ extension ReceiptReviewViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
     }
-
-    // MARK: Section Header
 
     func collectionView(_ collectionView: UICollectionView,
                         viewForSupplementaryElementOfKind kind: String,
@@ -782,8 +747,6 @@ extension ReceiptReviewViewController: UICollectionViewDataSource {
         return header
     }
 }
-
-// MARK: - UICollectionViewDelegate
 
 extension ReceiptReviewViewController: UICollectionViewDelegate {
 
@@ -814,8 +777,6 @@ extension ReceiptReviewViewController: UICollectionViewDelegate {
         }
     }
 }
-
-// MARK: - Item Editing
 
 extension ReceiptReviewViewController {
 

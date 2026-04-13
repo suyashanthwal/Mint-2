@@ -9,7 +9,6 @@ final class ReceiptOCRService {
     
     private let logger = OSLog(subsystem: "com.example.QrAndReceiptReading", category: "ReceiptOCR")
 
-    // Public API
     
     func recognizeText(in image: UIImage,
                        completion: @escaping (Result<String, ReceiptOCRError>) -> Void) {

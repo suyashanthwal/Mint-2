@@ -1,9 +1,3 @@
-//
-//  AmountViewController.swift
-//  QrScanner
-//
-//  Add Expense / Payment screen with scrollable categories and UPI app picker
-//
 
 import UIKit
 
@@ -46,37 +40,6 @@ class AmountViewController: UIViewController, UITextFieldDelegate {
     private func showUPIAppPicker() {
         guard let data = upiData else { return }
         
-        // Check if any UPI app is installed
-        //          guard let upiURL = URL(string: "upi://pay"),
-        //                UIApplication.shared.canOpenURL(upiURL) else {
-        //              showNoUPIAppAlert()
-        //              return
-        //          }
-        //
-        //
-        //        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        //
-        //        guard let picker = storyboard.instantiateViewController(
-        //            withIdentifier: "UPIAppPickerViewController"
-        //        ) as? UPIAppPickerViewController
-        //
-        //        else {
-        //            assertionFailure("UPIAppPickerViewController not found")
-        //            return
-        //        }
-        //
-        //        picker.upiData = data
-        //        picker.amount = amount
-        //        picker.categoryName = categories[selectedCategoryIndex].name
-        //        picker.modalPresentationStyle = .pageSheet
-        //
-        //        if let sheet = picker.sheetPresentationController {
-        //            sheet.detents = [.medium()]
-        //            sheet.prefersGrabberVisible = true
-        //            sheet.preferredCornerRadius = 24
-        //        }
-        //
-        //        present(picker, animated: true)
         
         
         

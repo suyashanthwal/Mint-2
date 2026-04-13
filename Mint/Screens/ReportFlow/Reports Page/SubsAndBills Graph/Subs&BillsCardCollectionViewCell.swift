@@ -1,9 +1,3 @@
-//
-//  Subs&BillsCardCollectionViewCell.swift
-//  Mint
-//
-//  Created by Suyash Anthwal on 06/04/26.
-//
 
 import UIKit
 

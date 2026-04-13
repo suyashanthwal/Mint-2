@@ -11,7 +11,6 @@ struct OnboardingHelper {
             return false
         }
 
-        // Migrate any previously stored local state into the DB-backed table.
         if UserDefaults.standard.bool(forKey: legacyScopedKey(for: key, userId: userId)) {
             DatabaseManager.shared.markOnboardingSeen(key: key, for: userId)
             return false

@@ -1,9 +1,3 @@
-//
-//  UPIAppPickerViewController.swift
-//  QrAndReceiptReading
-//
-//  Created by Ayush Singh Bhandari on 07/04/26.
-//
 
 import UIKit
 
@@ -38,8 +32,8 @@ class UPIAppPickerViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        detectInstalledApps()   //called here so present() works — view is fully on screen
-        collectionView.reloadData()  // reload after detection
+        detectInstalledApps()
+        collectionView.reloadData()
     }
 
         private func detectInstalledApps() {
@@ -50,7 +44,6 @@ class UPIAppPickerViewController: UIViewController {
 
             if installedUPIApps.isEmpty {
                    dismiss(animated: true) {
-                       // tell the presenting VC to show the alert instead
                    }
                    return
                }

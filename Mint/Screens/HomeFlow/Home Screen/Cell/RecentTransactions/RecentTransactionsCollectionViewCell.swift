@@ -1,9 +1,3 @@
-//
-//  UpcomingBillsCollectionViewCell.swift
-//  BudgetApp
-//
-//  Created by Suyash Anthwal on 12/02/26.
-//
 
 import UIKit
 
@@ -21,7 +15,6 @@ class RecentTransactionsCollectionViewCell: UICollectionViewCell {
         BillDate.textColor = AppColors.textSecondary
         contentView.backgroundColor = AppColors.card
 
-        // Set tint + symbol rendering mode so SF Symbols show in color
         BillIcon.tintColor = AppColors.brand
         BillIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(
             paletteColors: [AppColors.brand]
@@ -37,7 +30,6 @@ class RecentTransactionsCollectionViewCell: UICollectionViewCell {
 
         BillAmount.text = bill.amount.formatted(.currency(code: "INR"))
 
-        // ✅ Apply color when setting each icon too
         BillIcon.image = UIImage(systemName: bill.icon)?
             .withRenderingMode(.alwaysTemplate)
     }

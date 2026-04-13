@@ -1,23 +1,11 @@
-//
-//  SubsCalenderCollectionViewCell.swift
-//  BudgetApp
-//
-//  XIB requires:
-//    • dateLabel        — UILabel  (centred in the cell)
-//    • backgroundPill   — UIView   (the rounded background view you added)
-//  The dot indicator is created fully in code.
-//
 
 import UIKit
 
 class SubsCalenderCollectionViewCell: UICollectionViewCell {
 
-    // MARK: - Outlets
     @IBOutlet weak var dotView: UIView!
     @IBOutlet weak var dateLabel:      UILabel!
-    @IBOutlet weak var backgroundPill: UIView!   // ← the new UIView you added in XIB
-
-    // MARK: - Lifecycle
+    @IBOutlet weak var backgroundPill: UIView!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -33,8 +21,6 @@ class SubsCalenderCollectionViewCell: UICollectionViewCell {
         dotView.layer.cornerRadius = 2.5
         dotView.clipsToBounds      = true
     }
-
-    // MARK: - Configure
 
     func configure(day: Int?,
                    isToday: Bool = false,
@@ -81,8 +67,6 @@ class SubsCalenderCollectionViewCell: UICollectionViewCell {
             dotView.backgroundColor = AppColors.brand
         }
     }
-
-    // MARK: - Reuse
 
     override func prepareForReuse() {
         super.prepareForReuse()

@@ -1,9 +1,3 @@
-//
-//  CategoryCell.swift
-//  QrAndReceiptReading
-//
-//  Created by Ayush Singh Bhandari on 06/04/26.
-//
 
 import UIKit
 

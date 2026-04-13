@@ -1,7 +1,3 @@
-//
-//  SubsAndBillsCollectionViewCell.swift
-//  BudgetApp
-//
 
 import UIKit
 
@@ -11,8 +7,6 @@ class SubsAndBillsCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var IconImageView:         UIImageView!
     @IBOutlet weak var AmountLabel:           UILabel!
     @IBOutlet weak var SubsAndBillsNameLabel: UILabel!
-
-    // MARK: - Lifecycle
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -25,10 +19,7 @@ class SubsAndBillsCollectionViewCell: UICollectionViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-       // IconBackgroundView.layer.cornerRadius = IconBackgroundView.bounds.width / 2
     }
-
-    // MARK: - Configure for Upcoming Bills
 
     func configureBill(with bill: Bill) {
         IconImageView.image        = UIImage(systemName: bill.icon)
@@ -37,9 +28,6 @@ class SubsAndBillsCollectionViewCell: UICollectionViewCell {
         let df        = DateFormatter()
         df.dateFormat = "MMM d"
     }
-
-    // MARK: - Configure for Active Subscriptions
-    // Bug 3 fix: show "Last paid MMM d" using lastDate instead of note/duration
 
     func configureSubscription(with subscription: RecurringPayment) {
         IconImageView.image        = UIImage(systemName: subscription.icon ?? "creditcard.fill")

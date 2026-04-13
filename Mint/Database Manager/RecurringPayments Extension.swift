@@ -3,8 +3,6 @@ import SQLite3
 
 extension DatabaseManager {
 
-    // MARK: - Fetch Recurring Payments
-
     func fetchRecurringPayments() -> [RecurringPayment] {
         var result: [RecurringPayment] = []
         guard let userId = currentUserIdString else { return result }
@@ -60,8 +58,6 @@ extension DatabaseManager {
         sqlite3_finalize(stmt)
         return result
     }
-
-    // MARK: - Insert Recurring Payment
 
     @discardableResult
     func insertRecurringPayment(
@@ -133,8 +129,6 @@ extension DatabaseManager {
         }
     }
 
-    // MARK: - Update Recurring Payment
-
     func updateRecurringPayment(
         id: UUID,
         name: String,
@@ -182,8 +176,6 @@ extension DatabaseManager {
         }
         sqlite3_finalize(stmt)
     }
-
-    // MARK: - Delete Recurring Payment
 
     func deleteRecurringPayment(id: UUID) {
         execute("DELETE FROM recurring_payments WHERE id = ?;", args: [id.uuidString])

@@ -1,9 +1,3 @@
-//
-//  Category.swift
-//  DataModel
-//
-//  Created by Anushk on 04/02/26.
-//
 
 import Foundation
 

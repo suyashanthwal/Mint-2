@@ -1,9 +1,3 @@
-//
-//  SummaryViewController.swift
-//  Mint
-//
-//  Created by Anushk Barmola on 08/02/26.
-//
 
 import UIKit
 import DGCharts

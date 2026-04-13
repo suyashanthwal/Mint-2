@@ -1,9 +1,3 @@
-//
-//  ReceiptScanViewController.swift
-//  Mint
-//
-//  Created by Ayush Singh Bhandari on 08/04/26.
-//
 import UIKit
 import PhotosUI
 

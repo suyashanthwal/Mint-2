@@ -3,8 +3,6 @@ import SQLite3
 
 extension DatabaseManager {
 
-    // MARK: - Fetch Categories
-
     func fetchCategories() -> [Category] {
         var result: [Category] = []
 
@@ -104,8 +102,6 @@ extension DatabaseManager {
         )
     }
 
-    // MARK: - Insert Category
-
     @discardableResult
     func insertCategory(
         name: String,
@@ -168,8 +164,6 @@ extension DatabaseManager {
         return insertCategory(name: name, color: color, icon: icon, budget: budget, type: type)
     }
 
-    // MARK: - Link Category to Budget
-
     func linkCategoryToCurrentBudget(categoryId: UUID) {
         guard let budget = fetchCurrentBudget() else {
             print("⚠️ linkCategoryToCurrentBudget: no budget found")
@@ -181,8 +175,6 @@ extension DatabaseManager {
         )
         print("✅ Linked category \(categoryId) → budget \(budget.id)")
     }
-
-    // MARK: - Update Category
 
     func updateCategory(id: UUID, name: String, color: String, icon: String, budget: Double) {
         let query = """
@@ -208,8 +200,6 @@ extension DatabaseManager {
         }
         sqlite3_finalize(stmt)
     }
-
-    // MARK: - Delete Category
 
     func deleteCategory(id: UUID) {
         execute("DELETE FROM categories WHERE id = ?;", args: [id.uuidString])

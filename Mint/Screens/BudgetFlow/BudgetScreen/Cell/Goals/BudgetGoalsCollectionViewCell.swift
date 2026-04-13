@@ -1,9 +1,3 @@
-//
-//  BudgetGoalsCollectionViewCell.swift
-//  BudgetPage
-//
-//  Created by Suyash Anthwal on 25/03/26.
-//
 
 import UIKit
 
@@ -15,7 +9,6 @@ class BudgetGoalsCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
         
         contentView.backgroundColor = AppColors.card
         contentView.layer.cornerRadius = 16
@@ -27,18 +20,15 @@ class BudgetGoalsCollectionViewCell: UICollectionViewCell {
         GoalsTitleLabel.text = goal.name
         GoalsTitleLabel.textColor = AppColors.textPrimary
         
-        // Amount text → ₹ current / ₹ target
         let currentStr = currencyFormatter.string(from: NSNumber(value: goal.currentlySaved)) ?? "₹0"
         let targetStr = currencyFormatter.string(from: NSNumber(value: goal.targetAmount)) ?? "₹0"
         
         GoalsAmountLabel.text = "\(currentStr) / \(targetStr)"
         GoalsAmountLabel.textColor = AppColors.textPrimary
         
-        // Progress calculation
         let progress = Float(goal.currentlySaved / goal.targetAmount)
         GoalsProgressView.progress = progress
         
-        // Style progress bar
         GoalsProgressView.trackTintColor = UIColor.systemGray5
         GoalsProgressView.progressTintColor = AppColors.brand
         GoalsProgressView.transform = CGAffineTransform(scaleX: 1, y: 3)

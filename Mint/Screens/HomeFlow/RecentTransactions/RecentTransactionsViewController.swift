@@ -1,9 +1,3 @@
-//
-//  RecentTransactionsViewController.swift
-//  RecentTransactions
-//
-//  Created by Anushk Barmola on 08/02/26.
-//
 
 import UIKit
 
@@ -18,7 +12,6 @@ final class RecentTransactionsViewController: UIViewController {
     @IBOutlet private weak var paymentButton: UIButton!
 
     @IBOutlet weak var MonthCard: UIView!
-    // MARK: - Sort / Filter State
 
     private enum DateSortOrder {
         case newestFirst, oldestFirst
@@ -67,8 +60,6 @@ final class RecentTransactionsViewController: UIViewController {
         }
     }
 
-    // MARK: - Properties
-
     private let calendar = Calendar.current
     private let db = DatabaseManager.shared
 
@@ -78,8 +69,6 @@ final class RecentTransactionsViewController: UIViewController {
     private var allTransactions: [Transaction] = []
     private var allCategories: [Category] = []
     private var displayedTransactions: [Transaction] = []
-
-    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -120,7 +109,6 @@ final class RecentTransactionsViewController: UIViewController {
         
         
     }
-    // MARK: - Collection-view setup
 
     private func setupCollectionView() {
         collectionView.delegate   = self
@@ -141,8 +129,6 @@ final class RecentTransactionsViewController: UIViewController {
         collectionView.alwaysBounceVertical         = true
         collectionView.contentInset                 = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
-
-    // MARK: - Filter / Sort menus
 
     private func setupMenus() {
         setupDateMenu()
@@ -218,8 +204,6 @@ final class RecentTransactionsViewController: UIViewController {
         paymentButton.setTitle(paymentFilter.buttonTitle, for: .normal)
     }
 
-    // MARK: - Data helpers
-
     private func reloadFromDatabase() {
         allTransactions = db.fetchTransactions()
         allCategories = db.fetchCategories()
@@ -284,9 +268,63 @@ final class RecentTransactionsViewController: UIViewController {
         guard let id = transaction.categoryId else { return nil }
         return allCategories.first { $0.id == id }
     }
-}
 
-// MARK: - UICollectionViewDataSource
+    private func presentTransactionActions(
+        for transaction: Transaction,
+        sourceView: UIView?,
+        sourceRect: CGRect
+    ) {
+        let alert = UIAlertController(title: transaction.name, message: nil, preferredStyle: .actionSheet)
+
+        alert.addAction(UIAlertAction(title: "Edit", style: .default) { [weak self] _ in
+            self?.presentEditTransaction(transaction)
+        })
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            self?.promptDeleteTransaction(transaction)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = sourceView ?? view
+            popover.sourceRect = sourceView == nil
+                ? CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
+                : sourceRect
+        }
+
+        present(alert, animated: true)
+    }
+
+    private func presentEditTransaction(_ transaction: Transaction) {
+        guard let nav = storyboard?.instantiateViewController(withIdentifier: "EditTransactionNav") as? UINavigationController,
+              let editViewController = nav.viewControllers.first as? EditTransactionViewController
+        else { return }
+
+        editViewController.transaction = transaction
+        editViewController.onTransactionUpdated = { [weak self] in
+            self?.reloadFromDatabase()
+        }
+        present(nav, animated: true)
+    }
+
+    private func promptDeleteTransaction(_ transaction: Transaction) {
+        let alert = UIAlertController(
+            title: "Delete \"\(transaction.name)\"?",
+            message: "This will remove the transaction and refresh your totals.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            self?.deleteTransaction(transaction)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
+
+    private func deleteTransaction(_ transaction: Transaction) {
+        guard db.deleteTransaction(id: transaction.id) else { return }
+        NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
+    }
+}
 
 extension RecentTransactionsViewController: UICollectionViewDataSource {
 
@@ -310,9 +348,14 @@ extension RecentTransactionsViewController: UICollectionViewDataSource {
     }
 }
 
-// MARK: - UICollectionViewDelegateFlowLayout
-
 extension RecentTransactionsViewController: UICollectionViewDelegateFlowLayout {
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let transaction = displayedTransactions[indexPath.item]
+        let cell = collectionView.cellForItem(at: indexPath)
+        let sourceRect = cell?.bounds ?? CGRect(x: collectionView.bounds.midX, y: collectionView.bounds.midY, width: 1, height: 1)
+        presentTransactionActions(for: transaction, sourceView: cell, sourceRect: sourceRect)
+    }
 
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,

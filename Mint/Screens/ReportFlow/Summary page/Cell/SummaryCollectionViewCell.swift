@@ -1,7 +1,3 @@
-//
-//  SummaryCollectionViewCell.swift
-//  BudgetApp
-//
 
 import UIKit
 

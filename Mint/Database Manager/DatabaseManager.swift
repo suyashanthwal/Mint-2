@@ -43,14 +43,10 @@ final class DatabaseManager {
         setupDatabase()
     }
 
-    // MARK: - DB Path
-
     private func getDBPath() -> String {
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return url.appendingPathComponent("mint.sqlite").path
     }
-
-    // MARK: - Open DB
 
     private func openDatabase() {
         if sqlite3_open(getDBPath(), &db) != SQLITE_OK {
@@ -61,8 +57,6 @@ final class DatabaseManager {
             print("✅ DB opened at \(getDBPath())")
         }
     }
-
-    // MARK: - Setup DB
 
     private func setupDatabase() {
         let isFirstLaunch = !UserDefaults.standard.bool(forKey: "db_initialized")
@@ -79,13 +73,9 @@ final class DatabaseManager {
         ensureOnboardingStatesTableExists()
         ensureDefaultAdminAccountState()
         ensureDefaultAdminSeedDataIsCurrent()
-        // On every launch: roll over the budget if the month has changed.
         checkAndResetMonthlyExpenseIfNeeded()
     }
 
-    // MARK: - Reset DB
-
-    /// Deletes the database file and rebuilds it from schema + seed.
     func resetDatabase() {
         sqlite3_close(db)
         db = nil
@@ -104,8 +94,6 @@ final class DatabaseManager {
         )
         print("✅ DB reset complete")
     }
-
-    // MARK: - Run SQL File
 
     func runSQLFile(named fileName: String) {
         guard let path = Bundle.main.path(forResource: fileName, ofType: "sql") else {
@@ -129,9 +117,6 @@ final class DatabaseManager {
             print("❌ SQL exec failed: \(String(cString: sqlite3_errmsg(db)))")
         }
     }
-
-    // MARK: - Generic Write Helper
-    // `internal` so all same-module extensions can use it.
 
     func execute(_ sql: String, args: [String]) {
         var stmt: OpaquePointer?

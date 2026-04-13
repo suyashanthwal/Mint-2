@@ -1,32 +1,22 @@
-//
-//  LoginViewController.swift
-//  SignUp
-//
-//  Created by AnushkB on 23/03/26.
-//
 
 import UIKit
 
 class LoginViewController: UIViewController {
 
-        // MARK: - Outlets
         
         @IBOutlet weak var signInView: UIView!
         @IBOutlet weak var signUpView: UIView!
         
-        // Sign In
         @IBOutlet weak var emailTextField: UITextField!
         @IBOutlet weak var passwordTextField: UITextField!
         @IBOutlet weak var loginButton: UIButton!
         
-        // Sign Up (connect these if you have them)
         @IBOutlet weak var signUpEmailTextField: UITextField!
         @IBOutlet weak var signUpPasswordTextField: UITextField!
         @IBOutlet weak var signUpConfirmPasswordTextField: UITextField!
         @IBOutlet weak var signUpButton: UIButton!
 
         
-        // MARK: - Lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
@@ -36,20 +26,16 @@ class LoginViewController: UIViewController {
             super.viewDidLoad()
             enableKeyboardDismissOnBackgroundTapAndSwipe()
 
-                // Show Sign In first
                 signInView.alpha = 1
                 signInView.transform = .identity
 
-                // Keep Sign Up off-screen (left side)
                 signUpView.transform = CGAffineTransform(translationX: -view.frame.width, y: 0)
                 signUpView.alpha = 0
 
         }
         
         
-        // MARK: - Actions
         
-        // 👉 Sign In → Sign Up
         @IBAction func goToSignUp(_ sender: Any) {
             
             signUpView.transform = CGAffineTransform(translationX: -view.frame.width, y: 0)
@@ -65,7 +51,6 @@ class LoginViewController: UIViewController {
         }
         
         
-        // 👉 Sign Up → Sign In
         @IBAction func goToSignIn(_ sender: Any) {
             
             signInView.transform = CGAffineTransform(translationX: view.frame.width, y: 0)
@@ -81,7 +66,6 @@ class LoginViewController: UIViewController {
         }
         
         
-        // MARK: - Button Actions
         
     @IBAction func loginTapped(_ sender: Any) {
         let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""

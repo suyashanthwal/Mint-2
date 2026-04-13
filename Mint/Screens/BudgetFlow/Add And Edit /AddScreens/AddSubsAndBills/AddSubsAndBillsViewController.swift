@@ -93,6 +93,7 @@ class AddSubsAndBillsViewController: UIViewController {
         case .subscription:
             typeSegment.selectedSegmentIndex = 0
             intervals = ["Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"]
+            intervalLabel.text = "Weekly"
             intervalTitleLabel.text = "Interval"
             dueDateTitleLabel.text  = "Due date"
             alertSectionView.isHidden    = false
@@ -117,8 +118,6 @@ class AddSubsAndBillsViewController: UIViewController {
         }
         intervalPicker.reloadAllComponents()
     }
-
-    // MARK: - IBActions
 
     @IBAction func segmentChanged(_ sender: UISegmentedControl) {
         mode = sender.selectedSegmentIndex == 0 ? .subscription : .bill
@@ -197,16 +196,12 @@ class AddSubsAndBillsViewController: UIViewController {
             }
         }
 
-        // Call BEFORE dismiss so BudgetVC reloads regardless of modal presentation
-        // style — completion blocks are skipped when viewWillAppear doesn't fire.
         dismiss(animated: true) {
             self.onEntrySaved?()
             NotificationCenter.default.post(name: .categoryDataDidChange, object: nil)
             NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
         }
     }
-
-    // MARK: - Picker helpers
 
     private func paymentDuration(from string: String) -> PaymentDuration {
         switch string {
@@ -223,8 +218,6 @@ class AddSubsAndBillsViewController: UIViewController {
         }
     }
 
-    // MARK: - Validation
-
     private func showValidationError() {
         let alert = UIAlertController(
             title: "Missing Information",
@@ -235,8 +228,6 @@ class AddSubsAndBillsViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    // MARK: - Picker / DatePicker toggle
-
     @objc func intervalTapped() {
         view.endEditing(true)
         if !pickerVisible {
@@ -245,11 +236,6 @@ class AddSubsAndBillsViewController: UIViewController {
         }
         pickerVisible.toggle()
         intervalPickerHeight.constant = pickerVisible ? 160 : 0
-    }
-
-    func hideIntervalPicker() {
-        pickerVisible = false
-        intervalPickerHeight.constant = 0
     }
 
     @objc func dueDateTapped() {
@@ -274,16 +260,12 @@ class AddSubsAndBillsViewController: UIViewController {
     }
 }
 
-// MARK: - UIPickerViewDataSource
-
 extension AddSubsAndBillsViewController: UIPickerViewDataSource {
     func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         intervals.count
     }
 }
-
-// MARK: - UIPickerViewDelegate
 
 extension AddSubsAndBillsViewController: UIPickerViewDelegate {
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {

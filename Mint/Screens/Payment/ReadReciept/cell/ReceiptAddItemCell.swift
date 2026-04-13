@@ -1,9 +1,3 @@
-//
-//  ReceiptAddItemCell.swift
-//  QrAndReceiptReading
-//
-//  Created by Ayush Singh Bhandari on 01/04/26.
-//
 
 import UIKit
 
@@ -30,12 +24,9 @@ class ReceiptAddItemCell: UICollectionViewCell {
         override func layoutSubviews() {
             super.layoutSubviews()
             
-    // layer.cornerRadius is used to make the --- boarder around the + Add item manually cell circular
-            //containerView.layer.cornerRadius = containerView.bounds.height
             addDashedBorder()
         }
 
-    // the --- boarder around the + Add item manually cell
         private func addDashedBorder() {
             containerView.layer.sublayers?
                 .filter { $0.name == "dashedBorder" }
@@ -55,22 +46,17 @@ class ReceiptAddItemCell: UICollectionViewCell {
             containerView.layer.addSublayer(dash)
         }
 
-    //when tapped on + Add item manually
         @objc private func handleTap() {
             
-            // Step 1 — fade to 60% opacity (looks like it's being pressed)
             UIView.animate(withDuration: 0.1) {
                 self.containerView.alpha = 0.6
-                // Step 2 — after step 1 finishes, fade back to full opacity
             } completion: { _ in
                 UIView.animate(withDuration: 0.1) {
                     self.containerView.alpha = 1.0
                 }
             }
-            // Step 3 — tell whoever is listening that a tap happened
             onTap?()
         }
     }
    
-
 

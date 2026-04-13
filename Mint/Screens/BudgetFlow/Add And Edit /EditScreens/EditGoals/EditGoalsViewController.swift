@@ -1,9 +1,3 @@
-//
-//  EditGoalsViewController.swift
-//  EditPages
-//
-//  Created by Anushk Barmola on 06/02/26.
-//
 
 import UIKit
 
@@ -23,8 +17,6 @@ class EditGoalsViewController: UIViewController {
     @IBOutlet var AllBackgroundViews: [UIView]!
     @IBOutlet var AllInsideViews: [UIView]!
 
-    // Pass the full Goal object from BudgetViewController.
-    // The id is extracted on save — we update by UUID, mirroring updateCategory(id:...).
     var goal: Goal?
     var onGoalUpdated: (() -> Void)?
     var datePickerVisible = false
@@ -57,12 +49,11 @@ class EditGoalsViewController: UIViewController {
             return
         }
 
-        // Pass individual fields — mirrors updateCategory(id:name:color:icon:budget:).
         DatabaseManager.shared.updateGoal(
             id:             goal.id,
             name:           name.trimmingCharacters(in: .whitespaces),
             targetAmount:   targetAmount,
-            currentlySaved: goal.currentlySaved,    // preserved from the loaded Goal
+            currentlySaved: goal.currentlySaved,
             targetDate:     datePicker.date,
             monthlyGoal:    monthlyGoal,
             iconName:       goal.iconName,
@@ -71,8 +62,6 @@ class EditGoalsViewController: UIViewController {
             completedOn:    goal.completedOn
         )
 
-        // Call BEFORE dismiss — consistent with the add flow so BudgetVC
-        // always reloads regardless of modal presentation style.
         onGoalUpdated?()
         dismiss(animated: true) {
             NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
@@ -90,8 +79,6 @@ class EditGoalsViewController: UIViewController {
         present(alert, animated: true)
     }
 }
-
-// MARK: - UI Setup
 
 extension EditGoalsViewController {
 
@@ -123,8 +110,6 @@ extension EditGoalsViewController {
     }
 }
 
-// MARK: - Load Goal
-
 extension EditGoalsViewController {
 
     func loadGoal() {
@@ -141,8 +126,6 @@ extension EditGoalsViewController {
         updateDateLabel(goal.targetDate)
     }
 }
-
-// MARK: - Date Picker
 
 extension EditGoalsViewController {
 

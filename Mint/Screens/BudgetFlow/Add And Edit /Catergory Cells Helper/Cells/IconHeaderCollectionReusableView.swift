@@ -1,9 +1,3 @@
-//
-//  IconHeaderCollectionReusableView.swift
-//  EditPages
-//
-//  Created by Anushk Barmola on 13/02/26.
-//
 
 import UIKit
 

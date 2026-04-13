@@ -1,9 +1,3 @@
-//
-//  Transactions.swift
-//  DataMDoel
-//
-//  Created by Anushk on 04/02/26.
-//
 
 import Foundation
 
@@ -64,7 +58,6 @@ struct Transaction: Identifiable, Codable {
     var expenseType: String?
     var upiInfo: UPIInfo?
     
-    //Income Ke liye
     
     init(name: String,
          amount: Double,
@@ -89,7 +82,6 @@ struct Transaction: Identifiable, Codable {
         self.upiInfo = nil
     }
 
-    //Expense ke liye
     
     init(name: String,
          amount: Double,

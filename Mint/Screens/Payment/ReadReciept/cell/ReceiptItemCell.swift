@@ -1,9 +1,3 @@
-//
-//  ReceiptItemCell.swift
-//  QrAndReceiptReading
-//
-//  Created by Ayush Singh Bhandari on 30/03/26.
-//
 
 import UIKit
 
@@ -19,7 +13,6 @@ class ReceiptItemCell: UICollectionViewCell {
         @IBOutlet weak var categoryIconImageView: UIImageView!
         @IBOutlet weak var categoryLabel: UILabel!
     
-       // @IBOutlet weak var chevronImageView: UIImageView!
 
         var onCategoryTapped: (() -> Void)?
 
@@ -48,7 +41,6 @@ class ReceiptItemCell: UICollectionViewCell {
 
             categoryLabel.text = categoryName
             categoryIconImageView.image = categoryIcon
-            //chevronImageView.image = UIImage(systemName: "chevron.down")
         }
 
         @objc private func pillTapped() {

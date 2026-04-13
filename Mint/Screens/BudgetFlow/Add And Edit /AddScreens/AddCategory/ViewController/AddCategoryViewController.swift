@@ -1,9 +1,3 @@
-//
-//  AddCategoryViewController.swift
-//  EditPages
-//
-//  Created by Anushk Barmola on 07/02/26.
-//
 
 import UIKit
 
@@ -32,12 +26,9 @@ class AddCategoryViewController: UIViewController {
 
     private var selectedIconName: String?
     
-    // Tracks the currently chosen icon tint — defaults to brand color
     private var selectedIconColor: UIColor = AppColors.brand
 
     private let iconCategories: [String: [String]] = CategoryData.iconCategories
-
-    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,8 +38,6 @@ class AddCategoryViewController: UIViewController {
         setupColorWell()
         setupIconCollectionView()
     }
-
-    // MARK: - Setup
 
     private func setupUI() {
 
@@ -66,7 +55,6 @@ class AddCategoryViewController: UIViewController {
             eachStack.backgroundColor = AppColors.card
         }
 
-        // ── Text Fields ───────────────────────────────────────
         nameTextField.backgroundColor = AppColors.card
         nameTextField.textColor       = AppColors.textPrimary
 
@@ -76,32 +64,25 @@ class AddCategoryViewController: UIViewController {
 
         iconPickerImageView.tintColor       = selectedIconColor
 
-        // ── Icon Collection View ──────────────────────────────
         iconCollectionView.backgroundColor = AppColors.card
         iconCollectionView.clipsToBounds   = true
 
-        // ── Notes Text View ───────────────────────────────────
         notesTextView.backgroundColor    = AppColors.card
         notesTextView.layer.borderColor  = UIColor.systemGray5.cgColor
         notesTextView.layer.borderWidth  = 1
         notesTextView.layer.cornerRadius = 8
 
-        // ── Icon Picker Collapse State ────────────────────────
         iconCollectionViewHeightConstraint.constant = collapsedHeight
         iconCollectionView.isHidden = true
 
-        // ── Icon Picker tap gesture ───────────────────────────
         let tap = UITapGestureRecognizer(target: self, action: #selector(iconPickerTapped))
         iconPickerStackView.addGestureRecognizer(tap)
         iconPickerStackView.isUserInteractionEnabled = true
     }
 
     private func setupColorWell() {
-        // Set initial color to match the default icon tint
         IconColorWheelSelector.selectedColor = selectedIconColor
-        // Don't show the alpha component — categories use opaque colors
         IconColorWheelSelector.supportsAlpha = false
-        // Listen for color changes
         IconColorWheelSelector.addTarget(self, action: #selector(colorWellChanged(_:)), for: .valueChanged)
     }
 
@@ -127,16 +108,11 @@ class AddCategoryViewController: UIViewController {
         iconCollectionView.collectionViewLayout = layout
     }
 
-    // MARK: - Color Well Action
-
     @objc private func colorWellChanged(_ sender: UIColorWell) {
         guard let color = sender.selectedColor else { return }
         selectedIconColor = color
-        // Update the preview icon tint immediately
         iconPickerImageView.tintColor = color
     }
-
-    // MARK: - IBActions
 
     @IBAction func cancelButton(_ sender: Any) {
         dismiss(animated: true)
@@ -188,8 +164,6 @@ class AddCategoryViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    // MARK: - Icon Picker Expand / Collapse
-
     @objc private func iconPickerTapped() {
         isIconPickerExpanded.toggle()
         UIView.animate(withDuration: 0.3) {
@@ -206,11 +180,9 @@ class AddCategoryViewController: UIViewController {
 
     private func formatIconName(_ systemName: String) -> String {
         let words = systemName.split(separator: ".")
-        return words.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")
+        return words.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")  // take sf symbol - capitalize each first letter and split them by "."  then append them with space
     }
 }
-
-// MARK: - UICollectionViewDataSource
 
 extension AddCategoryViewController: UICollectionViewDataSource {
 
@@ -249,24 +221,19 @@ extension AddCategoryViewController: UICollectionViewDataSource {
     }
 }
 
-// MARK: - UICollectionViewDelegate
-
 extension AddCategoryViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let iconName = Array(iconCategories.values)[indexPath.section][indexPath.item]
         selectedIconName = iconName
 
-        // Update the preview image and apply the currently selected color
         iconPickerImageView.image    = UIImage(systemName: iconName)
         iconPickerImageView.tintColor = selectedIconColor
 
         iconPickerLabel.text = formatIconName(iconName)
-        iconPickerTapped()  // collapse the picker
+        iconPickerTapped()
     }
 }
-
-// MARK: - UICollectionViewDelegateFlowLayout
 
 extension AddCategoryViewController: UICollectionViewDelegateFlowLayout {
 
@@ -287,8 +254,6 @@ extension AddCategoryViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-// MARK: - UIColor Hex Helper
-
 private extension UIColor {
     func toHex() -> String? {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -296,8 +261,6 @@ private extension UIColor {
         return String(format: "#%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
     }
 }
-
-// MARK: - Shared Notification Names
 
 extension Notification.Name {
     static let categoryDataDidChange = Notification.Name("categoryDataDidChange")

@@ -5,7 +5,6 @@ final class IndianReceiptParserService {
     static let shared = IndianReceiptParserService()
     private init() {}
 
-    //Entry Point
     
     func parse(rawText: String) -> ReceiptScanData {
         var data = ReceiptScanData()
@@ -45,7 +44,6 @@ final class IndianReceiptParserService {
         return data
     }
 
-    //Step 1: Normalisation
     
     private func normalize(_ text: String) -> String {
         var s = text
@@ -77,7 +75,6 @@ final class IndianReceiptParserService {
         return s
     }
 
-    //Step 2: Merchant Name
     
     private func extractMerchantName(lines: [String]) -> String? {
         let skipPatterns = [
@@ -96,7 +93,6 @@ final class IndianReceiptParserService {
         return nil
     }
 
-    // Step 3: Invoice Number
     
     private func extractInvoiceNumber(text: String) -> String? {
         let patterns = [
@@ -110,7 +106,6 @@ final class IndianReceiptParserService {
         return nil
     }
 
-    //Step 4: Date
     
     private let dateFormats = [
         "dd/MM/yyyy", "dd-MM-yyyy", "dd.MM.yyyy",
@@ -143,7 +138,6 @@ final class IndianReceiptParserService {
         return nil
     }
 
-    //Step 5: Time
     
     private func extractTime(text: String) -> String? {
         let patterns = [
@@ -156,7 +150,6 @@ final class IndianReceiptParserService {
         return nil
     }
 
-    //Step 6: Amount Patterns
     
     private let subtotalPatterns = [
         #"(?i)sub\s*total\s*[:\-]?\s*(?:₹|Rs\.?\s*|INR\s*)?([\d,]+\.?\d*)"#,
@@ -201,7 +194,6 @@ final class IndianReceiptParserService {
         return nil
     }
 
-    // MARK: - Step 7: Payment Method
     
     private func extractPaymentMethod(text: String) -> String? {
         let methods: [(keyword: String, label: String)] = [
@@ -230,7 +222,6 @@ final class IndianReceiptParserService {
         return nil
     }
 
-    // MARK: - Step 8: Line Items
     
     private func extractLineItems(lines: [String]) -> [ReceiptLineItem] {
         var items: [ReceiptLineItem] = []
@@ -273,7 +264,6 @@ final class IndianReceiptParserService {
         return items
     }
 
-    // MARK: - Regex Helper
     
     private func firstCapture(pattern: String, in text: String) -> String? {
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }

@@ -3,12 +3,6 @@ import SQLite3
 
 extension DatabaseManager {
 
-    // MARK: - Fetch Budget
-    //
-    // The budget is a single persistent row — no date-range matching needed.
-    // `total_expense` reflects the current month-to-date spend, reset automatically
-    // at the start of each new month via checkAndResetMonthlyExpenseIfNeeded().
-
     func fetchCurrentBudget() -> Budget? {
         guard let userId = currentUserIdString else { return nil }
 
@@ -102,11 +96,6 @@ extension DatabaseManager {
         sqlite3_finalize(stmt)
     }
 
-    // MARK: - Update Budget Settings
-    //
-    // Call when the user edits their monthly budget amount or daily limit.
-    // Pass nil for `dailyLimit` to auto-compute it from allocated_budget / days-in-month.
-
     func updateBudgetSettings(allocatedBudget: Double, dailyLimit: Double? = nil) {
         guard let budget = fetchCurrentBudget() else {
             print("⚠️ updateBudgetSettings: no budget found")
@@ -129,11 +118,6 @@ extension DatabaseManager {
         print("✅ Budget settings updated: ₹\(allocatedBudget), daily limit ₹\(computed)")
     }
 
-    // MARK: - Add to Monthly Expense
-    //
-    // Call whenever a new expense transaction is recorded, to keep
-    // total_expense in sync without a full re-sum query.
-
     func addToMonthlyExpense(_ amount: Double) {
         guard let budget = fetchCurrentBudget() else { return }
         execute(
@@ -141,10 +125,6 @@ extension DatabaseManager {
             args: [String(amount), budget.id.uuidString]
         )
     }
-
-    // MARK: - Subtract from Monthly Expense
-    //
-    // Call when an expense transaction is deleted or edited down.
 
     func subtractFromMonthlyExpense(_ amount: Double) {
         guard let budget = fetchCurrentBudget() else { return }
@@ -154,12 +134,6 @@ extension DatabaseManager {
         )
     }
 
-    // MARK: - Monthly Reset
-    //
-    // Resets total_expense to the sum of this month's actual transactions and
-    // updates last_reset_date. Safe to call multiple times — only acts when the
-    // month has changed since last_reset_date.
-
     func checkAndResetMonthlyExpenseIfNeeded() {
         guard let budget = fetchCurrentBudget() else { return }
 
@@ -168,19 +142,15 @@ extension DatabaseManager {
         let nowYear   = calendar.component(.year,  from: today)
         let nowMonth  = calendar.component(.month, from: today)
 
-        // Parse last_reset_date (stored as "YYYY-MM-DD")
         let parts      = budget.lastResetDate.split(separator: "-").compactMap { Int($0) }
         let resetYear  = parts.count >= 1 ? parts[0] : 0
         let resetMonth = parts.count >= 2 ? parts[1] : 0
 
         guard nowYear != resetYear || nowMonth != resetMonth else { return }
 
-        // New month detected — re-sum from transactions for accuracy
         resetMonthlyExpense()
     }
 
-    /// Recomputes total_expense from this month's actual transactions and
-    /// stamps last_reset_date. Called automatically on month change.
     func resetMonthlyExpense() {
         guard let budget = fetchCurrentBudget() else { return }
 

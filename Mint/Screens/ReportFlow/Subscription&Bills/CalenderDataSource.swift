@@ -1,35 +1,20 @@
-//
-//  CalendarDataSource.swift
-//  BudgetApp
-//
-//  Pure data layer — zero UIKit, zero outlets.
-//  Computes the 7-column grid of CalendarDay items for a given month/year,
-//  and marks which days have a bill due.
-//
 
 import Foundation
 
-// MARK: - CalendarDay  (one cell in the grid)
-
 struct CalendarDay {
-    let day:       Int? // nil  → empty padding cell (prev / next month overflow)
+    let day:       Int?
     let isToday:   Bool
-    let isPadding: Bool   // true → belongs to an adjacent month
-    let hasBill:   Bool   // true → show the green dot indicator
+    let isPadding: Bool
+    let hasBill:   Bool
 }
-
-// MARK: - CalendarDataSource
 
 struct CalendarDataSource {
 
     let year:  Int
-    let month: Int        // 1-based  (1 = January … 12 = December)
+    let month: Int
 
     private let calendar = Calendar.current
 
-    // MARK: - Grid
-
-    /// Returns exactly enough cells to fill complete 7-column weeks.
     func days(billDates: Set<Int> = []) -> [CalendarDay] {
         guard let firstOfMonth = firstDayOfMonth() else { return [] }
 
@@ -38,12 +23,10 @@ struct CalendarDataSource {
 
         var cells: [CalendarDay] = []
 
-        // Leading padding
         for _ in 0 ..< startOffset {
             cells.append(CalendarDay(day: nil, isToday: false, isPadding: true, hasBill: false))
         }
 
-        // Actual days
         let todayComponents = calendar.dateComponents([.year, .month, .day], from: Date())
         for d in 1 ... daysInMonth {
             let isToday = todayComponents.year  == year
@@ -57,7 +40,6 @@ struct CalendarDataSource {
             ))
         }
 
-        // Trailing padding to complete the last row
         let remainder = cells.count % 7
         if remainder != 0 {
             for _ in 0 ..< (7 - remainder) {
@@ -68,9 +50,6 @@ struct CalendarDataSource {
         return cells
     }
 
-    // MARK: - Bill day set
-
-    /// Extracts the day-of-month integers from a list of Bills that fall in this month/year.
     func billDaySet(from bills: [Bill]) -> Set<Int> {
         Set(bills.compactMap { bill in
             let c = calendar.dateComponents([.year, .month, .day], from: bill.billDate)
@@ -79,14 +58,10 @@ struct CalendarDataSource {
         })
     }
 
-    // MARK: - Month display string  (e.g. "March 2026")
-
     var displayTitle: String {
         guard let d = firstDayOfMonth() else { return "" }
         return AppFormatters.monthYear.string(from: d)
     }
-
-    // MARK: - Private
 
     private func firstDayOfMonth() -> Date? {
         var c   = DateComponents()

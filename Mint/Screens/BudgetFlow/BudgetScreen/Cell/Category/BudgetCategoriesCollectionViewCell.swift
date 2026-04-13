@@ -1,9 +1,3 @@
-//
-//  BudgetCategoriesCollectionViewCell.swift
-//  BudgetPage
-//
-//  Created by Suyash Anthwal on 24/03/26.
-//
 
 import UIKit
 
@@ -18,9 +12,7 @@ class BudgetCategoriesCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
         
-        // White card
         contentView.backgroundColor = AppColors.card
         contentView.layer.cornerRadius = 16
         contentView.layer.masksToBounds = true
@@ -35,7 +27,7 @@ class BudgetCategoriesCollectionViewCell: UICollectionViewCell {
         Icon.image = UIImage(systemName: category.icon)?.withRenderingMode(.alwaysTemplate)
         Icon.tintColor = color
         
-        IconView.backgroundColor = color.withAlphaComponent(0.15) // lighter shade
+        IconView.backgroundColor = color.withAlphaComponent(0.15)
         IconView.layer.cornerRadius = 10
 
         let spent = max(category.budget - category.remaining, 0)

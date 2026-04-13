@@ -1,11 +1,6 @@
-//
-//  BudgetViewController.swift
-//  BudgetPage
-//
 
 import UIKit
 
-// MARK: - Unified item for the SubsAndBills collection view
 enum SubsOrBillItem {
     case subscription(RecurringPayment)
     case bill(Bill)
@@ -18,8 +13,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         static let compactCellHeight: CGFloat = 56
         static let compactGoalCellHeight: CGFloat = 88
     }
-
-    // MARK: - Outlets
 
     private var hasCheckedOnboarding = false
 
@@ -54,19 +47,13 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var newBudgetView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
 
-    // MARK: - Data
-
     private var categories:        [Category]         = []
     private var goals:             [Goal]              = []
     private var recurringPayments: [RecurringPayment]  = []
     private var bills:             [Bill]              = []
     private var currentBudget:     Budget?
 
-    // MARK: - Derived list for SubsAndBills collection view
-
     private var subsAndBillsItems: [SubsOrBillItem] = []
-
-    // MARK: - Onboarding State
 
     private let itemsPerPage = 4
     private let goalsItemsPerPage = 2
@@ -74,12 +61,9 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     private var currentOnboardingStep = 0
     private var onboardingSteps: [OnboardingStep] = []
 
-    // MARK: - Lifecycle
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
-        // reloadAll fetches fresh data AND tells every collection view to redraw
         reloadAll()
     }
 
@@ -90,11 +74,13 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         setupPageControls()
         setupCollectionViews()
         
+        
+        // jab bhi data change ho - call this
         NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleCategoryDataChange),
-            name: .categoryDataDidChange,
-            object: nil
+            self, // current view ocntroller
+            selector: #selector(handleCategoryDataChange), // method to call
+            name: .categoryDataDidChange, //notification identifier
+            object: nil // listen from any sender
         )
         NotificationCenter.default.addObserver(
             self,
@@ -146,7 +132,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     var isExpanded = false
         private var hasEdited = false
 
-        /// Sets the button title correctly for both plain and UIButton.Configuration buttons.
         private func setBudgetButtonTitle(_ title: String) {
             if BudgetEditButton.configuration != nil {
                 BudgetEditButton.configuration?.title = title
@@ -159,7 +144,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             let currentTitle = sender.configuration?.title ?? sender.title(for: .normal)
      
             if currentTitle == "Save" {
-                // SAVE: persist to DB, then collapse
                 guard let text = newBudgetTextField.text,
                       let amount = Double(text), amount > 0 else {
                     collapseEditView()
@@ -173,7 +157,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
                 collapseEditView()
      
             } else {
-                // EDIT: expand
                 isExpanded = true
                 hasEdited = false
                 newBudgetView.isHidden = false
@@ -222,15 +205,13 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         }
     }
 
-    // MARK: - Data Loading
-
     private func loadDataFromDatabase() {
         let db = DatabaseManager.shared
 
         categories        = db.fetchCategories()
         goals             = db.fetchGoals()
         recurringPayments = db.fetchRecurringPayments()
-        bills             = db.fetchUpcomingBills()   // reuse existing method
+        bills             = db.fetchUpcomingBills()
         currentBudget     = db.fetchCurrentBudget()
 
         buildSubsAndBillsList()
@@ -248,10 +229,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         updateCategoryBudgetSummary()
     }
 
-    // MARK: - Category Budget Summary
-
-    /// Sums every category's allocated budget and compares it against the
-    /// total monthly budget. Turns `sumOfCategories` red when over budget.
     private func updateCategoryBudgetSummary() {
         let categorySum    = categories.reduce(0) { $0 + $1.budget }
         let allocatedTotal = currentBudget?.allocatedBudget ?? 0
@@ -259,12 +236,9 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         sumOfCategories.text = currencyFormatter.string(from: NSNumber(value: categorySum)) ?? "₹0"
         totalBudget.text     = currencyFormatter.string(from: NSNumber(value: allocatedTotal)) ?? "₹0"
 
-        // Turn red when the sum of category budgets exceeds the total monthly budget
         totalBudget.textColor = AppColors.textSecondary
         sumOfCategories.textColor = categorySum > allocatedTotal ? .systemRed : AppColors.textSecondary
     }
-
-    // MARK: - Reload
 
     private func reloadAll() {
         loadDataFromDatabase()
@@ -275,8 +249,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         GoalsCollectionView.reloadData()
     }
 
-    // MARK: - Build SubsAndBills List
-
     private func buildSubsAndBillsList() {
         let calendar     = Calendar.current
         let now          = Date()
@@ -285,13 +257,10 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
      
         var items: [SubsOrBillItem] = []
      
-        // Newest subscription first — reverse the DB fetch order here
-        // so you don't need a schema change or a separate sort column.
         for payment in recurringPayments.reversed() {
             items.append(.subscription(payment))
         }
      
-        // Bills whose billDate falls in the current month+year
         for bill in bills {
             let billMonth = calendar.component(.month, from: bill.billDate)
             let billYear  = calendar.component(.year,  from: bill.billDate)
@@ -301,8 +270,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
      
         subsAndBillsItems = items
     }
-
-    // MARK: - prepare(for:sender:)
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let nav = segue.destination as? UINavigationController else { return }
@@ -328,8 +295,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             break
         }
     }
-
-    // MARK: - Open Edit VCs
 
     private func openEditCategory(category: Category) {
         guard
@@ -381,8 +346,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         present(nav, animated: true)
     }
 
-    // MARK: - Helpers
-
     private func confirmDelete(title: String, onConfirm: @escaping () -> Void) {
         let alert = UIAlertController(
             title: "Delete \"\(title)\"?",
@@ -393,8 +356,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true)
     }
-
-    // MARK: - Onboarding
 
     private func showBudgetOnboarding() { startOnboarding() }
 
@@ -485,8 +446,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         })
     }
 
-    // MARK: - Page Controls
-
     private func setupPageControls() {
             let categoriesPages = categories.isEmpty ? 0 : Int(ceil(Double(categories.count) / Double(itemsPerPage)))
             let paymentsPages   = subsAndBillsItems.isEmpty ? 0 : Int(ceil(Double(subsAndBillsItems.count) / Double(itemsPerPage)))
@@ -507,8 +466,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             SubsandBillsPageControl.isHidden = paymentsPages <= 1
             GoalsPageControl.isHidden = goalsPages <= 1
         }
-
-    // MARK: - Collection View Setup
 
     private func setupCollectionViews() {
             CategoriesCollectionView.register(
@@ -643,10 +600,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             return UICollectionViewCompositionalLayout(section: section)
         }
      
-        // MARK: - UI Setup
      
-
-    // MARK: - UI Setup
 
     func setupUI() {
         view.backgroundColor = AppColors.background
@@ -659,7 +613,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         BudgetEditButton.tintColor       = AppColors.brand
         BudgetEditButton.setTitleColor(AppColors.brandText, for: .normal)
 
-        // Footnote font — handles both UIButton.Configuration (iOS 15+) and plain buttons
         let footnoteFont = UIFont.preferredFont(forTextStyle: .footnote)
         if var config = BudgetEditButton.configuration {
             config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
@@ -672,7 +625,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             BudgetEditButton.titleLabel?.font = footnoteFont
         }
         
-        // Number-only keyboard + programmatic text-change detection
         newBudgetTextField.keyboardType = .decimalPad
         newBudgetTextField.addTarget(self,
                                      action: #selector(budgetTextFieldChanged(_:)),
@@ -689,7 +641,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         SubsandBillsCollectionView.backgroundColor = AppColors.background
         GoalsCollectionView.backgroundColor        = AppColors.background
     }
-    // MARK: - Notification Handler
 
     @objc private func handleCategoryDataChange() {
         reloadAll()
@@ -707,8 +658,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         NotificationCenter.default.removeObserver(self)
     }
 }
-
-// MARK: - UICollectionViewDataSource
 
 extension BudgetViewController: UICollectionViewDataSource {
  
@@ -753,7 +702,6 @@ extension BudgetViewController: UICollectionViewDataSource {
         }
     }
 }
-// MARK: - Context Menus
 
 extension BudgetViewController {
  

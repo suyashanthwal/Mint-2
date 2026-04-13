@@ -1,9 +1,3 @@
-//
-//  ReceiptHeaderCell.swift
-//  QrAndReceiptReading
-//
-//  Created by Ayush Singh Bhandari on 30/03/26.
-//
 
 import UIKit
 
@@ -54,6 +48,3 @@ final class ReceiptHeaderCell: UICollectionViewCell {
     }
 }
 
-// Registration/dequeue example:
-// collectionView.register(UINib(nibName: "ReceiptHeaderCell", bundle: nil), forCellWithReuseIdentifier: ReceiptHeaderCell.reuseID)
-// let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReceiptHeaderCell.reuseID, for: indexPath) as? ReceiptHeaderCell

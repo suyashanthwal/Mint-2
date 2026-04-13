@@ -1,13 +1,5 @@
-//
-//  OnboardingSpotlightView.swift
-//  JustChecking
-//
-//  Created by Suyash Anthwal on 22/03/26.
-//
 
 import UIKit
-
-// MARK: - Step Model
 
 struct OnboardingStep {
     let view: UIView
@@ -16,16 +8,12 @@ struct OnboardingStep {
     let tooltipBelow: Bool
 }
 
-// MARK: - OnboardingSpotlightView
-
 final class OnboardingSpotlightView: UIView {
 
     var onTap: (() -> Void)?
 
-    // MARK: - Style Constants (from styling.swift)
-
     private enum Style {
-        static let accentGreen      = UIColor(red: 0.27, green: 0.45, blue: 0.31, alpha: 1.0) // #456E4F
+        static let accentGreen      = UIColor(red: 0.27, green: 0.45, blue: 0.31, alpha: 1.0)
         static let accentGreenLight = UIColor(red: 0.27, green: 0.45, blue: 0.31, alpha: 0.15)
         static let cornerRadius: CGFloat  = 12.0
         static let shadowColor            = UIColor.black.cgColor
@@ -33,8 +21,6 @@ final class OnboardingSpotlightView: UIView {
         static let shadowOffset           = CGSize(width: 0, height: 1)
         static let shadowRadius: CGFloat  = 1
     }
-
-    // MARK: - Private Views
 
     private let maskLayer = CAShapeLayer()
     private let dimView   = UIView()
@@ -115,8 +101,6 @@ final class OnboardingSpotlightView: UIView {
     private var tooltipTopConstraint: NSLayoutConstraint?
     private var tooltipBottomConstraint: NSLayoutConstraint?
 
-    // MARK: - Init
-
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -127,19 +111,15 @@ final class OnboardingSpotlightView: UIView {
         setup()
     }
 
-    // MARK: - Setup
-
     private func setup() {
         backgroundColor = .clear
 
-        // Dim layer with cutout mask
         dimView.frame            = bounds
         dimView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         dimView.backgroundColor  = UIColor.black.withAlphaComponent(0.55)
         dimView.layer.mask       = maskLayer
         addSubview(dimView)
 
-        // Tooltip internals
         tooltipContainer.addSubview(accentBar)
         tooltipContainer.addSubview(stepBadge)
         tooltipContainer.addSubview(tooltipTitle)
@@ -150,43 +130,35 @@ final class OnboardingSpotlightView: UIView {
         addSubview(tapHint)
 
         NSLayoutConstraint.activate([
-            // Accent bar — left edge of tooltip
             accentBar.topAnchor.constraint(equalTo: tooltipContainer.topAnchor, constant: 16),
             accentBar.bottomAnchor.constraint(equalTo: tooltipContainer.bottomAnchor, constant: -16),
             accentBar.leadingAnchor.constraint(equalTo: tooltipContainer.leadingAnchor, constant: 16),
             accentBar.widthAnchor.constraint(equalToConstant: 3),
 
-            // Step badge
             stepBadge.topAnchor.constraint(equalTo: tooltipContainer.topAnchor, constant: 16),
             stepBadge.leadingAnchor.constraint(equalTo: accentBar.trailingAnchor, constant: 12),
 
-            // Title
             tooltipTitle.topAnchor.constraint(equalTo: stepBadge.bottomAnchor, constant: 4),
             tooltipTitle.leadingAnchor.constraint(equalTo: accentBar.trailingAnchor, constant: 12),
             tooltipTitle.trailingAnchor.constraint(equalTo: tooltipContainer.trailingAnchor, constant: -16),
 
-            // Message
             tooltipMessage.topAnchor.constraint(equalTo: tooltipTitle.bottomAnchor, constant: 6),
             tooltipMessage.leadingAnchor.constraint(equalTo: accentBar.trailingAnchor, constant: 12),
             tooltipMessage.trailingAnchor.constraint(equalTo: tooltipContainer.trailingAnchor, constant: -16),
 
-            // Divider
             divider.topAnchor.constraint(equalTo: tooltipMessage.bottomAnchor, constant: 14),
             divider.leadingAnchor.constraint(equalTo: tooltipContainer.leadingAnchor, constant: 16),
             divider.trailingAnchor.constraint(equalTo: tooltipContainer.trailingAnchor, constant: -16),
             divider.heightAnchor.constraint(equalToConstant: 1),
 
-            // Progress dots
             progressStack.topAnchor.constraint(equalTo: divider.bottomAnchor, constant: 12),
             progressStack.centerXAnchor.constraint(equalTo: tooltipContainer.centerXAnchor),
             progressStack.bottomAnchor.constraint(equalTo: tooltipContainer.bottomAnchor, constant: -14),
             progressStack.heightAnchor.constraint(equalToConstant: 8),
 
-            // Tooltip horizontal
             tooltipContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             tooltipContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
 
-            // Tap hint
             tapHint.centerXAnchor.constraint(equalTo: centerXAnchor),
             tapHint.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44),
         ])
@@ -194,8 +166,6 @@ final class OnboardingSpotlightView: UIView {
         let tap = UITapGestureRecognizer(target: self, action: #selector(tapped))
         addGestureRecognizer(tap)
     }
-
-    // MARK: - Public API
 
     func configure(totalSteps: Int) {
         progressStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -212,7 +182,6 @@ final class OnboardingSpotlightView: UIView {
         tooltipBelow: Bool,
         animated: Bool = true
     ) {
-        // --- Cutout ---
         let targetFrame = targetView.convert(targetView.bounds, to: self)
         let inset        = targetFrame.insetBy(dx: -10, dy: -10)
         let hole         = UIBezierPath(roundedRect: inset, cornerRadius: Style.cornerRadius)
@@ -231,13 +200,11 @@ final class OnboardingSpotlightView: UIView {
         }
         maskLayer.path = fullPath.cgPath
 
-        // --- Tooltip content ---
         stepBadge.text      = "STEP \(stepIndex + 1) OF \(progressStack.arrangedSubviews.count)"
         tooltipTitle.text   = title
         tooltipMessage.text = message
         updateDots(activeIndex: stepIndex)
 
-        // --- Position tooltip ---
         tooltipTopConstraint?.isActive    = false
         tooltipBottomConstraint?.isActive = false
 
@@ -251,7 +218,6 @@ final class OnboardingSpotlightView: UIView {
             tooltipBottomConstraint?.isActive = true
         }
 
-        // --- Animate tooltip in ---
         tooltipContainer.alpha     = 0
         tooltipContainer.transform = CGAffineTransform(translationX: 0, y: tooltipBelow ? -10 : 10)
 
@@ -261,8 +227,6 @@ final class OnboardingSpotlightView: UIView {
             self.layoutIfNeeded()
         }
     }
-
-    // MARK: - Helpers
 
     private func makeDot(active: Bool) -> UIView {
         let v    = UIView()

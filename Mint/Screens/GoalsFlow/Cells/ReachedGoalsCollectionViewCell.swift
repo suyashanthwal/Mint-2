@@ -1,52 +1,35 @@
-//
-//  ReachedGoalsCollectionViewCell.swift
-//  BudgetApp
-//
-//  Created by Suyash Anthwal on 02/04/26.
-//
 
 import UIKit
 
 class ReachedGoalsCollectionViewCell: UICollectionViewCell {
-    // MARK: - Outlets
 
     @IBOutlet weak var IconBackgroundView: UIView!
     @IBOutlet weak var ReachedGoalName: UILabel!
     @IBOutlet weak var ReachedGoalCompletedOn: UILabel!
     @IBOutlet weak var ReachedGoalAmount: UILabel!
 
-    // MARK: - Lifecycle
-
     override func awakeFromNib() {
         super.awakeFromNib()
         applyStyle()
     }
 
-    // MARK: - Styling
-
     private func applyStyle() {
         contentView.backgroundColor = AppColors.card
 
-        // Icon bubble — light brand green circle
         IconBackgroundView.backgroundColor    = AppColors.brandLight
         IconBackgroundView.layer.cornerRadius = IconBackgroundView.frame.width / 2
         IconBackgroundView.clipsToBounds      = true
 
-        // Goal name
         ReachedGoalName.font      = UIFont.systemFont(ofSize: 15, weight: .semibold)
         ReachedGoalName.textColor = AppColors.textPrimary
 
-        // Completed-on subtitle
         ReachedGoalCompletedOn.font      = UIFont.systemFont(ofSize: 12, weight: .regular)
         ReachedGoalCompletedOn.textColor = AppColors.textSecondary
 
-        // Amount (right-aligned)
         ReachedGoalAmount.font      = UIFont.systemFont(ofSize: 15, weight: .bold)
         ReachedGoalAmount.textColor = AppColors.brand
         ReachedGoalAmount.textAlignment = .right
     }
-
-    // MARK: - Configure
 
     func configure(with goal: Goal) {
         ReachedGoalName.text = goal.name
@@ -59,19 +42,13 @@ class ReachedGoalsCollectionViewCell: UICollectionViewCell {
 
         ReachedGoalAmount.text = formatCurrency(goal.targetAmount)
 
-        // Icon inside the bubble — checkmark using SF Symbols
-        // The icon is added programmatically so it works without a sub-outlet
         addIconIfNeeded(sfSymbol: goal.iconName)
 
-        // Corner radius needs bounds — update after layout
         layoutIfNeeded()
         IconBackgroundView.layer.cornerRadius = IconBackgroundView.bounds.width / 2
     }
 
-    // MARK: - Icon Helper
-
     private func addIconIfNeeded(sfSymbol: String) {
-        // Remove any existing image views added programmatically
         IconBackgroundView.subviews
             .filter { $0.tag == 99 }
             .forEach { $0.removeFromSuperview() }
@@ -93,8 +70,6 @@ class ReachedGoalsCollectionViewCell: UICollectionViewCell {
             imageView.heightAnchor.constraint(equalToConstant: 24),
         ])
     }
-
-    // MARK: - Helpers
 
     private func formatCurrency(_ amount: Double) -> String {
         let f             = NumberFormatter()

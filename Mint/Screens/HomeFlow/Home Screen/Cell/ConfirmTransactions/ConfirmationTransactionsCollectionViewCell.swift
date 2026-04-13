@@ -1,9 +1,3 @@
-//
-//  ConfirmationTransactionsCollectionViewCell.swift
-//  Mint
-//
-//  Created by Anushk Barmola on 07/04/26.
-//
 
 import UIKit
 
@@ -28,7 +22,6 @@ class ConfirmationTransactionsCollectionViewCell: UICollectionViewCell {
         noButton.tintColor = AppColors.error
         yesButton.tintColor = AppColors.brand
 
-        // Set tint + symbol rendering mode so SF Symbols show in color
         BillIcon.tintColor = AppColors.brand
         BillIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(
             paletteColors: [AppColors.brand]
@@ -56,7 +49,6 @@ class ConfirmationTransactionsCollectionViewCell: UICollectionViewCell {
 
         BillAmount.text = bill.amount.formatted(.currency(code: "INR"))
 
-        // ✅ Apply color when setting each icon too
         BillIcon.image = UIImage(systemName: bill.icon)?
             .withRenderingMode(.alwaysTemplate)
     }

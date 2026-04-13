@@ -1,23 +1,12 @@
-//
-//  AzureReceiptService.swift
-//  QrAndReceiptReading
-//
-//  Talks to Azure Document Intelligence (prebuilt-receipt model).
-// pure URLSession over HTTPS.
 
 
 import UIKit
-
-//AzureReceiptService
 
 final class AzureReceiptService {
 
     static let shared = AzureReceiptService()
     private init() {}
 
-    // ── Azure config ─────────────────────────────────────────────────────────
-
-    /// Read once at first use so the file is parsed only once.
     private lazy var secrets: [String: Any] = {
         guard let url  = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
               let dict = NSDictionary(contentsOf: url) as? [String: Any]
@@ -59,7 +48,6 @@ final class AzureReceiptService {
         return "Missing \(missingKeys.joined(separator: " and ")) in Secrets.plist"
     }
 
-    /// Azure Document Intelligence REST path for the prebuilt receipt model.
     private var analyzeURL: String {
         "\(normalizedEndpoint)/documentintelligence/documentModels/\(modelID):analyze?_overload=analyzeDocument&api-version=\(apiVersion)&locale=\(localeHint)"
     }
@@ -72,27 +60,19 @@ final class AzureReceiptService {
         return URLSession(configuration: configuration)
     }()
 
-    //Polling
-
     private let maxPollAttempts = 20
     private let defaultPollInterval: TimeInterval = 2
 
-    //Public API
-
-    ///Sends image to Azure and returns a populated ReceiptScanData
-    //Calls completion on the   main thread
     func analyze(image: UIImage,
                  completion: @escaping (Result<ReceiptScanData, AzureReceiptError>) -> Void) {
         guard let configurationIssue else {
             print("[AzureReceiptService] Starting Azure receipt analysis with API \(apiVersion).")
             print("[AzureReceiptService] Endpoint: \(normalizedEndpoint)")
 
-            // 1:Compress image to JPEG
             guard let jpeg = image.jpegData(compressionQuality: 0.75) else {
                 return complete(completion, .failure(.imageConversionFailed))
             }
 
-            // 2:POST to Azure
             submitImage(jpeg) { [weak self] result in
                 guard let self else { return }
                 switch result {
@@ -100,7 +80,6 @@ final class AzureReceiptService {
                     self.complete(completion, .failure(e))
                 case .success(let operationURL):
                     print("[AzureReceiptService] Azure accepted request. Polling result at \(operationURL.absoluteString)")
-                    // 3 ── Poll until Azure finishes, then parse
                     self.pollResult(operationURL: operationURL,
                                     attempt: 0,
                                     completion: completion)
@@ -115,8 +94,6 @@ final class AzureReceiptService {
             .failure(.invalidConfiguration(configurationIssue))
         )
     }
-
-    // ── Step 1: Submit ────────────────────────────────────────────────────────
 
     private func submitImage(_ jpeg: Data,
                              completion: @escaping (Result<URL, AzureReceiptError>) -> Void) {
@@ -143,7 +120,6 @@ final class AzureReceiptService {
             guard let http = response as? HTTPURLResponse else {
                 return completion(.failure(.unexpectedResponse("No HTTP response")))
             }
-            // Azure returns 202 Accepted + Operation-Location header on success
             guard http.statusCode == 202,
                   let locationString = http.value(forHTTPHeaderField: "Operation-Location"),
                   let locationURL    = URL(string: locationString)
@@ -155,8 +131,6 @@ final class AzureReceiptService {
             completion(.success(locationURL))
         }.resume()
     }
-
-    // ── Step 2: Poll ─────────────────────────────────────────────────────────
 
     private func pollResult(operationURL: URL,
                             attempt: Int,
@@ -184,7 +158,6 @@ final class AzureReceiptService {
 
                 switch status {
                 case "succeeded":
-                    // 3 : Parse the JSON into ReceiptScanData
                     let scanData = AzureReceiptBridge.convert(json: json)
                     self.logAzureResult(json: json, scanData: scanData)
                     self.complete(completion, .success(scanData))
@@ -208,8 +181,6 @@ final class AzureReceiptService {
             }
         }.resume()
     }
-
-    // ── Helper: always deliver on main thread ────────────────────────────────
 
     private func complete<T>(_ completion: @escaping (Result<T, AzureReceiptError>) -> Void,
                              _ result: Result<T, AzureReceiptError>) {
@@ -310,8 +281,6 @@ final class AzureReceiptService {
     }
 }
 
-// AzureReceiptError
-
 enum AzureReceiptError: Error, LocalizedError {
     case imageConversionFailed
     case invalidConfiguration(String)
@@ -334,16 +303,11 @@ enum AzureReceiptError: Error, LocalizedError {
     }
 }
 
-// MARK: - AzureReceiptBridge (JSON → ReceiptScanData)
-
-/// Converts the raw Azure Document Intelligence JSON into your existing ReceiptScanData model.
-/// Field access is aligned to the v4.0 response shape, with text fallbacks where Azure omits a structured field.
 enum AzureReceiptBridge {
 
     static func convert(json: [String: Any]?) -> ReceiptScanData {
         var data = ReceiptScanData()
 
-        // Navigate: analyzeResult → documents[0] → fields
         guard let analyzeResult = json?["analyzeResult"] as? [String: Any],
               let documents     = analyzeResult["documents"] as? [[String: Any]],
               let fields        = documents.first?["fields"] as? [String: Any]
@@ -351,8 +315,6 @@ enum AzureReceiptBridge {
 
         let documentText = analyzeResult["content"] as? String ?? ""
         data.rawOCRText = documentText
-
-        // ── Scalar fields ──────────────────────────────────────────────────
 
         data.merchantName   = stringField(fields, "MerchantName")
         data.invoiceNumber  = stringField(fields, "TransactionId")
@@ -377,12 +339,8 @@ enum AzureReceiptBridge {
         data.amountPaid     = currencyField(fields, "AmountDue")
                             ?? currencyField(fields, "Total")
 
-        // ── Date & Time ───────────────────────────────────────────────────
-
         data.date = dateField(fields, "TransactionDate")
         data.time = timeField(fields, "TransactionTime")
-
-        // ── Line items ────────────────────────────────────────────────────
 
         if let itemsField = fields["Items"] as? [String: Any],
            let itemsArray = itemsField["valueArray"] as? [[String: Any]] {
@@ -412,9 +370,6 @@ enum AzureReceiptBridge {
         return data
     }
 
-    // ── Field extractors ───────────────────────────────────────────────────
-
-    /// Extracts a string from { "valueString": "...", "content": "..." }
     private static func stringField(_ fields: [String: Any], _ key: String) -> String? {
         guard let field = fields[key] as? [String: Any] else { return nil }
         return (field["valueString"] as? String)
@@ -447,7 +402,6 @@ enum AzureReceiptBridge {
             ?? (field["content"] as? String)
     }
 
-    /// Extracts a Double from { "valueCurrency": { "amount": 99.5 } }
     private static func currencyField(_ fields: [String: Any], _ key: String) -> Double? {
         guard let field    = fields[key]            as? [String: Any],
               let currency = field["valueCurrency"]  as? [String: Any],
@@ -456,7 +410,6 @@ enum AzureReceiptBridge {
         return amount
     }
 
-    /// Extracts a Double from { "valueNumber": 2.0 }
     private static func doubleField(_ fields: [String: Any], _ key: String) -> Double? {
         guard let field = fields[key] as? [String: Any] else { return nil }
         return field["valueNumber"] as? Double

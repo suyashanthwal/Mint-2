@@ -1,9 +1,3 @@
-//
-//  AddMoneyAlertViewController.swift
-//  GoalsPage
-//
-//  Created by Suyash Anthwal on 03/04/26.
-//
 
 
 import UIKit
@@ -13,8 +7,6 @@ protocol AddMoneyAlertViewControllerDelegate: AnyObject {
 }
 
 class AddMoneyAlertViewController: UIViewController {
-
-    // MARK: - Outlets
 
     @IBOutlet weak var GoalNameLabel: UILabel!
     @IBOutlet weak var EntryAmountTextField: UITextField!
@@ -37,13 +29,10 @@ class AddMoneyAlertViewController: UIViewController {
             delegate?.didAddMoney(amount: amount, goalId: goal.id)
             dismiss(animated: true)
     }
-    // MARK: - Data
 
     var goal: Goal!
     var budgetRemaining: Double = 0
     weak var delegate: AddMoneyAlertViewControllerDelegate?
-
-    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,8 +46,6 @@ class AddMoneyAlertViewController: UIViewController {
         super.viewDidAppear(animated)
         EntryAmountTextField.becomeFirstResponder()
     }
-
-    // MARK: - Setup
 
     private func setupUI() {
         view.backgroundColor = AppColors.background
@@ -74,8 +61,6 @@ class AddMoneyAlertViewController: UIViewController {
         Amount2000Button.setTitleColor(AppColors.brand, for: .normal)
         Amount5000Button.backgroundColor = AppColors.brandLight
     }
-
-    // MARK: - Quick Amount Buttons
 
     @IBAction func amount500Tapped(_ sender: UIButton) {
         EntryAmountTextField.text = "500"
@@ -93,8 +78,6 @@ class AddMoneyAlertViewController: UIViewController {
 
         EntryAmountTextField.text = "5000"
     }
-
-    // MARK: - Actions
 
     @IBAction func confirmTapped(_ sender: UIButton) {
         guard let text = EntryAmountTextField.text,

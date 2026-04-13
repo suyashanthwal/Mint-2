@@ -10,7 +10,7 @@ enum TransactionInputType {
 
 struct TransactionInputItem {
     let type: TransactionInputType
-    let icon: String // SF Symbol name
+    let icon: String
     let title: String
     var value: String
     let hasAccessory: Bool

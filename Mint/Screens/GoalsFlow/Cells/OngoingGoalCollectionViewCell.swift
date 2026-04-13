@@ -1,9 +1,3 @@
-//
-//  OngoingGoalCollectionViewCell.swift
-//  BudgetApp
-//
-//  Created by Suyash Anthwal on 02/04/26.
-//
 
 import UIKit
 import PhotosUI
@@ -38,7 +32,6 @@ class OngoingGoalCollectionViewCell: UICollectionViewCell {
     
 
     private func applyStyle() {
-        // Card
         contentView.backgroundColor    = AppColors.card
 
         GoalName.textColor             = AppColors.textPrimary
@@ -51,7 +44,6 @@ class OngoingGoalCollectionViewCell: UICollectionViewCell {
 
         ToGoAmountLabel.textColor      = AppColors.textSecondary
 
-        // Progress bar
         GoalProgressBar.progressTintColor = AppColors.brand
         GoalProgressBar.trackTintColor    = AppColors.brandLight
         GoalProgressBar.layer.cornerRadius = 3
@@ -63,15 +55,13 @@ class OngoingGoalCollectionViewCell: UICollectionViewCell {
     
       func presentPhotoPicker(from viewController: UIViewController) {
           var config = PHPickerConfiguration(photoLibrary: .shared())
-          config.selectionLimit = 1                        // single item selection
-          config.filter         = .images                  // photos only
+          config.selectionLimit = 1
+          config.filter         = .images
 
           let picker = PHPickerViewController(configuration: config)
           picker.delegate = self
           viewController.present(picker, animated: true)
       }
-
-      // MARK: - Configure Cell
 
       func configure(with goal: Goal) {
           GoalName.text    = goal.name
@@ -85,9 +75,6 @@ class OngoingGoalCollectionViewCell: UICollectionViewCell {
 
           GoalProgressBar.setProgress(goal.progress, animated: false)
 
-          // Priority: 1) user-picked photo saved on disk
-                 //           2) named asset
-                 //           3) SF Symbol fallback
                  if let url = goal.pickedImageURL,
                     let data = try? Data(contentsOf: url),
                     let img  = UIImage(data: data) {
@@ -109,9 +96,6 @@ class OngoingGoalCollectionViewCell: UICollectionViewCell {
                      GoalImage.backgroundColor = AppColors.sectionBackground
                  }
     }
-
-
-
 
     @IBAction func addMoneyButtonTapped(_ sender: UIButton) {
         onAddMoney?()
@@ -152,7 +136,6 @@ extension OngoingGoalCollectionViewCell: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
 
-        // selectionLimit = 1 so results has at most one item
         guard let provider = results.first?.itemProvider,
               provider.canLoadObject(ofClass: UIImage.self) else { return }
 
@@ -161,13 +144,11 @@ extension OngoingGoalCollectionViewCell: PHPickerViewControllerDelegate {
             DispatchQueue.main.async {
                 self.GoalImage.image       = image
                 self.GoalImage.contentMode = .scaleAspectFill
-                self.onImagePicked?(image)   // bubble up to VC to persist the photo
+                self.onImagePicked?(image)
             }
         }
     }
 }
-
-// MARK: - UIView helper to reach the parent ViewController
 
 private extension UIView {
     var parentViewController: UIViewController? {

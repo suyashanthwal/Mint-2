@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -27,12 +27,19 @@
                                         <rect key="frame" x="0.0" y="0.0" width="389" height="140"/>
                                     </imageView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6uT-9P-fx1" userLabel="imageEdit">
-                                        <rect key="frame" x="345" y="12" width="32" height="24"/>
-                                        <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <rect key="frame" x="349" y="100" width="28" height="28"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="28" id="k1k-vv-X2l"/>
+                                            <constraint firstAttribute="height" constant="28" id="uRG-p8-j5s"/>
+                                        </constraints>
+                                        <color key="tintColor" red="0.2260742188" green="0.3195800781" blue="0.2231445312" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <state key="normal" title="Edit"/>
                                         <buttonConfiguration key="configuration" style="filled" image="pencil" catalog="system">
+                                            <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
+                                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                            </preferredSymbolConfiguration>
                                             <color key="baseForegroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <color key="baseBackgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <color key="baseBackgroundColor" systemColor="systemGrayColor"/>
                                         </buttonConfiguration>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -48,13 +55,11 @@
                                 <constraints>
                                     <constraint firstItem="vG1-E8-U3z" firstAttribute="leading" secondItem="O6P-rm-ZSx" secondAttribute="leading" id="25u-IE-S5S"/>
                                     <constraint firstAttribute="bottom" secondItem="vG1-E8-U3z" secondAttribute="bottom" id="3dz-lm-S5K"/>
-                                    <constraint firstAttribute="trailing" secondItem="6uT-9P-fx1" secondAttribute="trailing" constant="12" id="5mf-G1-TM0"/>
                                     <constraint firstAttribute="trailing" secondItem="vG1-E8-U3z" secondAttribute="trailing" id="8op-I0-OSv"/>
-                                    <constraint firstItem="6uT-9P-fx1" firstAttribute="top" secondItem="O6P-rm-ZSx" secondAttribute="top" constant="12" id="dN3-5C-uxV"/>
+                                    <constraint firstAttribute="bottom" secondItem="6uT-9P-fx1" secondAttribute="bottom" constant="12" id="Wh2-Ef-IQb"/>
+                                    <constraint firstAttribute="trailing" secondItem="6uT-9P-fx1" secondAttribute="trailing" constant="12" id="cle-64-KQF"/>
                                     <constraint firstAttribute="height" constant="140" id="dat-ng-YfZ"/>
                                     <constraint firstItem="vG1-E8-U3z" firstAttribute="top" secondItem="O6P-rm-ZSx" secondAttribute="top" id="hAt-FS-kgF"/>
-                                    <constraint firstItem="6uT-9P-fx1" firstAttribute="width" constant="32" id="p8E-5X-K4q"/>
-                                    <constraint firstItem="6uT-9P-fx1" firstAttribute="height" constant="24" id="wqA-7t-yT4"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ncB-lI-EM0">
@@ -115,10 +120,10 @@
                                         <rect key="frame" x="16" y="95.333333333333343" width="357" height="4"/>
                                     </progressView>
                                     <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="h73-yd-xFW">
-                                        <rect key="frame" x="15" y="115.33333333333333" width="358" height="34.333333333333329"/>
+                                        <rect key="frame" x="15" y="115.33333333333333" width="358" height="40.333333333333329"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qt0-EY-wN9">
-                                                <rect key="frame" x="0.0" y="0.0" width="200" height="34.333333333333336"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="200" height="40.333333333333336"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="200" id="8LD-Kw-pgN"/>
                                                 </constraints>
@@ -132,7 +137,7 @@
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Loi-Kv-15i">
-                                                <rect key="frame" x="208" y="0.0" width="150" height="34.333333333333336"/>
+                                                <rect key="frame" x="208" y="0.0" width="150" height="40.333333333333336"/>
                                                 <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <state key="normal" title="Button"/>
                                                 <buttonConfiguration key="configuration" style="plain" title="Edit">
@@ -197,6 +202,9 @@
         <image name="pencil" catalog="system" width="128" height="113"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGrayColor">
+            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
