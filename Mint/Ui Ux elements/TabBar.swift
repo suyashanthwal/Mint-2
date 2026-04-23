@@ -8,7 +8,7 @@ enum AppTab: Int {
 
     var title: String {
         switch self {
-        case .home:    return "HOME"
+        case .home:    return "Overview"
         case .budget:  return "BUDGET"
         case .reports: return "REPORTS"
         case .goals:   return "GOALS"
@@ -17,7 +17,7 @@ enum AppTab: Int {
 
     var icon: String {
         switch self {
-        case .home:    return "house"
+        case .home:    return "square.grid.2x2"
         case .budget:  return "wallet.bifold"
         case .reports: return "chart.bar"
         case .goals:   return "scope"

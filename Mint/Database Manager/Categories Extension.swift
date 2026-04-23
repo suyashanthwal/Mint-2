@@ -117,14 +117,14 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertCategory: prepare failed")
+            print("insertCategory: prepare failed")
             return nil
         }
 
         let newId     = UUID()
         guard let userId = currentUserIdString else {
             sqlite3_finalize(stmt)
-            print("⚠️ insertCategory: no signed-in user")
+            print("insertCategory: no signed-in user")
             return nil
         }
         let createdAt = databaseTimestampString(from: Date())
@@ -142,10 +142,10 @@ extension DatabaseManager {
         sqlite3_finalize(stmt)
 
         if success {
-            print("✅ Category inserted: \(name) (\(newId))")
+            print("Category inserted: \(name) (\(newId))")
             return newId
         } else {
-            print("❌ insertCategory failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertCategory failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
     }
@@ -166,14 +166,14 @@ extension DatabaseManager {
 
     func linkCategoryToCurrentBudget(categoryId: UUID) {
         guard let budget = fetchCurrentBudget() else {
-            print("⚠️ linkCategoryToCurrentBudget: no budget found")
+            print("linkCategoryToCurrentBudget: no budget found")
             return
         }
         execute(
             "INSERT OR IGNORE INTO budget_categories (budget_id, category_id) VALUES (?, ?);",
             args: [budget.id.uuidString, categoryId.uuidString]
         )
-        print("✅ Linked category \(categoryId) → budget \(budget.id)")
+        print("Linked category \(categoryId) → budget \(budget.id)")
     }
 
     func updateCategory(id: UUID, name: String, color: String, icon: String, budget: Double) {
@@ -184,7 +184,7 @@ extension DatabaseManager {
         """
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ updateCategory: prepare failed")
+            print("updateCategory: prepare failed")
             return
         }
         sqlite3_bind_text(stmt,   1, (name          as NSString).utf8String, -1, nil)
@@ -194,9 +194,9 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt,   5, (id.uuidString as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
-            print("✅ Category updated: \(name)")
+            print("Category updated: \(name)")
         } else {
-            print("❌ updateCategory failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("updateCategory failed: \(String(cString: sqlite3_errmsg(db)))")
         }
         sqlite3_finalize(stmt)
     }

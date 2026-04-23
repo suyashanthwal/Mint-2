@@ -145,7 +145,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ markOnboardingSeen: prepare failed")
+            print("markOnboardingSeen: prepare failed")
             return
         }
         defer { sqlite3_finalize(stmt) }
@@ -157,7 +157,7 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 4, (timestamp as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(stmt) == SQLITE_DONE else {
-            print("❌ markOnboardingSeen failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("markOnboardingSeen failed: \(String(cString: sqlite3_errmsg(db)))")
             return
         }
     }
@@ -237,7 +237,7 @@ extension DatabaseManager {
 
         var userStmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, userSQL, -1, &userStmt, nil) == SQLITE_OK else {
-            print("❌ createUserAccount: user prepare failed")
+            print("createUserAccount: user prepare failed")
             return nil
         }
 
@@ -249,7 +249,7 @@ extension DatabaseManager {
         sqlite3_bind_text(userStmt, 5, (createdAt as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(userStmt) == SQLITE_DONE else {
-            print("❌ createUserAccount: user insert failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("createUserAccount: user insert failed: \(String(cString: sqlite3_errmsg(db)))")
             sqlite3_finalize(userStmt)
             return nil
         }
@@ -263,7 +263,7 @@ extension DatabaseManager {
 
         var budgetStmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, budgetSQL, -1, &budgetStmt, nil) == SQLITE_OK else {
-            print("❌ createUserAccount: budget prepare failed")
+            print("createUserAccount: budget prepare failed")
             execute("DELETE FROM users WHERE id = ?;", args: [userId.uuidString])
             return nil
         }
@@ -274,7 +274,7 @@ extension DatabaseManager {
         sqlite3_bind_text(budgetStmt, 4, (createdAt as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(budgetStmt) == SQLITE_DONE else {
-            print("❌ createUserAccount: budget insert failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("createUserAccount: budget insert failed: \(String(cString: sqlite3_errmsg(db)))")
             sqlite3_finalize(budgetStmt)
             execute("DELETE FROM users WHERE id = ?;", args: [userId.uuidString])
             return nil

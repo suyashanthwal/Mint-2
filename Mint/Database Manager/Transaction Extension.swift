@@ -35,7 +35,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ fetchTransactions: prepare failed")
+            print("fetchTransactions: prepare failed")
             return result
         }
         defer { sqlite3_finalize(stmt) }
@@ -167,7 +167,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ fetchBufferedTransactions: prepare failed")
+            print("fetchBufferedTransactions: prepare failed")
             return result
         }
         defer { sqlite3_finalize(stmt) }
@@ -272,7 +272,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertBufferedExpenseTransaction: prepare failed")
+            print("insertBufferedExpenseTransaction: prepare failed")
             return nil
         }
         defer { sqlite3_finalize(stmt) }
@@ -302,7 +302,7 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 11, (expenseType as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(stmt) == SQLITE_DONE else {
-            print("❌ insertBufferedExpenseTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertBufferedExpenseTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 
@@ -330,7 +330,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertBufferedIncomeTransaction: prepare failed")
+            print("insertBufferedIncomeTransaction: prepare failed")
             return nil
         }
         defer { sqlite3_finalize(stmt) }
@@ -354,7 +354,7 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 9, (sourceName as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(stmt) == SQLITE_DONE else {
-            print("❌ insertBufferedIncomeTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertBufferedIncomeTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 
@@ -384,7 +384,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertExpenseTransaction: prepare failed")
+            print("insertExpenseTransaction: prepare failed")
             return nil
         }
         defer { sqlite3_finalize(stmt) }
@@ -410,7 +410,7 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 11, (expenseType as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(stmt) == SQLITE_DONE else {
-            print("❌ insertExpenseTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertExpenseTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 
@@ -441,7 +441,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertIncomeTransaction: prepare failed")
+            print("insertIncomeTransaction: prepare failed")
             return nil
         }
         defer { sqlite3_finalize(stmt) }
@@ -465,7 +465,7 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 9, (sourceName as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(stmt) == SQLITE_DONE else {
-            print("❌ insertIncomeTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertIncomeTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 
@@ -480,7 +480,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ discardBufferedTransaction: prepare failed")
+            print("discardBufferedTransaction: prepare failed")
             return false
         }
         defer { sqlite3_finalize(stmt) }
@@ -489,7 +489,7 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 2, (userId as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(stmt) == SQLITE_DONE else {
-            print("❌ discardBufferedTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("discardBufferedTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
             return false
         }
 
@@ -504,7 +504,7 @@ extension DatabaseManager {
 
         let beginResult = sqlite3_exec(db, "BEGIN TRANSACTION;", nil, nil, nil)
         guard beginResult == SQLITE_OK else {
-            print("❌ confirmBufferedTransaction: begin failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("confirmBufferedTransaction: begin failed: \(String(cString: sqlite3_errmsg(db)))")
             return false
         }
 
@@ -523,7 +523,7 @@ extension DatabaseManager {
         var insertStmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, insertSQL, -1, &insertStmt, nil) == SQLITE_OK else {
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ confirmBufferedTransaction: insert prepare failed")
+            print("confirmBufferedTransaction: insert prepare failed")
             return false
         }
 
@@ -535,7 +535,7 @@ extension DatabaseManager {
         guard sqlite3_step(insertStmt) == SQLITE_DONE else {
             sqlite3_finalize(insertStmt)
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ confirmBufferedTransaction: insert failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("confirmBufferedTransaction: insert failed: \(String(cString: sqlite3_errmsg(db)))")
             return false
         }
         sqlite3_finalize(insertStmt)
@@ -544,7 +544,7 @@ extension DatabaseManager {
         var deleteStmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, deleteSQL, -1, &deleteStmt, nil) == SQLITE_OK else {
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ confirmBufferedTransaction: delete prepare failed")
+            print("confirmBufferedTransaction: delete prepare failed")
             return false
         }
 
@@ -554,14 +554,14 @@ extension DatabaseManager {
         guard sqlite3_step(deleteStmt) == SQLITE_DONE else {
             sqlite3_finalize(deleteStmt)
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ confirmBufferedTransaction: delete failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("confirmBufferedTransaction: delete failed: \(String(cString: sqlite3_errmsg(db)))")
             return false
         }
         sqlite3_finalize(deleteStmt)
 
         guard sqlite3_exec(db, "COMMIT;", nil, nil, nil) == SQLITE_OK else {
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ confirmBufferedTransaction: commit failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("confirmBufferedTransaction: commit failed: \(String(cString: sqlite3_errmsg(db)))")
             return false
         }
 
@@ -611,7 +611,7 @@ extension DatabaseManager {
 
             var stmt: OpaquePointer?
             guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-                print("❌ updateTransaction: prepare failed")
+                print("updateTransaction: prepare failed")
                 return false
             }
             defer { sqlite3_finalize(stmt) }
@@ -624,7 +624,7 @@ extension DatabaseManager {
             sqlite3_bind_text(stmt, 6, (userId as NSString).utf8String, -1, nil)
 
             guard sqlite3_step(stmt) == SQLITE_DONE else {
-                print("❌ updateTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+                print("updateTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
                 return false
             }
         } else {
@@ -641,7 +641,7 @@ extension DatabaseManager {
 
             var stmt: OpaquePointer?
             guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-                print("❌ updateTransaction: prepare failed")
+                print("updateTransaction: prepare failed")
                 return false
             }
             defer { sqlite3_finalize(stmt) }
@@ -654,7 +654,7 @@ extension DatabaseManager {
             sqlite3_bind_text(stmt, 6, (userId as NSString).utf8String, -1, nil)
 
             guard sqlite3_step(stmt) == SQLITE_DONE else {
-                print("❌ updateTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+                print("updateTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
                 return false
             }
         }
@@ -677,7 +677,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ deleteTransaction: prepare failed")
+            print("deleteTransaction: prepare failed")
             return false
         }
         defer { sqlite3_finalize(stmt) }
@@ -686,7 +686,7 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 2, (userId as NSString).utf8String, -1, nil)
 
         guard sqlite3_step(stmt) == SQLITE_DONE else {
-            print("❌ deleteTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
+            print(" deleteTransaction failed: \(String(cString: sqlite3_errmsg(db)))")
             return false
         }
 

@@ -14,7 +14,7 @@ extension DatabaseManager {
         guard let userId = currentUserIdString else { return nil }
 
         guard sqlite3_exec(db, "BEGIN TRANSACTION;", nil, nil, nil) == SQLITE_OK else {
-            print("❌ insertReceipt: begin failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertReceipt: begin failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 
@@ -27,7 +27,7 @@ extension DatabaseManager {
         var receiptStmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, insertReceiptSQL, -1, &receiptStmt, nil) == SQLITE_OK else {
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ insertReceipt: prepare failed")
+            print("insertReceipt: prepare failed")
             return nil
         }
 
@@ -49,7 +49,7 @@ extension DatabaseManager {
         guard sqlite3_step(receiptStmt) == SQLITE_DONE else {
             sqlite3_finalize(receiptStmt)
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ insertReceipt failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertReceipt failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
         sqlite3_finalize(receiptStmt)
@@ -63,7 +63,7 @@ extension DatabaseManager {
             var joinStmt: OpaquePointer?
             guard sqlite3_prepare_v2(db, insertJoinSQL, -1, &joinStmt, nil) == SQLITE_OK else {
                 sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-                print("❌ insertReceipt: join prepare failed")
+                print("insertReceipt: join prepare failed")
                 return nil
             }
 
@@ -74,7 +74,7 @@ extension DatabaseManager {
                 guard sqlite3_step(joinStmt) == SQLITE_DONE else {
                     sqlite3_finalize(joinStmt)
                     sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-                    print("❌ insertReceipt: join insert failed: \(String(cString: sqlite3_errmsg(db)))")
+                    print("insertReceipt: join insert failed: \(String(cString: sqlite3_errmsg(db)))")
                     return nil
                 }
 
@@ -87,7 +87,7 @@ extension DatabaseManager {
 
         guard sqlite3_exec(db, "COMMIT;", nil, nil, nil) == SQLITE_OK else {
             sqlite3_exec(db, "ROLLBACK;", nil, nil, nil)
-            print("❌ insertReceipt: commit failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertReceipt: commit failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 

@@ -81,14 +81,14 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertRecurringPayment: prepare failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertRecurringPayment: prepare failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 
         let newId   = UUID()
         guard let userId = currentUserIdString else {
             sqlite3_finalize(stmt)
-            print("⚠️ insertRecurringPayment: no signed-in user")
+            print("insertRecurringPayment: no signed-in user")
             return nil
         }
         let nextStr = ISO8601DateFormatter().string(from: nextDate)
@@ -121,10 +121,10 @@ extension DatabaseManager {
         sqlite3_finalize(stmt)
 
         if success {
-            print("✅ RecurringPayment inserted: \(name) (\(newId))")
+            print("RecurringPayment inserted: \(name) (\(newId))")
             return newId
         } else {
-            print("❌ insertRecurringPayment failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertRecurringPayment failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
     }
@@ -149,7 +149,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ updateRecurringPayment: prepare failed")
+            print("updateRecurringPayment: prepare failed")
             return
         }
 
@@ -170,9 +170,9 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 9, (id.uuidString as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
-            print("✅ RecurringPayment updated: \(name)")
+            print("RecurringPayment updated: \(name)")
         } else {
-            print("❌ updateRecurringPayment failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("updateRecurringPayment failed: \(String(cString: sqlite3_errmsg(db)))")
         }
         sqlite3_finalize(stmt)
     }

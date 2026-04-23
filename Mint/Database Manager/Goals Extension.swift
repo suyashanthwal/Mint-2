@@ -74,7 +74,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertGoal: prepare failed")
+            print("insertGoal: prepare failed")
             return nil
         }
 
@@ -83,7 +83,7 @@ extension DatabaseManager {
 
         guard let userId = currentUserIdString else {
             sqlite3_finalize(stmt)
-            print("⚠️ insertGoal: no signed-in user")
+            print("insertGoal: no signed-in user")
             return nil
         }
         let createdAt = iso.string(from: Date())
@@ -111,22 +111,22 @@ extension DatabaseManager {
         sqlite3_finalize(stmt)
 
         if success {
-            print("✅ Goal inserted: \(name)")
+            print("Goal inserted: \(name)")
             return newId
         } else {
             let error = String(cString: sqlite3_errmsg(db))
-            print("❌ insertGoal failed: \(error)")
+            print("insertGoal failed: \(error)")
             return nil
         }
     }
 
     func linkGoalToCurrentBudget(goalId: UUID) {
         guard let budget = fetchCurrentBudget() else {
-            print("⚠️ linkGoalToCurrentBudget: no budget found")
+            print("linkGoalToCurrentBudget: no budget found")
             return
         }
 
-        print("ℹ️ Goal \(goalId) is available to budget \(budget.id) through the shared user scope")
+        print("Goal \(goalId) is available to budget \(budget.id) through the shared user scope")
     }
 
     func updateGoal(
@@ -157,7 +157,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ updateGoal: prepare failed")
+            print("updateGoal: prepare failed")
             return
         }
 
@@ -187,9 +187,9 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 10, (id.uuidString as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
-            print("✅ Goal updated: \(name)")
+            print("Goal updated: \(name)")
         } else {
-            print("❌ updateGoal failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("updateGoal failed: \(String(cString: sqlite3_errmsg(db)))")
         }
         sqlite3_finalize(stmt)
     }

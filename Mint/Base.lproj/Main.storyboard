@@ -4924,6 +4924,9 @@ spend on?</string>
                                             <imageReference key="image" image="person.circle.fill" catalog="system" symbolScale="large"/>
                                             <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="24"/>
                                         </buttonConfiguration>
+                                        <connections>
+                                            <segue destination="30n-5b-V71" kind="show" id="AYU-Fn-3ax"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <constraints>
@@ -5830,6 +5833,9 @@ spend on?</string>
                                             <imageReference key="image" image="person.circle.fill" catalog="system" symbolScale="large"/>
                                             <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="24"/>
                                         </buttonConfiguration>
+                                        <connections>
+                                            <segue destination="30n-5b-V71" kind="show" id="8HH-lh-D8q"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <constraints>
@@ -5861,7 +5867,6 @@ spend on?</string>
                                                             </label>
                                                             <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="T8d-Vc-IZK">
                                                                 <rect key="frame" x="325" y="4" width="24" height="24"/>
-                                                                <color key="backgroundColor" red="0.8980392157" green="0.91372549020000005" blue="0.90588235289999997" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="24" id="PDR-gr-Wbs"/>
                                                                     <constraint firstAttribute="height" constant="24" id="ubY-E1-8gc"/>
@@ -5870,7 +5875,7 @@ spend on?</string>
                                                                 <state key="normal" title="Button"/>
                                                                 <buttonConfiguration key="configuration" style="plain" image="xmark" catalog="system">
                                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="8"/>
                                                                     </preferredSymbolConfiguration>
                                                                 </buttonConfiguration>
                                                                 <connections>
@@ -6001,7 +6006,6 @@ spend on?</string>
                                                             </label>
                                                             <button opaque="NO" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1IU-hk-zFY">
                                                                 <rect key="frame" x="325" y="4" width="24" height="24"/>
-                                                                <color key="backgroundColor" red="0.8980392157" green="0.91372549020000005" blue="0.90588235289999997" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="24" id="tSb-p0-nhh"/>
                                                                     <constraint firstAttribute="height" constant="24" id="xc8-1k-BhZ"/>
@@ -6010,7 +6014,7 @@ spend on?</string>
                                                                 <state key="normal" title="Button"/>
                                                                 <buttonConfiguration key="configuration" style="plain" image="xmark" catalog="system">
                                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="8"/>
                                                                     </preferredSymbolConfiguration>
                                                                 </buttonConfiguration>
                                                                 <connections>
@@ -6141,7 +6145,6 @@ spend on?</string>
                                                             </label>
                                                             <button opaque="NO" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nj3-TF-sur">
                                                                 <rect key="frame" x="325" y="4" width="24" height="24"/>
-                                                                <color key="backgroundColor" red="0.8980392157" green="0.91372549020000005" blue="0.90588235289999997" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="24" id="Fvy-Lr-Ox6"/>
                                                                     <constraint firstAttribute="height" constant="24" id="Za7-JF-s8h"/>
@@ -6150,7 +6153,7 @@ spend on?</string>
                                                                 <state key="normal" title="Button"/>
                                                                 <buttonConfiguration key="configuration" style="plain" image="xmark" catalog="system">
                                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="8"/>
                                                                     </preferredSymbolConfiguration>
                                                                 </buttonConfiguration>
                                                                 <connections>
@@ -8387,7 +8390,7 @@ spend on?</string>
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view hidden="YES" tag="200" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mRI-oU-528">
+                            <view tag="200" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mRI-oU-528">
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="sTe-Fe-Znq">
@@ -8395,7 +8398,7 @@ spend on?</string>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="doc.viewfinder" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="aGR-Yg-Vag">
                                                 <rect key="frame" x="150.66666666666666" y="1" width="60" height="58"/>
-                                                <color key="tintColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="60" id="iBv-xD-S0u"/>
                                                     <constraint firstAttribute="width" constant="60" id="l7X-A9-IH9"/>
@@ -8408,7 +8411,7 @@ spend on?</string>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Upload a receipt image to extract amount, GST and payment details automatically" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4t2-gy-1NH">
                                                 <rect key="frame" x="0.0" y="108.00000000000001" width="361" height="40.666666666666671"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <nil key="textColor"/>
+                                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
@@ -8718,7 +8721,7 @@ spend on?</string>
         <segue reference="MkW-Fl-auK"/>
         <segue reference="0Uj-7W-r3N"/>
         <segue reference="ILI-uS-oWD"/>
-        <segue reference="5qd-iq-Isy"/>
+        <segue reference="8HH-lh-D8q"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="1" width="416" height="416"/>

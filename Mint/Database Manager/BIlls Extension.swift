@@ -87,14 +87,14 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ insertBill: prepare failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertBill: prepare failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
 
         let newId     = UUID()
         guard let userId = currentUserIdString else {
             sqlite3_finalize(stmt)
-            print("⚠️ insertBill: no signed-in user")
+            print("insertBill: no signed-in user")
             return nil
         }
         let dateStr   = databaseTimestampString(from: billDate)
@@ -120,10 +120,10 @@ extension DatabaseManager {
         sqlite3_finalize(stmt)
 
         if success {
-            print("✅ Bill inserted: \(name) (\(newId))")
+            print("Bill inserted: \(name) (\(newId))")
             return newId
         } else {
-            print("❌ insertBill failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("insertBill failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
     }
@@ -144,7 +144,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ updateBill: prepare failed")
+            print("updateBill: prepare failed")
             return
         }
 
@@ -162,9 +162,9 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 6, (id.uuidString as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
-            print("✅ Bill updated: \(name)")
+            print("Bill updated: \(name)")
         } else {
-            print("❌ updateBill failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("updateBill failed: \(String(cString: sqlite3_errmsg(db)))")
         }
         sqlite3_finalize(stmt)
     }

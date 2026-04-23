@@ -7,7 +7,7 @@ INSERT INTO users
      is_dark_mode_enabled, is_notification_enabled, created_on)
 VALUES
     ('00000000-0000-0000-0000-000000000001',
-     'Aarav Student', '9999999999', 'aarav.student@example.com', 'INR',
+     'Aarav Student', '9999999999', 'admin@example.com', 'INR',
      0, 0, 0, 0, 1, '2026-01-01T00:00:00');
 
 -- =============================================================

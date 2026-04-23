@@ -51,11 +51,11 @@ final class DatabaseManager {
 
     private func openDatabase() {
         if sqlite3_open(getDBPath(), &db) != SQLITE_OK {
-            print("❌ Error opening DB")
+            print("Error opening DB")
         } else {
             sqlite3_exec(db, "PRAGMA foreign_keys = ON;", nil, nil, nil)
             sqlite3_exec(db, "PRAGMA journal_mode = WAL;", nil, nil, nil)
-            print("✅ DB opened at \(getDBPath())")
+            print("DB opened at \(getDBPath())")
         }
     }
 
@@ -70,8 +70,6 @@ final class DatabaseManager {
                 forKey: Self.defaultAdminSeedVersionKey
             )
         }
-        ensureBufferTransactionsTableExists()
-        ensureOnboardingStatesTableExists()
         ensureDefaultAdminAccountState()
         ensureDefaultAdminSeedDataIsCurrent()
         checkAndResetMonthlyExpenseIfNeeded()
@@ -93,43 +91,43 @@ final class DatabaseManager {
             Self.currentDefaultAdminSeedVersion,
             forKey: Self.defaultAdminSeedVersionKey
         )
-        print("✅ DB reset complete")
+        print("DB reset complete")
     }
 
     func runSQLFile(named fileName: String) {
         guard let path = Bundle.main.path(forResource: fileName, ofType: "sql") else {
-            print("❌ SQL file not found: \(fileName).sql")
+            print("SQL file not found: \(fileName).sql")
             return
         }
         do {
             let sql = try String(contentsOfFile: path, encoding: .utf8)
             if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
-                print("❌ SQL error in \(fileName): \(String(cString: sqlite3_errmsg(db)))")
+                print("SQL error in \(fileName): \(String(cString: sqlite3_errmsg(db)))")
             } else {
-                print("✅ Executed \(fileName).sql")
+                print("Executed \(fileName).sql")
             }
         } catch {
-            print("❌ Could not read \(fileName).sql: \(error)")
+            print("Could not read \(fileName).sql: \(error)")
         }
     }
 
     func executeStatements(_ sql: String) {
         if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
-            print("❌ SQL exec failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("SQL exec failed: \(String(cString: sqlite3_errmsg(db)))")
         }
     }
 
     func execute(_ sql: String, args: [String]) {
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ Prepare failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("Prepare failed: \(String(cString: sqlite3_errmsg(db)))")
             return
         }
         for (i, arg) in args.enumerated() {
             sqlite3_bind_text(stmt, Int32(i + 1), (arg as NSString).utf8String, -1, nil)
         }
         if sqlite3_step(stmt) != SQLITE_DONE {
-            print("❌ Execute failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("Execute failed: \(String(cString: sqlite3_errmsg(db)))")
         }
         sqlite3_finalize(stmt)
     }
@@ -211,54 +209,4 @@ final class DatabaseManager {
         return Self.databaseDateFormatter.date(from: value)
     }
 
-    private func ensureBufferTransactionsTableExists() {
-        executeStatements(
-            """
-            CREATE TABLE IF NOT EXISTS buffer_transactions (
-                id                  TEXT    PRIMARY KEY,
-                user_id             TEXT    NOT NULL,
-                name                TEXT    NOT NULL,
-                amount              REAL    NOT NULL,
-                timestamp           TEXT    NOT NULL,
-                note                TEXT,
-                created_at          TEXT    NOT NULL,
-                source              TEXT    NOT NULL
-                                            CHECK(source IN ('upi','manual','receipt','ecommerce')),
-                type                TEXT    NOT NULL
-                                            CHECK(type IN ('income','expense')),
-                source_name         TEXT,
-                category_id         TEXT,
-                status              INTEGER,
-                expense_type        TEXT,
-                upi_transaction_id  TEXT,
-                upi_merchant_name   TEXT,
-                upi_currency_type   TEXT,
-                FOREIGN KEY (user_id)     REFERENCES users(id)      ON DELETE CASCADE,
-                FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_buffer_txn_user       ON buffer_transactions(user_id);
-            CREATE INDEX IF NOT EXISTS idx_buffer_txn_created_at ON buffer_transactions(created_at DESC);
-            CREATE INDEX IF NOT EXISTS idx_buffer_txn_type       ON buffer_transactions(type);
-            """
-        )
-    }
-
-    private func ensureOnboardingStatesTableExists() {
-        executeStatements(
-            """
-            CREATE TABLE IF NOT EXISTS onboarding_states (
-                user_id         TEXT    NOT NULL,
-                onboarding_key  TEXT    NOT NULL,
-                is_seen         INTEGER NOT NULL DEFAULT 1,
-                created_at      TEXT    NOT NULL,
-                updated_at      TEXT    NOT NULL,
-                PRIMARY KEY (user_id, onboarding_key),
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_onboarding_states_user ON onboarding_states(user_id);
-            """
-        )
-    }
 }

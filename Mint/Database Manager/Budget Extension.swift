@@ -52,7 +52,7 @@ extension DatabaseManager {
 
     func upsertCurrentBudget(allocatedBudget: Double) {
         guard let userId = currentUserIdString else {
-            print("⚠️ upsertCurrentBudget: no signed-in user")
+            print("upsertCurrentBudget: no signed-in user")
             return
         }
 
@@ -76,7 +76,7 @@ extension DatabaseManager {
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("❌ upsertCurrentBudget: prepare failed")
+            print("upsertCurrentBudget: prepare failed")
             return
         }
 
@@ -89,16 +89,16 @@ extension DatabaseManager {
         sqlite3_bind_text(stmt, 6, (createdAt as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
-            print("✅ Budget created for user \(userId)")
+            print("Budget created for user \(userId)")
         } else {
-            print("❌ upsertCurrentBudget failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("upsertCurrentBudget failed: \(String(cString: sqlite3_errmsg(db)))")
         }
         sqlite3_finalize(stmt)
     }
 
     func updateBudgetSettings(allocatedBudget: Double, dailyLimit: Double? = nil) {
         guard let budget = fetchCurrentBudget() else {
-            print("⚠️ updateBudgetSettings: no budget found")
+            print("updateBudgetSettings: no budget found")
             return
         }
 
@@ -115,7 +115,7 @@ extension DatabaseManager {
             "UPDATE budgets SET allocated_budget = ?, daily_limit = ? WHERE id = ?;",
             args: [String(allocatedBudget), String(computed), budget.id.uuidString]
         )
-        print("✅ Budget settings updated: ₹\(allocatedBudget), daily limit ₹\(computed)")
+        print("Budget settings updated: ₹\(allocatedBudget), daily limit ₹\(computed)")
     }
 
     func addToMonthlyExpense(_ amount: Double) {
@@ -169,6 +169,6 @@ extension DatabaseManager {
             "UPDATE budgets SET total_expense = ?, last_reset_date = ? WHERE id = ?;",
             args: [String(monthTotal), resetDateStr, budget.id.uuidString]
         )
-        print("✅ Monthly budget reset: total_expense = ₹\(monthTotal), last_reset_date = \(resetDateStr)")
+        print("Monthly budget reset: total_expense = ₹\(monthTotal), last_reset_date = \(resetDateStr)")
     }
 }
