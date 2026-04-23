@@ -39,9 +39,10 @@ final class DatabaseManager {
     var db: OpaquePointer?
 
     private init() {
-        resetDatabase()
+        let databaseExists = FileManager.default.fileExists(atPath: getDBPath())
         openDatabase()
-        setupDatabase()
+        setupDatabase(forceInitialize: !databaseExists)
+        clearInvalidCurrentSessionIfNeeded()
     }
 
     private func getDBPath() -> String {
@@ -59,8 +60,8 @@ final class DatabaseManager {
         }
     }
 
-    private func setupDatabase() {
-        let isFirstLaunch = !UserDefaults.standard.bool(forKey: "db_initialized")
+    private func setupDatabase(forceInitialize: Bool = false) {
+        let isFirstLaunch = forceInitialize || !UserDefaults.standard.bool(forKey: "db_initialized")
         if isFirstLaunch {
             runSQLFile(named: "schema")
             runSQLFile(named: "seed")
@@ -91,6 +92,7 @@ final class DatabaseManager {
             Self.currentDefaultAdminSeedVersion,
             forKey: Self.defaultAdminSeedVersionKey
         )
+        setCurrentUser(id: nil)
         print("DB reset complete")
     }
 
@@ -142,7 +144,8 @@ final class DatabaseManager {
     }
 
     var hasActiveSession: Bool {
-        currentUserId != nil
+        guard let currentUserId else { return false }
+        return fetchUser(id: currentUserId) != nil
     }
 
     func setCurrentUser(id: UUID?) {
@@ -152,6 +155,12 @@ final class DatabaseManager {
         } else {
             UserDefaults.standard.removeObject(forKey: Self.currentUserIdKey)
         }
+    }
+
+    private func clearInvalidCurrentSessionIfNeeded() {
+        guard let currentUserId, fetchUser(id: currentUserId) == nil else { return }
+        setCurrentUser(id: nil)
+        markSetupComplete(for: currentUserId, isComplete: false)
     }
 
     func markSetupComplete(for userId: UUID, isComplete: Bool) {

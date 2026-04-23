@@ -592,7 +592,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         )
         transactionsCollectionView.collectionViewLayout = generateVerticalLayout()
         transactionsCollectionView.isScrollEnabled = false
-        transactionsCollectionView.backgroundColor = .systemGray4
         transactionsCollectionView.dataSource = self
         transactionsCollectionView.delegate   = self
     }

@@ -20,6 +20,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
     private var currentAverageOverride: Double?
     private var previousMonthAverage: Double?
     private var lastDrawnBounds: CGRect = .zero
+    private var needsGraphRedraw = true
     private var plottedPoints: [CGPoint] = []
     private var plottedPadding = UIEdgeInsets(top: 24, left: 44, bottom: 38, right: 16)
 
@@ -41,6 +42,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         previousMonthAverage = nil
         plottedPoints = []
         lastDrawnBounds = .zero
+        needsGraphRedraw = true
         clearGraph()
         hideTooltip()
     }
@@ -50,11 +52,11 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         graphLayer.frame = LineGraphView.bounds
 
         guard LineGraphView.bounds.width > 0, LineGraphView.bounds.height > 0 else { return }
-        let graphIsEmpty = graphLayer.sublayers.orEmpty.isEmpty && LineGraphView.subviews.isEmpty
-        guard lastDrawnBounds != LineGraphView.bounds || graphIsEmpty else { return }
+        guard needsGraphRedraw || lastDrawnBounds != LineGraphView.bounds else { return }
 
         lastDrawnBounds = LineGraphView.bounds
         drawGraph()
+        needsGraphRedraw = false
     }
 
     func configure(with data: [DailySpending], currentAverage: Double?, previousMonthAverage: Double?) {
@@ -63,9 +65,16 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         self.previousMonthAverage = previousMonthAverage
         applySummaryLabels()
         lastDrawnBounds = .zero
+        needsGraphRedraw = true
         setNeedsLayout()
         if LineGraphView.bounds.width > 0, LineGraphView.bounds.height > 0 {
             layoutIfNeeded()
+            if needsGraphRedraw {
+                graphLayer.frame = LineGraphView.bounds
+                lastDrawnBounds = LineGraphView.bounds
+                drawGraph()
+                needsGraphRedraw = false
+            }
         }
     }
 
@@ -77,8 +86,6 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
     private func drawGraph() {
         clearGraph()
 
-        guard currentData.count > 1 else { return }
-
         let bounds = LineGraphView.bounds
         let width = bounds.width
         let height = bounds.height
@@ -89,17 +96,19 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         guard graphWidth > 0, graphHeight > 0 else { return }
 
         let amounts = currentData.map(\.amount)
-        let maxAmount = max(amounts.max() ?? 0, 1)
         let minAmount = 0.0
-        let valueRange = max(maxAmount - minAmount, 1)
-        let graphAverage = amounts.reduce(0, +) / Double(amounts.count)
+        let graphAverage = amounts.isEmpty ? 0 : amounts.reduce(0, +) / Double(amounts.count)
         let summaryAverage = currentAverageOverride ?? graphAverage
+        let maxAmount = max(max(amounts.max() ?? 0, summaryAverage), currentData.isEmpty ? 1000 : 1)
+        let valueRange = max(maxAmount - minAmount, 1)
 
         applySummaryLabels(average: summaryAverage)
         plottedPadding = padding
 
         func point(at index: Int) -> CGPoint {
-            let xProgress = CGFloat(index) / CGFloat(max(currentData.count - 1, 1))
+            let xProgress = currentData.count == 1
+                ? 0.5
+                : CGFloat(index) / CGFloat(max(currentData.count - 1, 1))
             let yProgress = CGFloat((amounts[index] - minAmount) / valueRange)
             return CGPoint(
                 x: padding.left + (graphWidth * xProgress),
@@ -110,10 +119,19 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         plottedPoints = currentData.indices.map(point)
 
         addGrid(width: width, graphHeight: graphHeight, padding: padding, maxAmount: maxAmount)
-        addSpendingLine(using: point)
+        addAxes(width: width, graphHeight: graphHeight, padding: padding)
+        addXAxisLabels(width: width, height: height, padding: padding, labels: xAxisLabels())
+
+        guard !currentData.isEmpty else {
+            hideTooltip()
+            return
+        }
+
+        if currentData.count > 1 {
+            addSpendingLine(using: point)
+        }
         addAverageLine(width: width, graphHeight: graphHeight, padding: padding, average: summaryAverage, maxAmount: maxAmount)
         addDots(using: point)
-        addXAxisLabels(height: height, padding: padding, pointProvider: point)
         addAverageLabel(width: width, graphHeight: graphHeight, padding: padding, average: summaryAverage, maxAmount: maxAmount)
         updateTooltip(at: plottedPoints.last)
     }
@@ -144,6 +162,20 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
             label.frame.origin = CGPoint(x: 4, y: y - (label.bounds.height / 2))
             LineGraphView.addSubview(label)
         }
+    }
+
+    private func addAxes(width: CGFloat, graphHeight: CGFloat, padding: UIEdgeInsets) {
+        let axisPath = UIBezierPath()
+        axisPath.move(to: CGPoint(x: padding.left, y: padding.top))
+        axisPath.addLine(to: CGPoint(x: padding.left, y: padding.top + graphHeight))
+        axisPath.addLine(to: CGPoint(x: width - padding.right, y: padding.top + graphHeight))
+
+        let layer = CAShapeLayer()
+        layer.path = axisPath.cgPath
+        layer.strokeColor = AppColors.textSecondary.withAlphaComponent(0.45).cgColor
+        layer.fillColor = UIColor.clear.cgColor
+        layer.lineWidth = 1
+        graphLayer.addSublayer(layer)
     }
 
     private func addAverageLine(width: CGFloat, graphHeight: CGFloat, padding: UIEdgeInsets, average: Double, maxAmount: Double) {
@@ -215,16 +247,37 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         }
     }
 
-    private func addXAxisLabels(height: CGFloat, padding: UIEdgeInsets, pointProvider: (Int) -> CGPoint) {
-        for (index, item) in currentData.enumerated() {
+    private func addXAxisLabels(width: CGFloat, height: CGFloat, padding: UIEdgeInsets, labels: [String]) {
+        let graphWidth = width - padding.left - padding.right
+
+        for (index, labelText) in labels.enumerated() {
+            let xProgress = labels.count == 1
+                ? 0.5
+                : CGFloat(index) / CGFloat(labels.count - 1)
             let label = UILabel()
             label.font = .systemFont(ofSize: 9, weight: .medium)
             label.textColor = AppColors.textSecondary
-            label.text = "\(item.day)"
+            label.text = labelText
             label.sizeToFit()
-            label.center = CGPoint(x: pointProvider(index).x, y: height - (padding.bottom / 2))
+            label.center = CGPoint(
+                x: padding.left + (graphWidth * xProgress),
+                y: height - (padding.bottom / 2)
+            )
             LineGraphView.addSubview(label)
         }
+    }
+
+    private func xAxisLabels() -> [String] {
+        if !currentData.isEmpty {
+            return currentData.map { "\($0.day)" }
+        }
+
+        let calendar = Calendar.current
+        let daysInMonth = calendar.range(of: .day, in: .month, for: Date())?.count ?? 30
+        var seenDays = Set<Int>()
+        return [1, 7, 14, 21, daysInMonth]
+            .filter { $0 <= daysInMonth && seenDays.insert($0).inserted }
+            .map(String.init)
     }
 
     private func addAverageLabel(width: CGFloat, graphHeight: CGFloat, padding: UIEdgeInsets, average: Double, maxAmount: Double) {
@@ -366,8 +419,4 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
     private func hideTooltip() {
         tooltipView.isHidden = true
     }
-}
-
-private extension Optional where Wrapped == [CALayer] {
-    var orEmpty: [CALayer] { self ?? [] }
 }
