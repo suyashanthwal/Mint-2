@@ -5942,7 +5942,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="TNX-Ru-TAe">
-                                                                <rect key="frame" x="0.0" y="52" width="353" height="340"/>
+                                                                <rect key="frame" x="0.0" y="52" width="353" height="328"/>
                                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="YYu-Zc-Gfz">
                                                                     <size key="itemSize" width="128" height="128"/>
@@ -5972,9 +5972,9 @@ spend on?</string>
                                                             <constraint firstAttribute="trailing" secondItem="TNX-Ru-TAe" secondAttribute="trailing" id="5MK-i5-WLg"/>
                                                             <constraint firstItem="TNX-Ru-TAe" firstAttribute="top" secondItem="E9l-iA-ohu" secondAttribute="bottom" constant="8" symbolic="YES" id="FK5-aq-uiT"/>
                                                             <constraint firstItem="E9l-iA-ohu" firstAttribute="leading" secondItem="acP-4P-M9Z" secondAttribute="leading" id="G8g-mv-YOp"/>
+                                                            <constraint firstAttribute="bottom" secondItem="TNX-Ru-TAe" secondAttribute="bottom" constant="20" symbolic="YES" id="PlU-fF-0Yn"/>
                                                             <constraint firstAttribute="trailing" secondItem="E9l-iA-ohu" secondAttribute="trailing" id="QFO-aR-rbq"/>
                                                             <constraint firstItem="TNX-Ru-TAe" firstAttribute="leading" secondItem="acP-4P-M9Z" secondAttribute="leading" id="aw2-jE-SVg"/>
-                                                            <constraint firstAttribute="bottom" secondItem="TNX-Ru-TAe" secondAttribute="bottom" constant="8" id="i1F-C7-I3i"/>
                                                             <constraint firstAttribute="height" constant="400" id="ro4-le-V8p"/>
                                                         </constraints>
                                                         <userDefinedRuntimeAttributes>
@@ -6081,8 +6081,11 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="9J2-W3-LnC">
-                                                                <rect key="frame" x="0.0" y="52" width="353" height="340"/>
+                                                                <rect key="frame" x="0.0" y="52" width="353" height="200"/>
                                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="200" id="SJv-Io-3uc"/>
+                                                                </constraints>
                                                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="K7Z-9b-FXh">
                                                                     <size key="itemSize" width="128" height="128"/>
                                                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -6105,6 +6108,31 @@ spend on?</string>
                                                                     </userDefinedRuntimeAttribute>
                                                                 </userDefinedRuntimeAttributes>
                                                             </collectionView>
+                                                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="2M8-a2-tOI">
+                                                                <rect key="frame" x="0.0" y="252" width="353" height="148"/>
+                                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="qlm-fT-sIz">
+                                                                    <size key="itemSize" width="128" height="128"/>
+                                                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                                </collectionViewFlowLayout>
+                                                                <cells>
+                                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="2i4-Rt-9wV">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                                        <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="HLY-gq-gW1">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
+                                                                            <autoresizingMask key="autoresizingMask"/>
+                                                                        </collectionViewCellContentView>
+                                                                    </collectionViewCell>
+                                                                </cells>
+                                                                <userDefinedRuntimeAttributes>
+                                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                        <integer key="value" value="22"/>
+                                                                    </userDefinedRuntimeAttribute>
+                                                                </userDefinedRuntimeAttributes>
+                                                            </collectionView>
                                                         </subviews>
                                                         <constraints>
                                                             <constraint firstItem="1Ce-W9-Rjf" firstAttribute="top" secondItem="huw-PT-UAy" secondAttribute="top" constant="4" id="1G5-kx-xKE"/>
@@ -6112,8 +6140,11 @@ spend on?</string>
                                                             <constraint firstAttribute="height" constant="400" id="Ab2-2m-860"/>
                                                             <constraint firstItem="9J2-W3-LnC" firstAttribute="top" secondItem="1Ce-W9-Rjf" secondAttribute="bottom" constant="8" symbolic="YES" id="B2A-Ds-rrJ"/>
                                                             <constraint firstItem="1Ce-W9-Rjf" firstAttribute="leading" secondItem="huw-PT-UAy" secondAttribute="leading" id="N1W-1E-dai"/>
-                                                            <constraint firstAttribute="bottom" secondItem="9J2-W3-LnC" secondAttribute="bottom" constant="8" id="eve-0O-0PW"/>
+                                                            <constraint firstItem="2M8-a2-tOI" firstAttribute="top" secondItem="9J2-W3-LnC" secondAttribute="bottom" id="STe-vn-mnl"/>
+                                                            <constraint firstItem="2M8-a2-tOI" firstAttribute="leading" secondItem="huw-PT-UAy" secondAttribute="leading" id="TNU-AY-K2V"/>
                                                             <constraint firstAttribute="trailing" secondItem="9J2-W3-LnC" secondAttribute="trailing" id="t2F-Ta-Zaf"/>
+                                                            <constraint firstAttribute="bottom" secondItem="2M8-a2-tOI" secondAttribute="bottom" id="x2q-36-cAb"/>
+                                                            <constraint firstAttribute="trailing" secondItem="2M8-a2-tOI" secondAttribute="trailing" id="xYM-wX-rq3"/>
                                                             <constraint firstAttribute="trailing" secondItem="1Ce-W9-Rjf" secondAttribute="trailing" id="yJv-xy-gf0"/>
                                                         </constraints>
                                                         <userDefinedRuntimeAttributes>
@@ -6220,7 +6251,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="idA-nt-sD4">
-                                                                <rect key="frame" x="0.0" y="52" width="353" height="380"/>
+                                                                <rect key="frame" x="0.0" y="52" width="353" height="368"/>
                                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="9dp-by-quk">
                                                                     <size key="itemSize" width="128" height="128"/>
@@ -6252,7 +6283,7 @@ spend on?</string>
                                                             <constraint firstItem="idA-nt-sD4" firstAttribute="top" secondItem="jd2-Mx-wz0" secondAttribute="bottom" constant="8" symbolic="YES" id="PiT-LD-q1X"/>
                                                             <constraint firstAttribute="trailing" secondItem="jd2-Mx-wz0" secondAttribute="trailing" id="QrW-tU-vmZ"/>
                                                             <constraint firstItem="jd2-Mx-wz0" firstAttribute="leading" secondItem="zfb-XD-xYc" secondAttribute="leading" id="WqD-8l-sVF"/>
-                                                            <constraint firstAttribute="bottom" secondItem="idA-nt-sD4" secondAttribute="bottom" constant="8" id="bLV-ib-mlG"/>
+                                                            <constraint firstAttribute="bottom" secondItem="idA-nt-sD4" secondAttribute="bottom" constant="20" symbolic="YES" id="bfy-az-Zje"/>
                                                             <constraint firstAttribute="trailing" secondItem="idA-nt-sD4" secondAttribute="trailing" id="kfS-7W-eIn"/>
                                                         </constraints>
                                                         <userDefinedRuntimeAttributes>
@@ -6302,6 +6333,7 @@ spend on?</string>
                         <outlet property="MainScrollView" destination="2OI-PA-sM9" id="EjZ-TL-bN2"/>
                         <outlet property="SubsAndBillsCard" destination="idA-nt-sD4" id="8fv-jb-cdd"/>
                         <outlet property="SummaryCard" destination="TNX-Ru-TAe" id="hRF-FH-9l2"/>
+                        <outlet property="SummaryDataEntry" destination="2M8-a2-tOI" id="mUy-7b-vXu"/>
                         <outlet property="categoryBreakdownView" destination="huw-PT-UAy" id="9E1-d5-7ux"/>
                         <outlet property="categoryInsightLabel" destination="BfX-FN-MYJ" id="ndS-9f-gwt"/>
                         <outlet property="categoryInsightView" destination="eV1-7Y-7oY" id="imr-EU-Oqh"/>
@@ -6515,10 +6547,10 @@ spend on?</string>
                                 <rect key="frame" x="0.0" y="172" width="393" height="563"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="swG-2U-WGx">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="976"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="988"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HxM-oC-uEZ">
-                                                <rect key="frame" x="0.0" y="0.0" width="393" height="328"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="393" height="340"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PBE-hd-YLQ">
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="40"/>
@@ -6572,7 +6604,7 @@ spend on?</string>
                                                         </constraints>
                                                     </view>
                                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="U0C-85-ktK">
-                                                        <rect key="frame" x="0.0" y="40" width="393" height="288"/>
+                                                        <rect key="frame" x="0.0" y="40" width="393" height="300"/>
                                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="pVa-9o-UDz">
                                                             <size key="itemSize" width="128" height="128"/>
@@ -6602,7 +6634,7 @@ spend on?</string>
                                                     <constraint firstItem="U0C-85-ktK" firstAttribute="top" secondItem="PBE-hd-YLQ" secondAttribute="bottom" id="LQY-jA-VNQ"/>
                                                     <constraint firstItem="PBE-hd-YLQ" firstAttribute="leading" secondItem="HxM-oC-uEZ" secondAttribute="leading" id="ZLP-IS-xek"/>
                                                     <constraint firstItem="U0C-85-ktK" firstAttribute="top" secondItem="PBE-hd-YLQ" secondAttribute="bottom" id="jBv-Dq-JYd"/>
-                                                    <constraint firstAttribute="height" constant="328" id="ngH-lh-g0b"/>
+                                                    <constraint firstAttribute="height" constant="340" id="ngH-lh-g0b"/>
                                                     <constraint firstItem="PBE-hd-YLQ" firstAttribute="top" secondItem="HxM-oC-uEZ" secondAttribute="top" id="qHx-Xs-O7H"/>
                                                     <constraint firstAttribute="bottom" secondItem="U0C-85-ktK" secondAttribute="bottom" id="qwJ-AX-LRp"/>
                                                     <constraint firstAttribute="trailing" secondItem="PBE-hd-YLQ" secondAttribute="trailing" id="uA3-pu-8ZL"/>
@@ -6610,7 +6642,7 @@ spend on?</string>
                                                 </constraints>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rsf-jD-mA8" userLabel="UpcomingBillsView">
-                                                <rect key="frame" x="0.0" y="352" width="393" height="300"/>
+                                                <rect key="frame" x="0.0" y="364" width="393" height="300"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current Bill" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E5Z-2R-1Xf">
                                                         <rect key="frame" x="16" y="16" width="94" height="24"/>
@@ -6662,7 +6694,7 @@ spend on?</string>
                                                 </constraints>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="69R-yf-IoH" userLabel="ActiveSusbscriptionView">
-                                                <rect key="frame" x="0.0" y="676" width="393" height="300"/>
+                                                <rect key="frame" x="0.0" y="688" width="393" height="300"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Active Subscriptions" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AeL-6S-qYF">
                                                         <rect key="frame" x="16" y="16" width="173" height="24"/>
@@ -8782,22 +8814,22 @@ spend on?</string>
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="separatorColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray4Color">
-            <color red="0.81960784313725488" green="0.81960784313725488" blue="0.83921568627450982" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.81960784310000001" green="0.81960784310000001" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGray6Color">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
