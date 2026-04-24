@@ -74,6 +74,7 @@ class ReportsViewController: UIViewController {
     @IBOutlet weak var summaryInsightVIew: UIView!
     @IBOutlet weak var MainScrollView: UIScrollView!
     @IBOutlet weak var SummaryCard: UICollectionView!
+    @IBOutlet weak var SummaryDataEntry: UICollectionView!
     @IBOutlet weak var CategoryBreakdown: UICollectionView!
     @IBOutlet weak var SubsAndBillsCard: UICollectionView?
 
@@ -209,6 +210,7 @@ class ReportsViewController: UIViewController {
         view.backgroundColor = AppColors.background
         MainScrollView.backgroundColor = AppColors.background
         SummaryCard.backgroundColor = AppColors.card
+        SummaryDataEntry.backgroundColor = AppColors.card
         CategoryBreakdown.backgroundColor = AppColors.card
         SubsAndBillsCard?.backgroundColor = AppColors.card
 
@@ -327,6 +329,7 @@ class ReportsViewController: UIViewController {
         loadInsights()
 
         SummaryCard.reloadData()
+        SummaryDataEntry.reloadData()
         CategoryBreakdown.reloadData()
         SubsAndBillsCard?.reloadData()
     }
@@ -398,10 +401,16 @@ class ReportsViewController: UIViewController {
             return CategorySpending(
                 name: category.name,
                 color: UIColor(hex: category.color),
+                amount: spent,
                 percent: percent
             )
         }
-        .sorted { $0.percent > $1.percent }
+        .sorted { lhs, rhs in
+            if lhs.amount == rhs.amount {
+                return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+            }
+            return lhs.amount > rhs.amount
+        }
 
         if categoryData.count > 4 {
             categoryData = Array(categoryData.prefix(4))
@@ -476,6 +485,20 @@ class ReportsViewController: UIViewController {
         )
         SummaryCard.collectionViewLayout = makeLayout(for: SummaryCard)
         SummaryCard.showsHorizontalScrollIndicator = false
+
+        SummaryDataEntry.dataSource = self
+        SummaryDataEntry.delegate = self
+        SummaryDataEntry.register(
+            UINib(nibName: "CategoryCardNameCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "CategoryCardName"
+        )
+        if let layout = SummaryDataEntry.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.scrollDirection = .vertical
+            layout.minimumLineSpacing = 4
+            layout.minimumInteritemSpacing = 0
+            layout.estimatedItemSize = .zero
+        }
+        SummaryDataEntry.showsVerticalScrollIndicator = false
 
         CategoryBreakdown.dataSource = self
         CategoryBreakdown.delegate = self
@@ -847,10 +870,14 @@ class ReportsViewController: UIViewController {
     }
 }
 
-extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        1
+        if collectionView == SummaryDataEntry {
+            return categoryData.count
+        }
+
+        return 1
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -861,6 +888,12 @@ extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDel
                 currentAverage: dailyAverage,
                 previousMonthAverage: previousMonthAverage
             )
+            return cell
+        }
+
+        if collectionView == SummaryDataEntry {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryCardName", for: indexPath) as! CategoryCardNameCollectionViewCell
+            cell.configure(with: categoryData[indexPath.item])
             return cell
         }
 
@@ -879,5 +912,16 @@ extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDel
         }
 
         return UICollectionViewCell()
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        guard collectionView == SummaryDataEntry else {
+            return collectionView.bounds.size
+        }
+
+        let visibleRows = max(min(categoryData.count, 4), 1)
+        let spacing: CGFloat = 4 * CGFloat(max(visibleRows - 1, 0))
+        let height = floor((collectionView.bounds.height - spacing) / CGFloat(visibleRows))
+        return CGSize(width: collectionView.bounds.width, height: max(height, 28))
     }
 }
