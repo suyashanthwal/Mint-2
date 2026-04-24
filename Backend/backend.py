@@ -437,200 +437,13 @@ def maybe_start_model_warmup() -> None:
     executor.submit(warm_model_once)
 
 
-def demo_payload() -> dict[str, Any]:
+def service_status_payload() -> dict[str, Any]:
     return {
-        "summary": {
-            "month_name": "April",
-            "year": 2026,
-            "days_elapsed": 8,
-            "days_in_month": 30,
-            "total_expense": 3390,
-            "total_income": 28500,
-            "daily_average": 423.75,
-            "previous_month_average": 57.42,
-            "transaction_count": 12,
-            "highest_spend_day": 6,
-            "highest_spend_day_amount": 840,
-            "budget": 24000,
-            "remaining_budget": 20610,
-        },
-        "category": {
-            "total_expense": 3390,
-            "category_count": 4,
-            "top_categories": [
-                {"name": "Food", "amount": 1180, "share_percent": 35},
-                {"name": "Transport", "amount": 760, "share_percent": 22},
-            ],
-        },
-        "subs_and_bills": {
-            "month_name": "April",
-            "unpaid_bills_count": 2,
-            "upcoming_bills_total": 828,
-            "next_bill_name": "Electricity Bill",
-            "next_bill_amount": 540,
-            "next_bill_due_date": "2026-04-11",
-            "days_until_next_bill": 3,
-            "active_subscription_count": 4,
-            "monthly_subscription_total": 3672,
-        },
-        "fields": list(ALLOWED_FIELDS),
-        "force_refresh": False,
+        "service": "mint-insights-backend",
+        "status": "ok",
+        "model": MODEL,
+        "public_base_url": PUBLIC_BASE_URL or None,
     }
-
-
-def debug_page_html() -> str:
-    sample_json = json.dumps(demo_payload(), indent=2)
-    return f"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mint Insights Debug</title>
-  <style>
-    :root {{
-      color-scheme: light;
-      --bg: #f5f6f2;
-      --card: #ffffff;
-      --ink: #1f2a1f;
-      --muted: #5f6d5f;
-      --brand: #496749;
-      --border: #d7ddd4;
-    }}
-    * {{ box-sizing: border-box; }}
-    body {{
-      margin: 0;
-      padding: 24px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-    }}
-    .wrap {{
-      max-width: 900px;
-      margin: 0 auto;
-      display: grid;
-      gap: 16px;
-    }}
-    .card {{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
-    }}
-    h1 {{ margin: 0 0 8px; font-size: 28px; }}
-    p {{ margin: 0; color: var(--muted); line-height: 1.5; }}
-    textarea, pre {{
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      padding: 14px;
-      background: #fbfcfa;
-      color: var(--ink);
-      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
-      overflow: auto;
-    }}
-    textarea {{ min-height: 320px; resize: vertical; }}
-    pre {{ min-height: 200px; white-space: pre-wrap; word-break: break-word; }}
-    .row {{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }}
-    button {{
-      appearance: none;
-      border: 0;
-      border-radius: 999px;
-      padding: 12px 18px;
-      font-weight: 600;
-      background: var(--brand);
-      color: white;
-    }}
-    button.secondary {{
-      background: #e6ece3;
-      color: var(--ink);
-    }}
-    .status {{
-      font-size: 14px;
-      color: var(--muted);
-    }}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Mint Insights Debug</h1>
-      <p>Use this page to test the backend directly through ngrok before wiring it into the app.</p>
-    </div>
-
-    <div class="card">
-      <div class="row">
-        <button id="healthBtn" class="secondary">Check Health</button>
-        <button id="runBtn">Run Sample Insight</button>
-        <button id="customBtn" class="secondary">Run Custom Payload</button>
-        <span id="status" class="status">Ready.</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h1 style="font-size:20px; margin-bottom:12px;">Payload</h1>
-      <textarea id="payload">{sample_json}</textarea>
-    </div>
-
-    <div class="card">
-      <h1 style="font-size:20px; margin-bottom:12px;">Response</h1>
-      <pre id="response">No request yet.</pre>
-    </div>
-  </div>
-
-  <script>
-    const payloadBox = document.getElementById('payload');
-    const responseBox = document.getElementById('response');
-    const statusBox = document.getElementById('status');
-
-    async function runRequest(url, options) {{
-      const started = performance.now();
-      statusBox.textContent = 'Running...';
-      responseBox.textContent = '';
-      try {{
-        const response = await fetch(url, options);
-        const text = await response.text();
-        const elapsed = Math.round(performance.now() - started);
-        statusBox.textContent = `${{response.status}} in ${{elapsed}}ms`;
-        try {{
-          const json = JSON.parse(text);
-          responseBox.textContent = JSON.stringify(json, null, 2);
-        }} catch {{
-          responseBox.textContent = text;
-        }}
-      }} catch (error) {{
-        statusBox.textContent = 'Request failed';
-        responseBox.textContent = String(error);
-      }}
-    }}
-
-    document.getElementById('healthBtn').addEventListener('click', () => {{
-      runRequest('/health', {{ method: 'GET' }});
-    }});
-
-    document.getElementById('runBtn').addEventListener('click', () => {{
-      payloadBox.value = {json.dumps(sample_json)};
-      runRequest('/insights', {{
-        method: 'POST',
-        headers: {{ 'Content-Type': 'application/json' }},
-        body: payloadBox.value,
-      }});
-    }});
-
-    document.getElementById('customBtn').addEventListener('click', () => {{
-      runRequest('/insights', {{
-        method: 'POST',
-        headers: {{ 'Content-Type': 'application/json' }},
-        body: payloadBox.value,
-      }});
-    }});
-  </script>
-</body>
-</html>"""
 
 
 @app.before_request
@@ -669,7 +482,7 @@ def after_request(response: Response) -> Response:
 
 @app.route("/", methods=["GET"])
 def debug_home() -> Response:
-    return html_response(debug_page_html())
+    return json_response(service_status_payload())
 
 
 @app.route("/insights", methods=["POST"])
@@ -695,8 +508,7 @@ def insights() -> Response:
 @app.route("/health", methods=["GET"])
 def health() -> Response:
     health_payload = {
-        "status": "ok",
-        "model": MODEL,
+        **service_status_payload(),
         "ollama_url": OLLAMA_URL,
         "cache_ttl_seconds": CACHE_TTL_SECONDS,
         "cache_size": len(cache),

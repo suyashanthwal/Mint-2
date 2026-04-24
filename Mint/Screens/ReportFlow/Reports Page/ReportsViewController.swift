@@ -78,7 +78,16 @@ class ReportsViewController: UIViewController {
     @IBOutlet weak var SubsAndBillsCard: UICollectionView?
 
     private let db = DatabaseManager.shared
-    private let insightsBaseURL = URL(string: "https://undebated-nonabstractedly-annalee.ngrok-free.dev")
+    private static let insightsBaseURLDefaultsKey = "mint_insights_base_url"
+    private var insightsBaseURL: URL? {
+        if let override = UserDefaults.standard.string(forKey: Self.insightsBaseURLDefaultsKey),
+           let url = sanitizedInsightsBaseURL(from: override) {
+            return url
+        }
+
+        let configuredBaseURL = Bundle.main.object(forInfoDictionaryKey: "MintInsightsBaseURL") as? String
+        return configuredBaseURL.flatMap(sanitizedInsightsBaseURL(from:))
+    }
     private var insightsURL: URL? {
         insightsBaseURL?.appendingPathComponent("insights")
     }
@@ -829,6 +838,12 @@ class ReportsViewController: UIViewController {
         if let signatureKey = insightsCacheSignatureKey {
             UserDefaults.standard.removeObject(forKey: signatureKey)
         }
+    }
+
+    private func sanitizedInsightsBaseURL(from rawValue: String) -> URL? {
+        let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedValue.isEmpty else { return nil }
+        return URL(string: trimmedValue)?.standardized
     }
 }
 

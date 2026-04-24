@@ -11,6 +11,8 @@
 		<string>amazonpay</string>
 		<string>upi</string>
 	</array>
+	<key>MintInsightsBaseURL</key>
+	<string>https://undebated-nonabstractedly-annalee.ngrok-free.dev</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

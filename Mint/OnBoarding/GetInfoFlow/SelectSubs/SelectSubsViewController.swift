@@ -20,21 +20,21 @@ class SelectSubsViewController: UIViewController {
     private var selectedViews: Set<Int> = []
     private let paymentTemplates: [PaymentTemplate] = [
         .init(name: "Mobile Recharge", amount: 899, icon: "phone.bubble.fill",
-              categoryName: "Transport", duration: .monthly, note: "Starter setup"),
+              categoryName: "Transport", duration: .monthly, note: nil),
         .init(name: "Netflix", amount: 699, icon: "movieclapper.fill",
-              categoryName: "Entertainment", duration: .monthly, note: "Starter setup"),
+              categoryName: "Entertainment", duration: .monthly, note: nil),
         .init(name: "Apple Music", amount: 89, icon: "music.note",
-              categoryName: "Entertainment", duration: .monthly, note: "Starter setup"),
+              categoryName: "Entertainment", duration: .monthly, note: nil),
         .init(name: "Spotify", amount: 119, icon: "music.note",
-              categoryName: "Entertainment", duration: .monthly, note: "Starter setup"),
+              categoryName: "Entertainment", duration: .monthly, note: nil),
         .init(name: "YouTube Premium", amount: 149, icon: "arrowtriangle.forward.fill",
-              categoryName: "Entertainment", duration: .monthly, note: "Starter setup"),
+              categoryName: "Entertainment", duration: .monthly, note: nil),
         .init(name: "Wifi", amount: 799, icon: "wifi.circle.fill",
-              categoryName: "Others", duration: .monthly, note: "Starter setup"),
+              categoryName: "Others", duration: .monthly, note: nil),
         .init(name: "Gym Membership", amount: 1200, icon: "dumbbell.fill",
-              categoryName: "Health & Fitness", duration: .monthly, note: "Starter setup"),
+              categoryName: "Health & Fitness", duration: .monthly, note: nil),
         .init(name: "Cloud", amount: 75, icon: "cloud.fill",
-              categoryName: "Others", duration: .monthly, note: "Starter setup"),
+              categoryName: "Others", duration: .monthly, note: nil),
     ]
 
     override func viewDidLoad() {
