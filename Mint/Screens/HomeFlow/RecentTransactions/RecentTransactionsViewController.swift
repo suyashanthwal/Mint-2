@@ -69,6 +69,9 @@ final class RecentTransactionsViewController: UIViewController {
     private var allTransactions: [Transaction] = []
     private var allCategories: [Category] = []
     private var displayedTransactions: [Transaction] = []
+    private var isShowingPlaceholder: Bool {
+        displayedTransactions.isEmpty
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,7 +107,6 @@ final class RecentTransactionsViewController: UIViewController {
         dateButton.backgroundColor = AppColors.brandLight
         amountButton.backgroundColor = AppColors.brandLight
         paymentButton.backgroundColor = AppColors.brandLight
-        collectionView.backgroundColor = .systemGray4
         MonthCard.backgroundColor = AppColors.card
         
         
@@ -115,8 +117,12 @@ final class RecentTransactionsViewController: UIViewController {
         collectionView.dataSource = self
 
         collectionView.register(
-            UINib(nibName: "TransactionCellCollectionViewCell", bundle: nil),
-            forCellWithReuseIdentifier: "TransactionCell"
+            UINib(nibName: "RecentTransactionsCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "RecentTransactionCell"
+        )
+        collectionView.register(
+            UINib(nibName: PlaceHolderCollectionViewCell.nibName, bundle: nil),
+            forCellWithReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier
         )
 
         let layout = UICollectionViewFlowLayout()
@@ -126,7 +132,8 @@ final class RecentTransactionsViewController: UIViewController {
         collectionView.collectionViewLayout = layout
         collectionView.layer.masksToBounds          = true
         collectionView.showsVerticalScrollIndicator = true
-        collectionView.alwaysBounceVertical         = true
+        collectionView.alwaysBounceVertical         = false
+        collectionView.bounces                      = false
         collectionView.contentInset                 = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
 
@@ -264,11 +271,6 @@ final class RecentTransactionsViewController: UIViewController {
         totalAmountLabel.text = AppFormatters.currency(monthlyTotal)
     }
 
-    private func category(for transaction: Transaction) -> Category? {
-        guard let id = transaction.categoryId else { return nil }
-        return allCategories.first { $0.id == id }
-    }
-
     private func presentTransactionActions(
         for transaction: Transaction,
         sourceView: UIView?,
@@ -330,20 +332,35 @@ extension RecentTransactionsViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView,
                         numberOfItemsInSection section: Int) -> Int {
-        displayedTransactions.count
+        max(displayedTransactions.count, 1)
     }
 
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if isShowingPlaceholder {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier,
+                for: indexPath
+            ) as? PlaceHolderCollectionViewCell else {
+                return UICollectionViewCell()
+            }
+
+            cell.configure(
+                message: "Your recent transactions will be visible here.",
+                sizeStyle: .fill
+            )
+            return cell
+        }
+
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: "TransactionCell",
+            withReuseIdentifier: "RecentTransactionCell",
             for: indexPath
-        ) as? TransactionCell else {
+        ) as? RecentTransactionsCollectionViewCell else {
             return UICollectionViewCell()
         }
 
         let transaction = displayedTransactions[indexPath.item]
-        cell.configure(with: transaction, category: category(for: transaction))
+        cell.configureCell(with: transaction, categories: allCategories)
         return cell
     }
 }
@@ -351,6 +368,7 @@ extension RecentTransactionsViewController: UICollectionViewDataSource {
 extension RecentTransactionsViewController: UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard !isShowingPlaceholder else { return }
         let transaction = displayedTransactions[indexPath.item]
         let cell = collectionView.cellForItem(at: indexPath)
         let sourceRect = cell?.bounds ?? CGRect(x: collectionView.bounds.midX, y: collectionView.bounds.midY, width: 1, height: 1)
@@ -360,6 +378,10 @@ extension RecentTransactionsViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: collectionView.bounds.width, height: 70)
+        if isShowingPlaceholder {
+            return CGSize(width: collectionView.bounds.width, height: collectionView.bounds.height)
+        }
+
+        return CGSize(width: collectionView.bounds.width, height: 60)
     }
 }

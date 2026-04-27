@@ -5,6 +5,7 @@ class RecentTransactionsCollectionViewCell: UICollectionViewCell {
 
     @IBOutlet weak var BillDate: UILabel!
     @IBOutlet weak var BillIcon: UIImageView!
+    @IBOutlet weak var BillIconBackgroundView: UIView!
     @IBOutlet weak var BillName: UILabel!
     @IBOutlet weak var BillAmount: UILabel!
 
@@ -15,9 +16,13 @@ class RecentTransactionsCollectionViewCell: UICollectionViewCell {
         BillDate.textColor = AppColors.textSecondary
         contentView.backgroundColor = AppColors.card
 
-        BillIcon.tintColor = AppColors.brand
         BillIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(
-            paletteColors: [AppColors.brand]
+            pointSize: 18,
+            weight: .medium
+        )
+        applyIconAppearance(
+            tint: AppColors.brand,
+            background: AppColors.brandLight.withAlphaComponent(0.35)
         )
     }
 
@@ -29,9 +34,14 @@ class RecentTransactionsCollectionViewCell: UICollectionViewCell {
         BillDate.text = formatter.string(from: bill.billDate)
 
         BillAmount.text = bill.amount.formatted(.currency(code: "INR"))
+        BillAmount.textColor = AppColors.textPrimary
 
         BillIcon.image = UIImage(systemName: bill.icon)?
             .withRenderingMode(.alwaysTemplate)
+        applyIconAppearance(
+            tint: AppColors.brand,
+            background: AppColors.brandLight.withAlphaComponent(0.35)
+        )
     }
 
     func configureCell(with transaction: Transaction, categories: [Category]) {
@@ -45,21 +55,37 @@ class RecentTransactionsCollectionViewCell: UICollectionViewCell {
             BillAmount.textColor = AppColors.brand
             BillIcon.image = UIImage(systemName: "indianrupeesign.circle.fill")?
                 .withRenderingMode(.alwaysTemplate)
-            BillIcon.tintColor = AppColors.brand
+            applyIconAppearance(
+                tint: AppColors.brand,
+                background: AppColors.brandLight.withAlphaComponent(0.35)
+            )
         } else {
             BillAmount.text = "- \(amount)"
             BillAmount.textColor = AppColors.error
 
             if let id = transaction.categoryId,
                let category = categories.first(where: { $0.id == id }) {
+                let categoryColor = UIColor(hex: category.color)
                 BillIcon.image = UIImage(systemName: category.icon)?
                     .withRenderingMode(.alwaysTemplate)
+                applyIconAppearance(
+                    tint: categoryColor,
+                    background: categoryColor.withAlphaComponent(0.15)
+                )
             } else {
                 BillIcon.image = UIImage(systemName: "questionmark")?
                     .withRenderingMode(.alwaysTemplate)
+                applyIconAppearance(
+                    tint: AppColors.brand,
+                    background: AppColors.brandLight.withAlphaComponent(0.35)
+                )
             }
-            BillIcon.tintColor = AppColors.brand
         }
+    }
+
+    private func applyIconAppearance(tint: UIColor, background: UIColor) {
+        BillIcon.tintColor = tint
+        BillIconBackgroundView.backgroundColor = background
     }
 
     private func timestampText(for date: Date) -> String {

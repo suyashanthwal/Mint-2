@@ -6,7 +6,13 @@ class GoalsViewController: UIViewController {
     private enum LayoutMetrics {
         static let activeGoalHeight: CGFloat = 320
         static let reachedGoalHeight: CGFloat = 72
+        static let placeholderGoalHeight: CGFloat = 88
         static let sectionSpacing: CGFloat = 16
+    }
+
+    private enum EmptyStateMessage {
+        static let activeGoals = "Your active goals will be visible here."
+        static let reachedGoals = "Your reached goals will be visible here."
     }
 
     @IBOutlet weak var scrollView: UIScrollView!
@@ -99,8 +105,16 @@ class GoalsViewController: UIViewController {
 
     private func registerCells() {
         ActiveGoalsCollectionView.register(
+            UINib(nibName: PlaceHolderCollectionViewCell.nibName, bundle: nil),
+            forCellWithReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier
+        )
+        ActiveGoalsCollectionView.register(
             UINib(nibName: "OngoingGoalCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "OngoingGoalCollectionViewCell"
+        )
+        ReachedGoalsCollectionView.register(
+            UINib(nibName: PlaceHolderCollectionViewCell.nibName, bundle: nil),
+            forCellWithReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier
         )
         ReachedGoalsCollectionView.register(
             UINib(nibName: "ReachedGoalsCollectionViewCell", bundle: nil),
@@ -143,7 +157,10 @@ class GoalsViewController: UIViewController {
 
     private func makeReachedLayout(width: CGFloat) -> UICollectionViewFlowLayout {
         let layout                   = UICollectionViewFlowLayout()
-        layout.itemSize              = CGSize(width: max(width, 0), height: LayoutMetrics.reachedGoalHeight)
+        layout.itemSize              = CGSize(
+            width: max(width, 0),
+            height: completedGoals.isEmpty ? LayoutMetrics.placeholderGoalHeight : LayoutMetrics.reachedGoalHeight
+        )
         layout.minimumLineSpacing    = 1
         layout.scrollDirection       = .vertical
         return layout
@@ -202,6 +219,39 @@ class GoalsViewController: UIViewController {
 
     @objc private func handleGoalDataChange() {
         reloadGoals()
+    }
+
+    private func isShowingPlaceholder(in collectionView: UICollectionView) -> Bool {
+        if collectionView === ActiveGoalsCollectionView {
+            return ongoingGoals.isEmpty
+        } else {
+            return completedGoals.isEmpty
+        }
+    }
+
+    private func placeholderMessage(for collectionView: UICollectionView) -> String {
+        if collectionView === ActiveGoalsCollectionView {
+            return EmptyStateMessage.activeGoals
+        } else {
+            return EmptyStateMessage.reachedGoals
+        }
+    }
+
+    private func dequeuePlaceholderCell(
+        in collectionView: UICollectionView,
+        for indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier,
+            for: indexPath
+        ) as! PlaceHolderCollectionViewCell
+        let sizeStyle: PlaceHolderCollectionViewCell.SizeStyle =
+            collectionView === ActiveGoalsCollectionView ? .fill : .compact
+        cell.configure(
+            message: placeholderMessage(for: collectionView),
+            sizeStyle: sizeStyle
+        )
+        return cell
     }
 
     private func formatCurrency(_ amount: Double) -> String {
@@ -310,14 +360,18 @@ extension GoalsViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         numberOfItemsInSection section: Int) -> Int {
         if collectionView === ActiveGoalsCollectionView {
-            return ongoingGoals.count
+            return max(ongoingGoals.count, 1)
         } else {
-            return completedGoals.count
+            return max(completedGoals.count, 1)
         }
     }
 
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        if isShowingPlaceholder(in: collectionView) {
+            return dequeuePlaceholderCell(in: collectionView, for: indexPath)
+        }
 
         if collectionView === ActiveGoalsCollectionView {
             let cell = collectionView.dequeueReusableCell(
@@ -367,7 +421,8 @@ extension GoalsViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView,
                         didSelectItemAt indexPath: IndexPath) {
-        if collectionView === ActiveGoalsCollectionView {
+        if collectionView === ActiveGoalsCollectionView,
+           !ongoingGoals.isEmpty {
             handleDetail(for: ongoingGoals[indexPath.item])
         }
     }

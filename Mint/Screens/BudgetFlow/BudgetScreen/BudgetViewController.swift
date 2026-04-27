@@ -12,6 +12,13 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         static let compactListSpacing: CGFloat = 12
         static let compactCellHeight: CGFloat = 56
         static let compactGoalCellHeight: CGFloat = 88
+        static let placeholderCellHeight: CGFloat = 88
+    }
+
+    private enum EmptyStateMessage {
+        static let categories = "Your budget categories will be visible here."
+        static let subsAndBills = "Your subscriptions and bills will be visible here."
+        static let goals = "Your budget goals will be visible here."
     }
 
     private var hasCheckedOnboarding = false
@@ -468,6 +475,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         }
 
     private func setupCollectionViews() {
+            registerPlaceholderCell(for: CategoriesCollectionView)
             CategoriesCollectionView.register(
                 UINib(nibName: "BudgetCategoriesCollectionViewCell", bundle: nil),
                 forCellWithReuseIdentifier: "BudgetCategoriesCell"
@@ -475,6 +483,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             CategoriesCollectionView.delegate   = self
             CategoriesCollectionView.dataSource = self
      
+            registerPlaceholderCell(for: SubsandBillsCollectionView)
             SubsandBillsCollectionView.register(
                 UINib(nibName: "BudgetSubsandBillsCollectionViewCell", bundle: nil),
                 forCellWithReuseIdentifier: "BudgetSubsandBillsCell"
@@ -482,6 +491,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             SubsandBillsCollectionView.delegate   = self
             SubsandBillsCollectionView.dataSource = self
      
+            registerPlaceholderCell(for: GoalsCollectionView)
             GoalsCollectionView.register(
                 UINib(nibName: "BudgetGoalsCollectionViewCell", bundle: nil),
                 forCellWithReuseIdentifier: "BudgetGoalsCell"
@@ -492,20 +502,27 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             updateCollectionLayouts()
         }
 
+        private func registerPlaceholderCell(for collectionView: UICollectionView) {
+            collectionView.register(
+                UINib(nibName: PlaceHolderCollectionViewCell.nibName, bundle: nil),
+                forCellWithReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier
+            )
+        }
+
         private func updateCollectionLayouts() {
             CategoriesCollectionView.collectionViewLayout = makeDynamicLayout(
-                itemCount: categories.count,
-                cellHeight: LayoutMetrics.compactCellHeight,
+                itemCount: max(categories.count, 1),
+                cellHeight: categories.isEmpty ? LayoutMetrics.placeholderCellHeight : LayoutMetrics.compactCellHeight,
                 pageControl: CategoriesPageControl
             )
             SubsandBillsCollectionView.collectionViewLayout = makeDynamicLayout(
-                itemCount: subsAndBillsItems.count,
-                cellHeight: LayoutMetrics.compactCellHeight,
+                itemCount: max(subsAndBillsItems.count, 1),
+                cellHeight: subsAndBillsItems.isEmpty ? LayoutMetrics.placeholderCellHeight : LayoutMetrics.compactCellHeight,
                 pageControl: SubsandBillsPageControl
             )
             GoalsCollectionView.collectionViewLayout = makeDynamicLayout(
-                itemCount: goals.count,
-                cellHeight: LayoutMetrics.compactGoalCellHeight,
+                itemCount: max(goals.count, 1),
+                cellHeight: goals.isEmpty ? LayoutMetrics.placeholderCellHeight : LayoutMetrics.compactGoalCellHeight,
                 pageControl: GoalsPageControl,
                 itemsPerPage: goalsItemsPerPage
             )
@@ -529,20 +546,6 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
 
         private func makeStaticVerticalLayout(itemCount: Int,
                                               cellHeight: CGFloat) -> UICollectionViewLayout {
-            if itemCount == 0 {
-                let itemSize = NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(0.1)
-                )
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                let group = NSCollectionLayoutGroup.vertical(
-                    layoutSize: itemSize,
-                    subitems: [item]
-                )
-                let section = NSCollectionLayoutSection(group: group)
-                return UICollectionViewCompositionalLayout(section: section)
-            }
-
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .absolute(cellHeight)
@@ -654,6 +657,41 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         reloadAll()
     }
 
+    private func isShowingPlaceholder(in collectionView: UICollectionView) -> Bool {
+        if collectionView == CategoriesCollectionView {
+            return categories.isEmpty
+        } else if collectionView == SubsandBillsCollectionView {
+            return subsAndBillsItems.isEmpty
+        } else {
+            return goals.isEmpty
+        }
+    }
+
+    private func placeholderMessage(for collectionView: UICollectionView) -> String {
+        if collectionView == CategoriesCollectionView {
+            return EmptyStateMessage.categories
+        } else if collectionView == SubsandBillsCollectionView {
+            return EmptyStateMessage.subsAndBills
+        } else {
+            return EmptyStateMessage.goals
+        }
+    }
+
+    private func dequeuePlaceholderCell(
+        in collectionView: UICollectionView,
+        for indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier,
+            for: indexPath
+        ) as! PlaceHolderCollectionViewCell
+        cell.configure(
+            message: placeholderMessage(for: collectionView),
+            sizeStyle: .compact
+        )
+        return cell
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -664,16 +702,20 @@ extension BudgetViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         numberOfItemsInSection section: Int) -> Int {
         if collectionView == CategoriesCollectionView {
-            return categories.count
+            return max(categories.count, 1)
         } else if collectionView == SubsandBillsCollectionView {
-            return subsAndBillsItems.count
+            return max(subsAndBillsItems.count, 1)
         } else {
-            return goals.count
+            return max(goals.count, 1)
         }
     }
  
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        if isShowingPlaceholder(in: collectionView) {
+            return dequeuePlaceholderCell(in: collectionView, for: indexPath)
+        }
  
         if collectionView == CategoriesCollectionView {
             let cell = collectionView.dequeueReusableCell(
@@ -710,6 +752,7 @@ extension BudgetViewController {
                         point: CGPoint) -> UIContextMenuConfiguration? {
  
         if collectionView == CategoriesCollectionView {
+            guard !categories.isEmpty else { return nil }
             let category = categories[indexPath.item]
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
                 let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
@@ -728,6 +771,7 @@ extension BudgetViewController {
             }
  
         } else if collectionView == SubsandBillsCollectionView {
+            guard !subsAndBillsItems.isEmpty else { return nil }
             let item = subsAndBillsItems[indexPath.item]
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
                 switch item {
@@ -762,6 +806,7 @@ extension BudgetViewController {
             }
  
         } else {
+            guard !goals.isEmpty else { return nil }
             let goal = goals[indexPath.item]
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
                 let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in

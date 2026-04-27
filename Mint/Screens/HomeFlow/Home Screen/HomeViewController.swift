@@ -3,6 +3,11 @@ import UIKit
 
 class HomeViewController: UIViewController, UICollectionViewDelegate {
 
+    private enum EmptyStateMessage {
+        static let recentTransactions = "Your recent transactions will be visible here."
+        static let upcomingBills = "Your upcoming bills will be visible here."
+    }
+
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var todaycardview: UIView!
     @IBOutlet weak var goalcardview: UIView!
@@ -157,6 +162,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         goals             = db.fetchGoals()
         currentBudget     = db.fetchCurrentBudget()
 
+        if isViewLoaded {
+            updateHomeCollectionLayouts()
+        }
+
         updateMonthlyOverview()
         updateDailyAverageCard()
         updateGoalCard()
@@ -206,6 +215,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         super.viewDidLayoutSubviews()
         confirmCollectionView.collectionViewLayout.invalidateLayout()
         transactionsCollectionView.collectionViewLayout.invalidateLayout()
+        billsCollectionView.collectionViewLayout.invalidateLayout()
         renderMonthlyProgress()
     }
 
@@ -586,25 +596,46 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         confirmCollectionView.delegate = self
     }
     private func setupTransactionsCollectionView() {
+        registerPlaceholderCell(for: transactionsCollectionView)
         transactionsCollectionView.register(
             UINib(nibName: "RecentTransactionsCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "RecentTransactionCell"
         )
         transactionsCollectionView.collectionViewLayout = generateVerticalLayout()
         transactionsCollectionView.isScrollEnabled = false
+        transactionsCollectionView.layer.cornerRadius = 22
+        transactionsCollectionView.layer.masksToBounds = true
         transactionsCollectionView.dataSource = self
         transactionsCollectionView.delegate   = self
     }
 
     private func setupBillsCollectionView() {
+        registerPlaceholderCell(for: billsCollectionView)
         billsCollectionView.register(
             UINib(nibName: "UpcomingBillsCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "UpcomingBillsCell"
         )
         billsCollectionView.collectionViewLayout = generateHorizontalLayout()
         billsCollectionView.showsHorizontalScrollIndicator = false
+        billsCollectionView.showsVerticalScrollIndicator = false
+        billsCollectionView.alwaysBounceVertical = false
         billsCollectionView.dataSource = self
         billsCollectionView.delegate   = self
+        billsCollectionView.bounces = false
+        billsCollectionView.isDirectionalLockEnabled = true
+    }
+
+    private func registerPlaceholderCell(for collectionView: UICollectionView) {
+        collectionView.register(
+            UINib(nibName: PlaceHolderCollectionViewCell.nibName, bundle: nil),
+            forCellWithReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier
+        )
+    }
+
+    private func updateHomeCollectionLayouts() {
+        confirmCollectionView.collectionViewLayout = generateConfirmLayout()
+        transactionsCollectionView.collectionViewLayout = generateVerticalLayout()
+        billsCollectionView.collectionViewLayout = generateHorizontalLayout()
     }
 
     private func generateVerticalLayout() -> UICollectionViewLayout {
@@ -616,7 +647,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(52)
+            heightDimension: transactions.isEmpty ? .absolute(60) : .estimated(64)
         )
         let group = NSCollectionLayoutGroup.vertical(
             layoutSize: groupSize,
@@ -637,7 +668,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(52)
+            heightDimension: .estimated(64)
         )
         let group = NSCollectionLayoutGroup.vertical(
             layoutSize: groupSize,
@@ -657,8 +688,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(120),
-            heightDimension: .absolute(92)
+            widthDimension: bills.isEmpty ? .fractionalWidth(1.0) : .absolute(120),
+            heightDimension: .fractionalHeight(1.0)
         )
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
@@ -666,10 +697,43 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         )
 
         let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .continuous
-        section.interGroupSpacing = 12
+        section.orthogonalScrollingBehavior = bills.isEmpty ? .none : .continuous
+        section.interGroupSpacing = bills.isEmpty ? 0 : 12
 
         return UICollectionViewCompositionalLayout(section: section)
+    }
+
+    private func isShowingPlaceholder(in collectionView: UICollectionView) -> Bool {
+        if collectionView == billsCollectionView {
+            return bills.isEmpty
+        } else {
+            return transactions.isEmpty
+        }
+    }
+
+    private func placeholderMessage(for collectionView: UICollectionView) -> String {
+        if collectionView == billsCollectionView {
+            return EmptyStateMessage.upcomingBills
+        } else {
+            return EmptyStateMessage.recentTransactions
+        }
+    }
+
+    private func dequeuePlaceholderCell(
+        in collectionView: UICollectionView,
+        for indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier,
+            for: indexPath
+        ) as! PlaceHolderCollectionViewCell
+        let sizeStyle: PlaceHolderCollectionViewCell.SizeStyle =
+            collectionView == billsCollectionView ? .compact : .listRow
+        cell.configure(
+            message: placeholderMessage(for: collectionView),
+            sizeStyle: sizeStyle
+        )
+        return cell
     }
 
 }
@@ -681,14 +745,18 @@ extension HomeViewController: UICollectionViewDataSource {
         if collectionView == confirmCollectionView {
             return pendingTransactions.count
         } else if collectionView == billsCollectionView {
-            return bills.count
+            return max(bills.count, 1)
         } else {
-            return min(transactions.count, 5)
+            return max(min(transactions.count, 5), 1)
         }
     }
 
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        if isShowingPlaceholder(in: collectionView) {
+            return dequeuePlaceholderCell(in: collectionView, for: indexPath)
+        }
 
         if collectionView == confirmCollectionView {
             let cell = collectionView.dequeueReusableCell(
@@ -733,6 +801,7 @@ extension HomeViewController {
                         contextMenuConfigurationForItemAt indexPath: IndexPath,
                         point: CGPoint) -> UIContextMenuConfiguration? {
         if collectionView == transactionsCollectionView {
+            guard !transactions.isEmpty else { return nil }
             let transaction = transactions[indexPath.item]
             contextMenuFeedbackGenerator.prepare()
             contextMenuFeedbackGenerator.impactOccurred()
@@ -758,6 +827,7 @@ extension HomeViewController {
         }
 
         if collectionView == billsCollectionView {
+            guard !bills.isEmpty else { return nil }
             let bill = bills[indexPath.item]
             contextMenuFeedbackGenerator.prepare()
             contextMenuFeedbackGenerator.impactOccurred()
