@@ -81,16 +81,13 @@ class SelectCategoriesViewController: UIViewController {
 
         guard shouldApplySelections, !selectedViews.isEmpty else { return }
 
-        let totalBudget = db.fetchCurrentBudget()?.allocatedBudget ?? 0
-        let splitBudget = totalBudget / Double(selectedViews.count)
-
         for index in selectedViews.sorted() where index < categoryTemplates.count {
             let template = categoryTemplates[index]
             if let categoryId = db.insertCategory(
                 name: template.name,
                 color: template.color,
                 icon: template.icon,
-                budget: splitBudget
+                budget: 0
             ) {
                 db.linkCategoryToCurrentBudget(categoryId: categoryId)
             }

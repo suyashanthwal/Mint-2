@@ -153,7 +153,18 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             if currentTitle == "Save" {
                 guard let text = newBudgetTextField.text,
                       let amount = Double(text), amount > 0 else {
-                    collapseEditView()
+                    showAlert(
+                        title: "Invalid Budget",
+                        message: "Enter a monthly budget greater than zero."
+                    )
+                    return
+                }
+                let categoryTotal = categories.reduce(0) { $0 + $1.budget }
+                guard amount >= categoryTotal else {
+                    showAlert(
+                        title: "Budget Too Low",
+                        message: "Your category limits already add up to \(formatCurrency(categoryTotal)). Enter a higher budget or lower category limits first."
+                    )
                     return
                 }
                 DatabaseManager.shared.updateBudgetSettings(allocatedBudget: amount)
@@ -313,6 +324,123 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         vc.onCategoryUpdated = { [weak self] in self?.reloadAll() }
         nav.modalPresentationStyle = .pageSheet
         present(nav, animated: true)
+    }
+
+    private func presentSetLimitPrompt(for category: Category) {
+        guard let allocatedBudget = currentBudget?.allocatedBudget, allocatedBudget > 0 else {
+            showAlert(
+                title: "Set Monthly Budget First",
+                message: "Add your monthly budget before setting category limits."
+            )
+            return
+        }
+
+        let alreadyAllocatedByOthers = categories
+            .filter { $0.id != category.id }
+            .reduce(0) { $0 + $1.budget }
+        let maximumAllowed = allocatedBudget - alreadyAllocatedByOthers
+
+        guard maximumAllowed > 0 || category.budget > 0 else {
+            showAlert(
+                title: "No Budget Left",
+                message: "Your full monthly budget is already allocated to other categories."
+            )
+            return
+        }
+
+        let alert = UIAlertController(
+            title: "Set \(category.name) Limit",
+            message: "Available: \(formatCurrency(max(maximumAllowed, 0)))",
+            preferredStyle: .alert
+        )
+        alert.addTextField { textField in
+            textField.keyboardType = .decimalPad
+            textField.placeholder = "Amount"
+            textField.text = category.budget > 0 ? String(Int(category.budget)) : nil
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Save", style: .default) { [weak self, weak alert] _ in
+            guard let self else { return }
+            let text = alert?.textFields?.first?.text
+            guard let limit = self.parsedAmount(from: text), limit > 0 else {
+                self.showAlert(
+                    title: "Invalid Limit",
+                    message: "Enter a category limit greater than zero."
+                )
+                return
+            }
+
+            guard limit <= maximumAllowed else {
+                self.showAlert(
+                    title: "Limit Too High",
+                    message: "This category can use up to \(self.formatCurrency(maximumAllowed)) based on your remaining monthly budget."
+                )
+                return
+            }
+
+            self.saveLimit(limit, for: category, allocatedBudget: allocatedBudget)
+        })
+        present(alert, animated: true)
+    }
+
+    private func saveLimit(_ limit: Double, for category: Category, allocatedBudget: Double) {
+        let db = DatabaseManager.shared
+        db.updateCategory(
+            id: category.id,
+            name: category.name,
+            color: category.color,
+            icon: category.icon,
+            budget: limit
+        )
+
+        var updatedCategories = categories.map { existing -> Category in
+            var copy = existing
+            if copy.id == category.id {
+                copy.budget = limit
+            }
+            return copy
+        }
+
+        let unsetCategories = updatedCategories.filter { $0.id != category.id && $0.budget <= 0 }
+        if unsetCategories.count == 1, let finalCategory = unsetCategories.first {
+            let allocatedSoFar = updatedCategories.reduce(0) { $0 + $1.budget }
+            let remainingBudget = max(allocatedBudget - allocatedSoFar, 0)
+            db.updateCategory(
+                id: finalCategory.id,
+                name: finalCategory.name,
+                color: finalCategory.color,
+                icon: finalCategory.icon,
+                budget: remainingBudget
+            )
+            updatedCategories = updatedCategories.map { existing -> Category in
+                var copy = existing
+                if copy.id == finalCategory.id {
+                    copy.budget = remainingBudget
+                }
+                return copy
+            }
+        }
+
+        NotificationCenter.default.post(name: .categoryDataDidChange, object: nil)
+        NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+        reloadAll()
+    }
+
+    private func parsedAmount(from text: String?) -> Double? {
+        let cleaned = (text ?? "")
+            .filter { $0.isNumber || $0 == "." }
+        guard cleaned.filter({ $0 == "." }).count <= 1 else { return nil }
+        return Double(cleaned)
+    }
+
+    private func formatCurrency(_ amount: Double) -> String {
+        currencyFormatter.string(from: NSNumber(value: amount)) ?? "₹0"
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 
     private func openEditSubscription(payment: RecurringPayment) {
@@ -721,7 +849,12 @@ extension BudgetViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "BudgetCategoriesCell", for: indexPath
             ) as! BudgetCategoriesCollectionViewCell
-            cell.configureCategoryCell(category: categories[indexPath.item])
+            let category = categories[indexPath.item]
+            cell.configureCategoryCell(category: category)
+            cell.onSetLimitTapped = { [weak self] in
+                guard category.budget <= 0 else { return }
+                self?.presentSetLimitPrompt(for: category)
+            }
             return cell
  
         } else if collectionView == SubsandBillsCollectionView {

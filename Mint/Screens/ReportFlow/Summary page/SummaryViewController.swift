@@ -17,6 +17,9 @@ class SummaryViewController: UIViewController {
         let label: String
         let expense: Double
         let budget: Double
+        let startDate: Date?
+        let endDate: Date?
+        let transactionId: UUID?
     }
 
     private struct SummaryDetailItem {
@@ -33,6 +36,7 @@ class SummaryViewController: UIViewController {
     private var currentAverageAmount: Double = 0
     private var currentComparisonPercent: Double?
     private var currentBudgetLimit: Double = 0
+    private var currentBudgetLimitLabel: String = ""
     private var currentRange: TimeRange = .daily
 
     private var expenseTransactions: [Transaction] {
@@ -99,6 +103,7 @@ class SummaryViewController: UIViewController {
         barChartView.extraBottomOffset = 5
         barChartView.extraRightOffset = 10
         barChartView.fitBars = true
+        barChartView.delegate = self
     }
 
     private func reloadFromDatabase(animateChart: Bool) {
@@ -126,20 +131,18 @@ class SummaryViewController: UIViewController {
         case .daily:
             currentBuckets = makeDailyBuckets()
             currentDetails = makeDailyDetails()
-            currentBudgetLimit = currentBudget?.dailyLimit ?? 0
         case .weekly:
             currentBuckets = makeWeeklyBuckets()
             currentDetails = makeWeeklyDetails()
-            currentBudgetLimit = (currentBudget?.dailyLimit ?? 0) * 7
         case .monthly:
             currentBuckets = makeMonthlyBuckets()
             currentDetails = makeMonthlyDetails()
-            currentBudgetLimit = currentBudget?.allocatedBudget ?? 0
         case .yearly:
             currentBuckets = makeYearlyBuckets()
             currentDetails = makeYearlyDetails()
-            currentBudgetLimit = currentBudget?.allocatedBudget ?? 0
         }
+        currentBudgetLimit = budgetLimit(for: timeRange)
+        currentBudgetLimitLabel = budgetLimitLabel(for: timeRange)
 
         currentAverageAmount = averageAmount(for: timeRange, buckets: currentBuckets)
         currentComparisonPercent = comparisonPercent(for: timeRange)
@@ -147,6 +150,7 @@ class SummaryViewController: UIViewController {
         updateTopLabels(for: timeRange)
         updateDetailsHeading(for: timeRange)
         setupChart(labels: currentBuckets.map(\.label), barWidth: timeRange == .monthly ? 0.55 : 0.5, animate: animateChart)
+        barChartView.highlightValue(nil)
         monthlyDetailsCollectionView.reloadData()
     }
 
@@ -189,16 +193,29 @@ class SummaryViewController: UIViewController {
         UPorDOWNPercentLabel.attributedText = text
     }
 
-    private func updateDetailsHeading(for timeRange: TimeRange) {
-        switch timeRange {
-        case .daily:
-            detailsHeadingLabel.text = "Today's Transactions"
-        case .weekly:
-            detailsHeadingLabel.text = "Weekly Breakdown"
-        case .monthly:
-            detailsHeadingLabel.text = "Monthly Breakdown"
-        case .yearly:
-            detailsHeadingLabel.text = "Yearly Breakdown"
+    private func updateDetailsHeading(for timeRange: TimeRange, selectedBucket: SummaryBucket? = nil) {
+        if let selectedBucket {
+            switch timeRange {
+            case .daily:
+                detailsHeadingLabel.text = "\(selectedBucket.label) Transactions"
+            case .weekly:
+                detailsHeadingLabel.text = "\(selectedBucket.label) Transactions"
+            case .monthly:
+                detailsHeadingLabel.text = "Day \(selectedBucket.label) Transactions"
+            case .yearly:
+                detailsHeadingLabel.text = "\(selectedBucket.label) Transactions"
+            }
+        } else {
+            switch timeRange {
+            case .daily:
+                detailsHeadingLabel.text = "Today's Transactions"
+            case .weekly:
+                detailsHeadingLabel.text = "Weekly Breakdown"
+            case .monthly:
+                detailsHeadingLabel.text = "Monthly Breakdown"
+            case .yearly:
+                detailsHeadingLabel.text = "Yearly Breakdown"
+            }
         }
     }
 
@@ -252,7 +269,7 @@ class SummaryViewController: UIViewController {
         leftAxis.removeAllLimitLines()
 
         if currentBudgetLimit > 0 {
-            let limitLine = ChartLimitLine(limit: currentBudgetLimit, label: "Budget")
+            let limitLine = ChartLimitLine(limit: currentBudgetLimit, label: currentBudgetLimitLabel)
             limitLine.lineColor = AppColors.brand
             limitLine.lineWidth = 1.0
             limitLine.lineDashLengths = [6, 4]
@@ -278,7 +295,10 @@ class SummaryViewController: UIViewController {
             SummaryBucket(
                 label: hourFormatter.string(from: $0.timestamp),
                 expense: $0.amount,
-                budget: currentBudget?.dailyLimit ?? 0
+                budget: currentBudget?.dailyLimit ?? 0,
+                startDate: $0.timestamp,
+                endDate: $0.timestamp,
+                transactionId: $0.id
             )
         }
     }
@@ -294,7 +314,15 @@ class SummaryViewController: UIViewController {
                 .filter { calendar.isDate($0.timestamp, inSameDayAs: date) }
                 .reduce(0) { $0 + $1.amount }
             let label = shortDayFormatter.string(from: date).uppercased()
-            return SummaryBucket(label: label, expense: total, budget: currentBudget?.dailyLimit ?? 0)
+            let endDate = calendar.date(byAdding: .day, value: 1, to: date)
+            return SummaryBucket(
+                label: label,
+                expense: total,
+                budget: currentBudget?.dailyLimit ?? 0,
+                startDate: date,
+                endDate: endDate,
+                transactionId: nil
+            )
         }
     }
 
@@ -312,10 +340,18 @@ class SummaryViewController: UIViewController {
                 }
                 .reduce(0) { $0 + $1.amount }
 
+            let startDate = calendar.date(from: DateComponents(year: year, month: month, day: day))
+            let endDate = startDate.flatMap {
+                calendar.date(byAdding: .day, value: 1, to: $0)
+            }
+
             return SummaryBucket(
                 label: "\(day)",
                 expense: total,
-                budget: currentBudget?.dailyLimit ?? 0
+                budget: currentBudget?.dailyLimit ?? 0,
+                startDate: startDate,
+                endDate: endDate,
+                transactionId: nil
             )
         }
     }
@@ -332,10 +368,18 @@ class SummaryViewController: UIViewController {
                 }
                 .reduce(0) { $0 + $1.amount }
 
+            let startDate = calendar.date(from: DateComponents(year: targetYear, month: month, day: 1))
+            let endDate = startDate.flatMap {
+                calendar.date(byAdding: .month, value: 1, to: $0)
+            }
+
             return SummaryBucket(
                 label: shortMonthName(for: month),
                 expense: total,
-                budget: currentBudget?.allocatedBudget ?? 0
+                budget: currentBudget?.allocatedBudget ?? 0,
+                startDate: startDate,
+                endDate: endDate,
+                transactionId: nil
             )
         }
     }
@@ -364,6 +408,69 @@ class SummaryViewController: UIViewController {
         makeYearlyBuckets()
             .filter { $0.expense > 0 }
             .map { SummaryDetailItem(title: $0.label, amount: $0.expense) }
+    }
+
+    private func details(for transactions: [Transaction], includeDate: Bool = false) -> [SummaryDetailItem] {
+        transactions
+            .sorted { $0.timestamp < $1.timestamp }
+            .map { transaction in
+                let title = includeDate
+                    ? "\(shortDateFormatter.string(from: transaction.timestamp)), \(timeFormatter.string(from: transaction.timestamp))"
+                    : timeFormatter.string(from: transaction.timestamp)
+                return SummaryDetailItem(title: title, amount: transaction.amount)
+            }
+    }
+
+    private func transactions(in bucket: SummaryBucket) -> [Transaction] {
+        if let transactionId = bucket.transactionId {
+            return expenseTransactions.filter { $0.id == transactionId }
+        }
+
+        guard let startDate = bucket.startDate,
+              let endDate = bucket.endDate
+        else { return [] }
+
+        return expenseTransactions.filter {
+            $0.timestamp >= startDate && $0.timestamp < endDate
+        }
+    }
+
+    private func budgetLimit(for timeRange: TimeRange) -> Double {
+        guard let currentBudget else { return 0 }
+
+        switch timeRange {
+        case .daily:
+            return currentBudget.dailyLimit
+        case .weekly:
+            return currentBudget.dailyLimit * 7
+        case .monthly:
+            return currentBudget.allocatedBudget
+        case .yearly:
+            return currentBudget.allocatedBudget * 12
+        }
+    }
+
+    private func budgetLimitLabel(for timeRange: TimeRange) -> String {
+        switch timeRange {
+        case .daily:
+            return "Daily average limit"
+        case .weekly:
+            return "Weekly average limit"
+        case .monthly:
+            return "Monthly average limit"
+        case .yearly:
+            return "Yearly average limit"
+        }
+    }
+
+    private func selectDetails(for bucket: SummaryBucket) {
+        let selectedTransactions = transactions(in: bucket)
+        currentDetails = details(
+            for: selectedTransactions,
+            includeDate: currentRange == .yearly
+        )
+        updateDetailsHeading(for: currentRange, selectedBucket: bucket)
+        monthlyDetailsCollectionView.reloadData()
     }
 
     private func averageAmount(for timeRange: TimeRange, buckets: [SummaryBucket]) -> Double {
@@ -448,7 +555,35 @@ class SummaryViewController: UIViewController {
 
     private let hourFormatter = AppFormatters.hourOnly
     private let timeFormatter = AppFormatters.timeWithMeridiem
+    private let shortDateFormatter = AppFormatters.shortDate
     private let shortDayFormatter = AppFormatters.shortWeekday
+}
+
+extension SummaryViewController: ChartViewDelegate {
+
+    func chartValueSelected(_ chartView: ChartViewBase,
+                            entry: ChartDataEntry,
+                            highlight: Highlight) {
+        let bucketIndex = Int(entry.x.rounded())
+        guard currentBuckets.indices.contains(bucketIndex) else { return }
+        selectDetails(for: currentBuckets[bucketIndex])
+    }
+
+    func chartValueNothingSelected(_ chartView: ChartViewBase) {
+        switch currentRange {
+        case .daily:
+            currentDetails = makeDailyDetails()
+        case .weekly:
+            currentDetails = makeWeeklyDetails()
+        case .monthly:
+            currentDetails = makeMonthlyDetails()
+        case .yearly:
+            currentDetails = makeYearlyDetails()
+        }
+
+        updateDetailsHeading(for: currentRange)
+        monthlyDetailsCollectionView.reloadData()
+    }
 }
 
 extension SummaryViewController: UICollectionViewDataSource {

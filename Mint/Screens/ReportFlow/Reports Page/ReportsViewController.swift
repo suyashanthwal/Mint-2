@@ -64,6 +64,10 @@ private struct ReportsInsightsResponse: Codable {
 
 class ReportsViewController: UIViewController {
 
+    private enum EmptyStateMessage {
+        static let topCategories = "Your top 4 categories will be shown here once you log transactions."
+    }
+
     private var hasCheckedOnboarding = false
 
     @IBOutlet weak var subsAndBillsView: UIView!
@@ -74,7 +78,7 @@ class ReportsViewController: UIViewController {
     @IBOutlet weak var summaryInsightVIew: UIView!
     @IBOutlet weak var MainScrollView: UIScrollView!
     @IBOutlet weak var SummaryCard: UICollectionView!
-    @IBOutlet weak var SummaryDataEntry: UICollectionView!
+    @IBOutlet weak var CategoryBreakdownDataEntry: UICollectionView!
     @IBOutlet weak var CategoryBreakdown: UICollectionView!
     @IBOutlet weak var SubsAndBillsCard: UICollectionView?
 
@@ -210,7 +214,7 @@ class ReportsViewController: UIViewController {
         view.backgroundColor = AppColors.background
         MainScrollView.backgroundColor = AppColors.background
         SummaryCard.backgroundColor = AppColors.card
-        SummaryDataEntry.backgroundColor = AppColors.card
+        CategoryBreakdownDataEntry.backgroundColor = AppColors.card
         CategoryBreakdown.backgroundColor = AppColors.card
         SubsAndBillsCard?.backgroundColor = AppColors.card
 
@@ -329,7 +333,7 @@ class ReportsViewController: UIViewController {
         loadInsights()
 
         SummaryCard.reloadData()
-        SummaryDataEntry.reloadData()
+        CategoryBreakdownDataEntry.reloadData()
         CategoryBreakdown.reloadData()
         SubsAndBillsCard?.reloadData()
     }
@@ -486,19 +490,23 @@ class ReportsViewController: UIViewController {
         SummaryCard.collectionViewLayout = makeLayout(for: SummaryCard)
         SummaryCard.showsHorizontalScrollIndicator = false
 
-        SummaryDataEntry.dataSource = self
-        SummaryDataEntry.delegate = self
-        SummaryDataEntry.register(
+        CategoryBreakdownDataEntry.dataSource = self
+        CategoryBreakdownDataEntry.delegate = self
+        CategoryBreakdownDataEntry.register(
             UINib(nibName: "CategoryCardNameCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "CategoryCardName"
         )
-        if let layout = SummaryDataEntry.collectionViewLayout as? UICollectionViewFlowLayout {
+        CategoryBreakdownDataEntry.register(
+            UINib(nibName: PlaceHolderCollectionViewCell.nibName, bundle: nil),
+            forCellWithReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier
+        )
+        if let layout = CategoryBreakdownDataEntry.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.scrollDirection = .vertical
             layout.minimumLineSpacing = 4
             layout.minimumInteritemSpacing = 0
             layout.estimatedItemSize = .zero
         }
-        SummaryDataEntry.showsVerticalScrollIndicator = false
+        CategoryBreakdownDataEntry.showsVerticalScrollIndicator = false
 
         CategoryBreakdown.dataSource = self
         CategoryBreakdown.delegate = self
@@ -873,8 +881,8 @@ class ReportsViewController: UIViewController {
 extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if collectionView == SummaryDataEntry {
-            return categoryData.count
+        if collectionView == CategoryBreakdownDataEntry {
+            return max(categoryData.count, 1)
         }
 
         return 1
@@ -891,7 +899,16 @@ extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDel
             return cell
         }
 
-        if collectionView == SummaryDataEntry {
+        if collectionView == CategoryBreakdownDataEntry {
+            if categoryData.isEmpty {
+                let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier,
+                    for: indexPath
+                ) as! PlaceHolderCollectionViewCell
+                cell.configure(message: EmptyStateMessage.topCategories, sizeStyle: .listRow)
+                return cell
+            }
+
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryCardName", for: indexPath) as! CategoryCardNameCollectionViewCell
             cell.configure(with: categoryData[indexPath.item])
             return cell
@@ -915,7 +932,7 @@ extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDel
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        guard collectionView == SummaryDataEntry else {
+        guard collectionView == CategoryBreakdownDataEntry else {
             return collectionView.bounds.size
         }
 
