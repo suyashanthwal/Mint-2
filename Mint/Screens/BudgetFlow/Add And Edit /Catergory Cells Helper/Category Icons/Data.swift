@@ -36,5 +36,30 @@ struct CategoryData {
             "bed.double", "pills"
        ]
     ]
-}
 
+    static let subsAndBillsIconCategories: [String: [String]] = [
+        "Streaming & Media": [
+            "play.rectangle.fill", "tv.fill", "music.note",
+            "gamecontroller.fill", "book.fill", "newspaper.fill",
+            "headphones", "film.fill", "antenna.radiowaves.left.and.right"
+        ],
+
+        "Utilities": [
+            "bolt.fill", "drop.fill", "flame.fill", "wifi",
+            "phone.fill", "lightbulb.fill", "trash.fill",
+            "house.fill"
+        ],
+
+        "Finance & Services": [
+            "creditcard.fill", "doc.text.fill", "banknote.fill",
+            "building.columns.fill", "lock.shield.fill", "cross.case.fill",
+            "car.fill", "bus.fill", "fuelpump.fill", "wrench.fill"
+        ],
+
+        "Home & Essentials": [
+            "cart.fill", "bag.fill", "basket.fill", "fork.knife",
+            "cup.and.saucer.fill", "shippingbox.fill", "giftcard.fill",
+            "calendar.badge.clock"
+       ]
+    ]
+}

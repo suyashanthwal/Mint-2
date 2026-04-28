@@ -306,22 +306,32 @@ class BillsSubscriptionCalenderViewController: UIViewController {
                 return day
             })
 
-        case .monthly:
+        case .monthly, .quarterly, .halfYearly, .yearly:
             let anchorMonthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: anchorDate)) ?? anchorDate
-            guard monthStart >= anchorMonthStart else { return [] }
-            return [min(calendar.component(.day, from: anchorDate), dayRange.count)]
-
-        case .yearly:
             let anchorComponents = calendar.dateComponents([.year, .month, .day], from: anchorDate)
             guard let anchorYear = anchorComponents.year,
                   let anchorMonth = anchorComponents.month,
                   let anchorDay = anchorComponents.day
             else { return [] }
+            guard monthStart >= anchorMonthStart else { return [] }
 
-            guard (year > anchorYear || (year == anchorYear && month >= anchorMonth)),
-                  month == anchorMonth
-            else { return [] }
+            let monthDelta = (year - anchorYear) * 12 + (month - anchorMonth)
+            let stride: Int
 
+            switch subscription.duration {
+            case .monthly:
+                stride = 1
+            case .quarterly:
+                stride = 3
+            case .halfYearly:
+                stride = 6
+            case .yearly:
+                stride = 12
+            case .daily, .weekly:
+                stride = 1
+            }
+
+            guard monthDelta >= 0, monthDelta % stride == 0 else { return [] }
             return [min(anchorDay, dayRange.count)]
         }
     }

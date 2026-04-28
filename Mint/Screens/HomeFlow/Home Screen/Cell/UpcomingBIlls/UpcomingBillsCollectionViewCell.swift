@@ -61,4 +61,30 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
         Title.text  = bill.name
         Amount.text = bill.amount.formatted(.currency(code: "INR"))
     }
+
+    func configureCell(with subscription: RecurringPayment) {
+        contentView.alpha = 1.0
+
+        let today = Calendar.current.startOfDay(for: Date())
+        let dueDay = Calendar.current.startOfDay(for: subscription.nextDate)
+        let daysUntilDue = Calendar.current.dateComponents([.day], from: today, to: dueDay).day ?? 0
+
+        switch daysUntilDue {
+        case ..<0:
+            duration.text = "OVERDUE"
+        case 0:
+            duration.text = "DUE TODAY"
+        case 1:
+            duration.text = "IN 1 DAY"
+        default:
+            duration.text = "IN \(daysUntilDue) DAYS"
+        }
+
+        let accentColor: UIColor = daysUntilDue <= urgentThreshold ? AppColors.error : AppColors.brand
+        leftAccentBar.backgroundColor = accentColor
+        duration.textColor = accentColor
+
+        Title.text = subscription.name
+        Amount.text = subscription.amount.formatted(.currency(code: "INR"))
+    }
 }

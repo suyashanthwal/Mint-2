@@ -3,6 +3,11 @@ import UIKit
 
 class HomeViewController: UIViewController, UICollectionViewDelegate {
 
+    private enum HomeUpcomingItem {
+        case bill(Bill)
+        case subscription(RecurringPayment)
+    }
+
     private enum EmptyStateMessage {
         static let recentTransactions = "Your recent transactions will be visible here."
         static let upcomingBills = "Your upcoming bills will be visible here."
@@ -36,11 +41,13 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private var allTransactions: [Transaction] = []
     private var pendingTransactions: [BufferedTransaction] = []
     private var bills: [Bill] = []
+    private var upcomingItems: [HomeUpcomingItem] = []
     private var allBills: [Bill] = []
     private var goals: [Goal] = []
     private var recurringPayments: [RecurringPayment] = []
     private var currentBudget: Budget?
     private var monthlyProgressValue: CGFloat = 0
+    private var shouldRenderMonthlyProgressOnLaunch = true
     private var categories: [Category] = []
     private let contextMenuFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let actionFeedbackGenerator = UINotificationFeedbackGenerator()
@@ -157,8 +164,9 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         transactions      = db.fetchRecentTransactions(limit: 5)
         pendingTransactions = db.fetchBufferedTransactions()
         allBills          = db.fetchBills()
-        bills             = upcomingBillsForHome()
         recurringPayments = db.fetchRecurringPayments()
+        bills             = upcomingBillsForHome()
+        upcomingItems     = buildUpcomingItemsForHome()
         goals             = db.fetchGoals()
         currentBudget     = db.fetchCurrentBudget()
 
@@ -179,13 +187,50 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private func upcomingBillsForHome() -> [Bill] {
         let startOfToday = Calendar.current.startOfDay(for: Date())
         return allBills
-            .filter { $0.billDate >= startOfToday }
+            .filter { !$0.isPaid || $0.billDate >= startOfToday }
             .sorted { lhs, rhs in
                 if lhs.isPaid != rhs.isPaid {
                     return !lhs.isPaid && rhs.isPaid
                 }
                 return lhs.billDate < rhs.billDate
             }
+    }
+
+    private func buildUpcomingItemsForHome() -> [HomeUpcomingItem] {
+        let billItems = upcomingBillsForHome().map(HomeUpcomingItem.bill)
+        let subscriptionItems = recurringPayments
+            .filter { $0.isActive && !$0.isIncome }
+            .sorted { $0.nextDate < $1.nextDate }
+            .map(HomeUpcomingItem.subscription)
+
+        return (billItems + subscriptionItems).sorted { lhs, rhs in
+            func dueDate(for item: HomeUpcomingItem) -> Date {
+                switch item {
+                case .bill(let bill):
+                    return bill.billDate
+                case .subscription(let subscription):
+                    return subscription.nextDate
+                }
+            }
+
+            func isPaidLike(for item: HomeUpcomingItem) -> Bool {
+                switch item {
+                case .bill(let bill):
+                    return bill.isPaid
+                case .subscription:
+                    return false
+                }
+            }
+
+            let lhsPaid = isPaidLike(for: lhs)
+            let rhsPaid = isPaidLike(for: rhs)
+
+            if lhsPaid != rhsPaid {
+                return !lhsPaid && rhsPaid
+            }
+
+            return dueDate(for: lhs) < dueDate(for: rhs)
+        }
     }
 
     @objc private func handleTransactionDataChange() {
@@ -216,7 +261,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         confirmCollectionView.collectionViewLayout.invalidateLayout()
         transactionsCollectionView.collectionViewLayout.invalidateLayout()
         billsCollectionView.collectionViewLayout.invalidateLayout()
-        renderMonthlyProgress()
+        renderMonthlyProgressIfNeeded()
     }
 
     private func startOnboarding() {
@@ -302,8 +347,14 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         monthlyProgressValue = budgetAmount > 0
             ? CGFloat(min(monthlyExpense / budgetAmount, 1))
             : 0
+    }
+
+    private func renderMonthlyProgressIfNeeded() {
+        guard shouldRenderMonthlyProgressOnLaunch else { return }
+        guard MonthlyView.bounds.width > 0, MonthlyView.bounds.height > 0 else { return }
 
         renderMonthlyProgress()
+        shouldRenderMonthlyProgressOnLaunch = false
     }
 
     private func renderMonthlyProgress() {
@@ -519,6 +570,12 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
             )
         }
 
+        if nextPaidState {
+            BillSubscriptionReminderManager.shared.cancelReminder(forBillId: billId)
+        } else if let refreshedBill = db.fetchBill(id: billId) {
+            BillSubscriptionReminderManager.shared.scheduleReminder(for: refreshedBill)
+        }
+
         db.resetMonthlyExpense()
         actionFeedbackGenerator.notificationOccurred(.success)
         NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
@@ -688,7 +745,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: bills.isEmpty ? .fractionalWidth(1.0) : .absolute(120),
+            widthDimension: upcomingItems.isEmpty ? .fractionalWidth(1.0) : .absolute(120),
             heightDimension: .fractionalHeight(1.0)
         )
         let group = NSCollectionLayoutGroup.horizontal(
@@ -697,15 +754,15 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         )
 
         let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = bills.isEmpty ? .none : .continuous
-        section.interGroupSpacing = bills.isEmpty ? 0 : 12
+        section.orthogonalScrollingBehavior = upcomingItems.isEmpty ? .none : .continuous
+        section.interGroupSpacing = upcomingItems.isEmpty ? 0 : 12
 
         return UICollectionViewCompositionalLayout(section: section)
     }
 
     private func isShowingPlaceholder(in collectionView: UICollectionView) -> Bool {
         if collectionView == billsCollectionView {
-            return bills.isEmpty
+            return upcomingItems.isEmpty
         } else {
             return transactions.isEmpty
         }
@@ -745,7 +802,7 @@ extension HomeViewController: UICollectionViewDataSource {
         if collectionView == confirmCollectionView {
             return pendingTransactions.count
         } else if collectionView == billsCollectionView {
-            return max(bills.count, 1)
+            return max(upcomingItems.count, 1)
         } else {
             return max(min(transactions.count, 5), 1)
         }
@@ -778,7 +835,12 @@ extension HomeViewController: UICollectionViewDataSource {
                 withReuseIdentifier: "UpcomingBillsCell",
                 for: indexPath
             ) as! UpcomingBillsCollectionViewCell
-            cell.configureCell(with: bills[indexPath.row])
+            switch upcomingItems[indexPath.row] {
+            case .bill(let bill):
+                cell.configureCell(with: bill)
+            case .subscription(let subscription):
+                cell.configureCell(with: subscription)
+            }
             return cell
 
         } else {
@@ -827,8 +889,8 @@ extension HomeViewController {
         }
 
         if collectionView == billsCollectionView {
-            guard !bills.isEmpty else { return nil }
-            let bill = bills[indexPath.item]
+            guard !upcomingItems.isEmpty else { return nil }
+            guard case .bill(let bill) = upcomingItems[indexPath.item] else { return nil }
             contextMenuFeedbackGenerator.prepare()
             contextMenuFeedbackGenerator.impactOccurred()
 

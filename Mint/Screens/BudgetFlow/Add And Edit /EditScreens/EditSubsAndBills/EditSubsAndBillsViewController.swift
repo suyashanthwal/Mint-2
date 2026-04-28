@@ -32,6 +32,11 @@ class EditSubsAndBillsViewController: UIViewController {
     @IBOutlet weak var autoAddToggle: UISwitch!
     @IBOutlet weak var isActiveToggle: UISwitch!
     @IBOutlet weak var isActiveSectionView: UIView!
+    @IBOutlet weak var iconPickerStackView: UIStackView!
+    @IBOutlet weak var iconPickerImageView: UIImageView!
+    @IBOutlet weak var iconPickerLabel: UILabel!
+    @IBOutlet weak var iconCollectionView: UICollectionView!
+    @IBOutlet weak var iconCollectionViewHeightConstraint: NSLayoutConstraint!
 
     @IBOutlet var AllBackgroundViews: [UIView]!
     @IBOutlet var AllCardViews: [UIView]!
@@ -40,11 +45,18 @@ class EditSubsAndBillsViewController: UIViewController {
     var pickerVisible = false
     var datePickerVisible = false
 
+    private var isIconPickerExpanded = false
+    private let collapsedIconPickerHeight: CGFloat = 0
+    private let expandedIconPickerHeight: CGFloat = 400
+    private var selectedIconName: String?
+    private let iconCategories = CategoryData.subsAndBillsIconCategories
+
     override func viewDidLoad() {
         super.viewDidLoad()
         enableKeyboardDismissOnBackgroundTapAndSwipe()
         setupUI()
         setupPickers()
+        setupIconCollectionView()
         setupGestures()
         setupDatePicker()
         applyModeUI()
@@ -61,12 +73,40 @@ class EditSubsAndBillsViewController: UIViewController {
         }
         nameTextField.backgroundColor   = AppColors.card
         amountTextField.backgroundColor = AppColors.card
+        iconPickerImageView.tintColor   = AppColors.brand
+        iconCollectionView.backgroundColor = AppColors.card
+        iconCollectionView.clipsToBounds = true
+        iconCollectionViewHeightConstraint.constant = collapsedIconPickerHeight
+        iconCollectionView.isHidden = true
+        setSelectedIcon(defaultIconName)
     }
 
     func setupPickers() {
         intervalPicker.delegate   = self
         intervalPicker.dataSource = self
         intervalPickerHeight.constant = 0
+    }
+
+    private func setupIconCollectionView() {
+        iconCollectionView.delegate = self
+        iconCollectionView.dataSource = self
+
+        iconCollectionView.register(
+            UINib(nibName: "IconCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "IconCell"
+        )
+        iconCollectionView.register(
+            UINib(nibName: "IconHeaderCollectionReusableView", bundle: nil),
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: "IconHeaderView"
+        )
+
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumInteritemSpacing = 10
+        layout.minimumLineSpacing = 10
+        layout.headerReferenceSize = CGSize(width: iconCollectionView.frame.width, height: 40)
+        iconCollectionView.collectionViewLayout = layout
     }
 
     func setupDatePicker() {
@@ -85,13 +125,17 @@ class EditSubsAndBillsViewController: UIViewController {
         let dueDateTap = UITapGestureRecognizer(target: self, action: #selector(dueDateTapped))
         dueDateRowStack.addGestureRecognizer(dueDateTap)
         dueDateRowStack.isUserInteractionEnabled = true
+
+        let iconTap = UITapGestureRecognizer(target: self, action: #selector(iconPickerTapped))
+        iconPickerStackView.addGestureRecognizer(iconTap)
+        iconPickerStackView.isUserInteractionEnabled = true
     }
 
     func applyModeUI() {
         switch mode {
         case .subscription:
             typeSegment.selectedSegmentIndex = 0
-            intervals = ["Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"]
+            intervals = ["Daily", "Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"]
             intervalTitleLabel.text = "Interval"
             dueDateTitleLabel.text  = "Due date"
             alertSectionView.isHidden    = false
@@ -100,10 +144,10 @@ class EditSubsAndBillsViewController: UIViewController {
 
         case .bill:
             typeSegment.selectedSegmentIndex = 1
-            intervals = ["Monthly", "Quarterly", "Half-Yearly", "Yearly"]
+            intervals = ["Daily", "Weekly", "Monthly", "Quarterly", "Half-Yearly", "Yearly"]
             intervalTitleLabel.text = "Duration"
             dueDateTitleLabel.text  = "Payment Date"
-            alertSectionView.isHidden    = true
+            alertSectionView.isHidden    = false
             autoAddSectionView.isHidden  = true
             isActiveSectionView.isHidden = true
         }
@@ -122,6 +166,7 @@ class EditSubsAndBillsViewController: UIViewController {
             alertToggle?.isOn           = payment.isAlertEnabled
             autoAddToggle?.isOn         = payment.isAddAutomatically
             isActiveToggle?.isOn        = payment.isActive
+            setSelectedIcon(payment.icon ?? defaultIconName)
 
             let durationString = durationDisplayString(payment.duration)
             intervalLabel.text = durationString
@@ -138,6 +183,8 @@ class EditSubsAndBillsViewController: UIViewController {
                                     ? String(Int(bill.amount))
                                     : String(bill.amount)
             notesTextView.text = bill.note ?? ""
+            alertToggle?.isOn = bill.isAlertEnabled
+            setSelectedIcon(bill.icon)
 
             let rangeString = rangeDisplayString(bill.range)
             intervalLabel.text = rangeString
@@ -174,6 +221,23 @@ class EditSubsAndBillsViewController: UIViewController {
         switch mode {
         case .subscription:
             guard let payment = recurringPayment else { return }
+            let updatedPayment = RecurringPayment(
+                id: payment.id,
+                name: name.trimmingCharacters(in: .whitespaces),
+                categoryId: payment.categoryId,
+                duration: paymentDuration(from: selectedString),
+                amount: amount,
+                nextDate: datePicker.date,
+                isActive: isActiveToggle?.isOn ?? true,
+                isAlertEnabled: alertToggle?.isOn ?? true,
+                isAddAutomatically: autoAddToggle?.isOn ?? true,
+                repeatCount: payment.repeatCount,
+                totalAmount: payment.totalAmount,
+                icon: selectedIconName,
+                note: cleanNote,
+                isIncome: payment.isIncome,
+                lastDate: payment.lastDate
+            )
             db.updateRecurringPayment(
                 id:                 payment.id,
                 name:               name.trimmingCharacters(in: .whitespaces),
@@ -183,19 +247,36 @@ class EditSubsAndBillsViewController: UIViewController {
                 isAlertEnabled:     alertToggle?.isOn ?? true,
                 isAddAutomatically: autoAddToggle?.isOn ?? true,
                 isActive:           isActiveToggle?.isOn ?? true,
+                icon:               selectedIconName,
                 note:               cleanNote
             )
+            BillSubscriptionReminderManager.shared.scheduleReminder(for: updatedPayment)
 
         case .bill:
             guard let bill = bill else { return }
+            let updatedBill = Bill(
+                id: bill.id,
+                name: name.trimmingCharacters(in: .whitespaces),
+                icon: selectedIconName ?? bill.icon,
+                categoryId: bill.categoryId,
+                amount: amount,
+                billDate: datePicker.date,
+                range: billingRange(from: selectedString),
+                isPaid: bill.isPaid,
+                isAlertEnabled: alertToggle?.isOn ?? true,
+                note: cleanNote
+            )
             db.updateBill(
                 id:       bill.id,
                 name:     name.trimmingCharacters(in: .whitespaces),
                 amount:   amount,
                 billDate: datePicker.date,
                 range:    billingRange(from: selectedString),
+                icon:     selectedIconName,
+                isAlertEnabled: alertToggle?.isOn ?? true,
                 note:     cleanNote
             )
+            BillSubscriptionReminderManager.shared.scheduleReminder(for: updatedBill)
         }
 
         dismiss(animated: true) {
@@ -246,36 +327,74 @@ class EditSubsAndBillsViewController: UIViewController {
         selectedDateLabel.text = fmt.string(from: date)
     }
 
+    @objc private func iconPickerTapped() {
+        isIconPickerExpanded.toggle()
+        UIView.animate(withDuration: 0.3) {
+            self.iconCollectionViewHeightConstraint.constant = self.isIconPickerExpanded
+                ? self.expandedIconPickerHeight
+                : self.collapsedIconPickerHeight
+            self.iconCollectionView.isHidden = !self.isIconPickerExpanded
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    private var defaultIconName: String {
+        Array(iconCategories.values).first?.first ?? "doc.text.fill"
+    }
+
+    private func setSelectedIcon(_ iconName: String) {
+        selectedIconName = iconName
+        iconPickerImageView.image = UIImage(systemName: iconName)
+        iconPickerImageView.tintColor = AppColors.brand
+        iconPickerLabel.text = formatIconName(iconName)
+    }
+
+    private func formatIconName(_ systemName: String) -> String {
+        let words = systemName.split(separator: ".")
+        return words.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")
+    }
+
     private func paymentDuration(from string: String) -> PaymentDuration {
         switch string {
-        case "Weekly":  return .weekly
-        case "Yearly":  return .yearly
-        default:        return .monthly
+        case "Daily":       return .daily
+        case "Weekly":      return .weekly
+        case "Quarterly":   return .quarterly
+        case "Half-Yearly": return .halfYearly
+        case "Yearly":      return .yearly
+        default:            return .monthly
         }
     }
 
     private func billingRange(from string: String) -> BillingRange {
         switch string {
-        case "Yearly":  return .yearly
-        default:        return .monthly
+        case "Daily":       return .daily
+        case "Weekly":      return .weekly
+        case "Quarterly":   return .quarterly
+        case "Half-Yearly": return .halfYearly
+        case "Yearly":      return .yearly
+        default:            return .monthly
         }
     }
 
     private func durationDisplayString(_ duration: PaymentDuration) -> String {
         switch duration {
-        case .daily:   return "Weekly"
-        case .weekly:  return "Weekly"
-        case .monthly: return "Monthly"
-        case .yearly:  return "Yearly"
+        case .daily:      return "Daily"
+        case .weekly:     return "Weekly"
+        case .monthly:    return "Monthly"
+        case .quarterly:  return "Quarterly"
+        case .halfYearly: return "Half-Yearly"
+        case .yearly:     return "Yearly"
         }
     }
 
     private func rangeDisplayString(_ range: BillingRange) -> String {
         switch range {
-        case .daily:   return "Monthly"
-        case .weekly:  return "Monthly"
-        case .monthly: return "Monthly"
-        case .yearly:  return "Yearly"
+        case .daily:      return "Daily"
+        case .weekly:     return "Weekly"
+        case .monthly:    return "Monthly"
+        case .quarterly:  return "Quarterly"
+        case .halfYearly: return "Half-Yearly"
+        case .yearly:     return "Yearly"
         }
     }
 }
@@ -293,5 +412,71 @@ extension EditSubsAndBillsViewController: UIPickerViewDelegate {
     }
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         intervalLabel.text = intervals[row]
+    }
+}
+
+extension EditSubsAndBillsViewController: UICollectionViewDataSource {
+
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        iconCategories.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        Array(iconCategories.values)[section].count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "IconCell",
+            for: indexPath
+        ) as! IconCollectionViewCell
+        let iconName = Array(iconCategories.values)[indexPath.section][indexPath.item]
+        cell.configure(with: iconName)
+        return cell
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else {
+            return UICollectionReusableView()
+        }
+        let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: "IconHeaderView",
+            for: indexPath
+        ) as! IconHeaderCollectionReusableView
+        header.configure(with: Array(iconCategories.keys)[indexPath.section])
+        return header
+    }
+}
+
+extension EditSubsAndBillsViewController: UICollectionViewDelegate {
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let iconName = Array(iconCategories.values)[indexPath.section][indexPath.item]
+        setSelectedIcon(iconName)
+        iconPickerTapped()
+    }
+}
+
+extension EditSubsAndBillsViewController: UICollectionViewDelegateFlowLayout {
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        CGSize(width: 50, height: 50)
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetForSectionAt section: Int
+    ) -> UIEdgeInsets {
+        UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 16)
     }
 }

@@ -51,12 +51,17 @@ class SelectSubsViewController: UIViewController {
 
     private func finishOnboarding(applySelections: Bool) {
         let db = DatabaseManager.shared
-        db.deleteAllRecurringPaymentsForCurrentUser()
-        db.deleteAllBillsForCurrentUser()
 
         if applySelections {
+            let existingPaymentNames = Set(
+                db.fetchRecurringPayments().map { $0.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+            )
+
             for index in selectedViews.sorted() where index < paymentTemplates.count {
                 let template = paymentTemplates[index]
+                let normalizedName = template.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                guard !existingPaymentNames.contains(normalizedName) else { continue }
+
                 let categoryId = template.categoryName.flatMap { db.fetchCategory(named: $0)?.id }
                 db.insertRecurringPayment(
                     name: template.name,
@@ -75,6 +80,8 @@ class SelectSubsViewController: UIViewController {
         if let currentUserId = db.currentUserId {
             db.markSetupComplete(for: currentUserId, isComplete: true)
         }
+
+        BillSubscriptionReminderManager.shared.refreshAllReminders()
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "TabBar")

@@ -138,14 +138,26 @@ extension DatabaseManager {
         isAlertEnabled: Bool,
         isAddAutomatically: Bool,
         isActive: Bool,
+        icon: String? = nil,
         note: String?
     ) {
-        let query = """
-        UPDATE recurring_payments
-        SET name = ?, duration = ?, amount = ?, next_date = ?,
-            is_alert_enabled = ?, is_add_automatically = ?, is_active = ?, note = ?
-        WHERE id = ?;
-        """
+        let query: String
+        if icon != nil {
+            query = """
+            UPDATE recurring_payments
+            SET name = ?, duration = ?, amount = ?, next_date = ?,
+                is_alert_enabled = ?, is_add_automatically = ?, is_active = ?,
+                icon = ?, note = ?
+            WHERE id = ?;
+            """
+        } else {
+            query = """
+            UPDATE recurring_payments
+            SET name = ?, duration = ?, amount = ?, next_date = ?,
+                is_alert_enabled = ?, is_add_automatically = ?, is_active = ?, note = ?
+            WHERE id = ?;
+            """
+        }
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
@@ -162,12 +174,24 @@ extension DatabaseManager {
         sqlite3_bind_int(stmt,    5, isAlertEnabled     ? 1 : 0)
         sqlite3_bind_int(stmt,    6, isAddAutomatically ? 1 : 0)
         sqlite3_bind_int(stmt,    7, isActive           ? 1 : 0)
-        if let note = note, !note.isEmpty {
-            sqlite3_bind_text(stmt, 8, (note as NSString).utf8String, -1, nil)
+
+        let noteIndex: Int32
+        let idIndex: Int32
+        if let icon {
+            sqlite3_bind_text(stmt, 8, (icon as NSString).utf8String, -1, nil)
+            noteIndex = 9
+            idIndex = 10
         } else {
-            sqlite3_bind_null(stmt, 8)
+            noteIndex = 8
+            idIndex = 9
         }
-        sqlite3_bind_text(stmt, 9, (id.uuidString as NSString).utf8String, -1, nil)
+
+        if let note = note, !note.isEmpty {
+            sqlite3_bind_text(stmt, noteIndex, (note as NSString).utf8String, -1, nil)
+        } else {
+            sqlite3_bind_null(stmt, noteIndex)
+        }
+        sqlite3_bind_text(stmt, idIndex, (id.uuidString as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
             print("RecurringPayment updated: \(name)")

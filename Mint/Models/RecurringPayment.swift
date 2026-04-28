@@ -5,6 +5,8 @@ enum PaymentDuration: String, Codable, CaseIterable {
     case daily
     case weekly
     case monthly
+    case quarterly
+    case halfYearly
     case yearly
 }
 

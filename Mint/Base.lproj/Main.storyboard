@@ -1194,8 +1194,8 @@ with our effortless categorization.</string>
                                                                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" translatesAutoresizingMaskIntoConstraints="NO" id="t3W-8Z-xbR">
                                                                                         <rect key="frame" x="0.0" y="0.0" width="353" height="40"/>
                                                                                         <subviews>
-                                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Upcoming Bills" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="koL-iF-lzz">
-                                                                                                <rect key="frame" x="0.0" y="0.0" width="113.66666666666667" height="40"/>
+                                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Upcoming Payments" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="koL-iF-lzz">
+                                                                                                <rect key="frame" x="0.0" y="0.0" width="157.33333333333334" height="40"/>
                                                                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                                 <color key="textColor" red="0.34901960780000002" green="0.3803921569" blue="0.37254901959999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                                 <nil key="highlightedColor"/>
@@ -1712,10 +1712,9 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                 </subviews>
-                                                <color key="backgroundColor" systemColor="systemGray6Color"/>
                                             </stackView>
                                         </subviews>
-                                        <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                        <color key="backgroundColor" red="0.97254901959999995" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="lW4-0x-bVr" secondAttribute="trailing" constant="20" id="4oC-BP-t3z"/>
                                             <constraint firstItem="lW4-0x-bVr" firstAttribute="top" secondItem="zTn-gR-IVg" secondAttribute="top" constant="20" id="7Rm-PC-TZq"/>
@@ -1736,7 +1735,7 @@ with our effortless categorization.</string>
                             </scrollView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="VxO-7k-B9m"/>
-                        <color key="backgroundColor" systemColor="systemGray6Color"/>
+                        <color key="backgroundColor" red="0.97254901959999995" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Ewz-OF-wvq" firstAttribute="top" secondItem="VxO-7k-B9m" secondAttribute="top" id="0TZ-gW-g1p"/>
                             <constraint firstItem="Ewz-OF-wvq" firstAttribute="leading" secondItem="VxO-7k-B9m" secondAttribute="leading" id="14M-EN-TY9"/>
@@ -2303,10 +2302,10 @@ with our effortless categorization.</string>
                                 <rect key="frame" x="0.0" y="70" width="393" height="723"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2Bs-pf-LK7">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="697"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="785"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="ihd-Qr-0Xi">
-                                                <rect key="frame" x="16" y="16" width="361" height="665"/>
+                                                <rect key="frame" x="16" y="16" width="361" height="753"/>
                                                 <subviews>
                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="yF7-6D-s4J" userLabel="Selector">
                                                         <rect key="frame" x="0.0" y="0.0" width="361" height="32"/>
@@ -2365,8 +2364,79 @@ with our effortless categorization.</string>
                                                             </userDefinedRuntimeAttribute>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3IR-bT-N7w" userLabel="Icon Picker">
+                                                        <rect key="frame" x="0.0" y="192" width="361" height="56"/>
+                                                        <subviews>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="IVE-5K-puL">
+                                                                <rect key="frame" x="12" y="0.0" width="337" height="56"/>
+                                                                <subviews>
+                                                                    <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="Hg0-XF-oRn" userLabel="TargetDateRow">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="337" height="56"/>
+                                                                        <subviews>
+                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="251" text="Icon Picker" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="X9m-R7-fi0">
+                                                                                <rect key="frame" x="0.0" y="8" width="309" height="40"/>
+                                                                                <constraints>
+                                                                                    <constraint firstAttribute="height" constant="40" id="waP-l5-5mu"/>
+                                                                                </constraints>
+                                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                                <nil key="textColor"/>
+                                                                                <nil key="highlightedColor"/>
+                                                                            </label>
+                                                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pencil" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="oAl-Ot-W2F">
+                                                                                <rect key="frame" x="313" y="18.666666666666664" width="24" height="19"/>
+                                                                                <constraints>
+                                                                                    <constraint firstAttribute="height" constant="24" id="UFt-4K-nuy"/>
+                                                                                    <constraint firstAttribute="width" constant="24" id="qSJ-kU-elK"/>
+                                                                                </constraints>
+                                                                            </imageView>
+                                                                        </subviews>
+                                                                    </stackView>
+                                                                </subviews>
+                                                            </stackView>
+                                                        </subviews>
+                                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="bottom" secondItem="IVE-5K-puL" secondAttribute="bottom" id="Oef-1k-oFA"/>
+                                                            <constraint firstItem="IVE-5K-puL" firstAttribute="top" secondItem="3IR-bT-N7w" secondAttribute="top" id="gRx-bC-HkN"/>
+                                                            <constraint firstAttribute="trailing" secondItem="IVE-5K-puL" secondAttribute="trailing" constant="12" id="rfR-1K-2Gj"/>
+                                                            <constraint firstAttribute="height" constant="56" id="tfb-F5-fuR"/>
+                                                            <constraint firstItem="IVE-5K-puL" firstAttribute="leading" secondItem="3IR-bT-N7w" secondAttribute="leading" constant="12" id="uY5-nP-nT1"/>
+                                                        </constraints>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                <integer key="value" value="16"/>
+                                                            </userDefinedRuntimeAttribute>
+                                                        </userDefinedRuntimeAttributes>
+                                                    </view>
+                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="xGe-B8-qOw" userLabel="Icon Collection view">
+                                                        <rect key="frame" x="0.0" y="264" width="361" height="0.0"/>
+                                                        <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" id="30Z-wp-OmN"/>
+                                                        </constraints>
+                                                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="uIQ-Ev-pZW">
+                                                            <size key="itemSize" width="128" height="128"/>
+                                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                        </collectionViewFlowLayout>
+                                                        <cells>
+                                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="t03-fI-mGd">
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                                <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" id="LdH-Rd-JYL">
+                                                                    <autoresizingMask key="autoresizingMask"/>
+                                                                </collectionViewCellContentView>
+                                                                <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                                                <userDefinedRuntimeAttributes>
+                                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                        <integer key="value" value="18"/>
+                                                                    </userDefinedRuntimeAttribute>
+                                                                </userDefinedRuntimeAttributes>
+                                                            </collectionViewCell>
+                                                        </cells>
+                                                    </collectionView>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gcY-pP-Gxq" userLabel="interval and date">
-                                                        <rect key="frame" x="0.0" y="192" width="361" height="153"/>
+                                                        <rect key="frame" x="0.0" y="280" width="361" height="153"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="iSV-sI-us0">
                                                                 <rect key="frame" x="12" y="12" width="337" height="129"/>
@@ -2462,13 +2532,13 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CgN-0f-XMc" userLabel="Alert">
-                                                        <rect key="frame" x="0.0" y="361" width="361" height="56"/>
+                                                        <rect key="frame" x="0.0" y="449" width="361" height="56"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="xvA-hQ-dgI">
                                                                 <rect key="frame" x="12" y="12" width="337" height="32"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Alert" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rAl-9M-qTP">
-                                                                        <rect key="frame" x="0.0" y="7.6666666666666856" width="276" height="17"/>
+                                                                        <rect key="frame" x="0.0" y="7.6666666666666288" width="276" height="17"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
@@ -2494,7 +2564,7 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7Qe-Vq-GS6" userLabel="Add Automatically ">
-                                                        <rect key="frame" x="0.0" y="433" width="361" height="56"/>
+                                                        <rect key="frame" x="0.0" y="521" width="361" height="56"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="5Ye-Ta-DSN">
                                                                 <rect key="frame" x="12" y="12" width="337" height="32"/>
@@ -2526,7 +2596,7 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9L3-VN-bmr">
-                                                        <rect key="frame" x="0.0" y="505" width="361" height="160"/>
+                                                        <rect key="frame" x="0.0" y="593" width="361" height="160"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="OCT-JV-Fxs">
                                                                 <rect key="frame" x="12" y="12" width="337" height="136"/>
@@ -2613,6 +2683,11 @@ with our effortless categorization.</string>
                         <outlet property="datePickerHeight" destination="60g-rR-JOy" id="ht9-8r-Kvg"/>
                         <outlet property="dueDateRowStack" destination="CrL-91-WWq" id="0kl-1P-mXH"/>
                         <outlet property="dueDateTitleLabel" destination="SZ5-6X-s5O" id="Oww-JL-Ecg"/>
+                        <outlet property="iconCollectionView" destination="xGe-B8-qOw" id="add-sb-icon-cv"/>
+                        <outlet property="iconCollectionViewHeightConstraint" destination="30Z-wp-OmN" id="add-sb-icon-h"/>
+                        <outlet property="iconPickerImageView" destination="oAl-Ot-W2F" id="add-sb-icon-img"/>
+                        <outlet property="iconPickerLabel" destination="X9m-R7-fi0" id="add-sb-icon-lbl"/>
+                        <outlet property="iconPickerStackView" destination="Hg0-XF-oRn" id="add-sb-icon-row"/>
                         <outlet property="intervalLabel" destination="0dl-0P-bCB" id="Nur-kR-8JA"/>
                         <outlet property="intervalPicker" destination="YrR-vc-1Ec" id="qAJ-Xf-C1O"/>
                         <outlet property="intervalPickerHeight" destination="rTb-WD-g41" id="YJ8-n4-eF6"/>
@@ -2956,10 +3031,10 @@ with our effortless categorization.</string>
                                 <rect key="frame" x="0.0" y="172" width="393" height="612"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8g4-fY-pgr">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="769"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="857"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="eHC-DJ-6Xj">
-                                                <rect key="frame" x="16" y="16" width="361" height="737"/>
+                                                <rect key="frame" x="16" y="16" width="361" height="825"/>
                                                 <subviews>
                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="jss-lh-a6e" userLabel="Selector">
                                                         <rect key="frame" x="0.0" y="0.0" width="361" height="32"/>
@@ -3015,8 +3090,79 @@ with our effortless categorization.</string>
                                                             </userDefinedRuntimeAttribute>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3pK-t3-CjJ" userLabel="Icon Picker">
+                                                        <rect key="frame" x="0.0" y="192" width="361" height="56"/>
+                                                        <subviews>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="RRU-MM-c0I">
+                                                                <rect key="frame" x="12" y="0.0" width="337" height="56"/>
+                                                                <subviews>
+                                                                    <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="74T-ZX-2BO" userLabel="TargetDateRow">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="337" height="56"/>
+                                                                        <subviews>
+                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="251" text="Icon Picker" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3d7-Pf-zmo">
+                                                                                <rect key="frame" x="0.0" y="8" width="309" height="40"/>
+                                                                                <constraints>
+                                                                                    <constraint firstAttribute="height" constant="40" id="nqN-zC-WTm"/>
+                                                                                </constraints>
+                                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                                <nil key="textColor"/>
+                                                                                <nil key="highlightedColor"/>
+                                                                            </label>
+                                                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pencil" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="U8W-q7-mFb">
+                                                                                <rect key="frame" x="313" y="18.666666666666664" width="24" height="19"/>
+                                                                                <constraints>
+                                                                                    <constraint firstAttribute="height" constant="24" id="9c6-Nr-oOU"/>
+                                                                                    <constraint firstAttribute="width" constant="24" id="kCK-CR-g4u"/>
+                                                                                </constraints>
+                                                                            </imageView>
+                                                                        </subviews>
+                                                                    </stackView>
+                                                                </subviews>
+                                                            </stackView>
+                                                        </subviews>
+                                                        <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                                        <constraints>
+                                                            <constraint firstItem="RRU-MM-c0I" firstAttribute="top" secondItem="3pK-t3-CjJ" secondAttribute="top" id="Jdt-wk-c5i"/>
+                                                            <constraint firstAttribute="height" constant="56" id="NlP-2Y-GNx"/>
+                                                            <constraint firstItem="RRU-MM-c0I" firstAttribute="leading" secondItem="3pK-t3-CjJ" secondAttribute="leading" constant="12" id="d7d-Ju-1zk"/>
+                                                            <constraint firstAttribute="trailing" secondItem="RRU-MM-c0I" secondAttribute="trailing" constant="12" id="foj-3q-gqj"/>
+                                                            <constraint firstAttribute="bottom" secondItem="RRU-MM-c0I" secondAttribute="bottom" id="syV-KK-1We"/>
+                                                        </constraints>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                <integer key="value" value="16"/>
+                                                            </userDefinedRuntimeAttribute>
+                                                        </userDefinedRuntimeAttributes>
+                                                    </view>
+                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="edS-Ic-cVw" userLabel="Icon Collection view">
+                                                        <rect key="frame" x="0.0" y="264" width="361" height="0.0"/>
+                                                        <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" id="edS-Ic-hgt"/>
+                                                        </constraints>
+                                                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="edS-Ic-lay">
+                                                            <size key="itemSize" width="128" height="128"/>
+                                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                        </collectionViewFlowLayout>
+                                                        <cells>
+                                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="IconPlaceholderCell" id="edS-Ic-cell">
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                                <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" id="edS-Ic-content">
+                                                                    <autoresizingMask key="autoresizingMask"/>
+                                                                </collectionViewCellContentView>
+                                                                <color key="backgroundColor" systemColor="systemGray6Color"/>
+                                                                <userDefinedRuntimeAttributes>
+                                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                        <integer key="value" value="18"/>
+                                                                    </userDefinedRuntimeAttribute>
+                                                                </userDefinedRuntimeAttributes>
+                                                            </collectionViewCell>
+                                                        </cells>
+                                                    </collectionView>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DDa-7U-jPy" userLabel="interval and date">
-                                                        <rect key="frame" x="0.0" y="192" width="361" height="153"/>
+                                                        <rect key="frame" x="0.0" y="280" width="361" height="153"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-Du-Z59">
                                                                 <rect key="frame" x="12" y="12" width="337" height="129"/>
@@ -3112,7 +3258,7 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jaK-6F-ODR" userLabel="Alert">
-                                                        <rect key="frame" x="0.0" y="361" width="361" height="56"/>
+                                                        <rect key="frame" x="0.0" y="449" width="361" height="56"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4TK-3p-eXI">
                                                                 <rect key="frame" x="12" y="12" width="337" height="32"/>
@@ -3144,7 +3290,7 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hGk-Se-oed" userLabel="Add Automatically ">
-                                                        <rect key="frame" x="0.0" y="433" width="361" height="56"/>
+                                                        <rect key="frame" x="0.0" y="521" width="361" height="56"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="imD-lm-6pC">
                                                                 <rect key="frame" x="12" y="12" width="337" height="32"/>
@@ -3176,7 +3322,7 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NbO-DY-CHV" userLabel="Is_Active">
-                                                        <rect key="frame" x="0.0" y="505" width="361" height="56"/>
+                                                        <rect key="frame" x="0.0" y="593" width="361" height="56"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="s32-iS-Xy2">
                                                                 <rect key="frame" x="12" y="12" width="337" height="32"/>
@@ -3208,7 +3354,7 @@ with our effortless categorization.</string>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HAf-Zv-l1P">
-                                                        <rect key="frame" x="0.0" y="577" width="361" height="160"/>
+                                                        <rect key="frame" x="0.0" y="665" width="361" height="160"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Yyy-fJ-y2S">
                                                                 <rect key="frame" x="12" y="12" width="337" height="136"/>
@@ -3295,6 +3441,11 @@ with our effortless categorization.</string>
                         <outlet property="datePickerHeight" destination="ah6-CV-sec" id="CPe-hS-7cT"/>
                         <outlet property="dueDateRowStack" destination="1xi-At-DXw" id="t99-mE-4qa"/>
                         <outlet property="dueDateTitleLabel" destination="Inf-3p-P00" id="l90-2b-OJu"/>
+                        <outlet property="iconCollectionView" destination="edS-Ic-cVw" id="edit-sb-icon-cv"/>
+                        <outlet property="iconCollectionViewHeightConstraint" destination="edS-Ic-hgt" id="edit-sb-icon-h"/>
+                        <outlet property="iconPickerImageView" destination="U8W-q7-mFb" id="edit-sb-icon-img"/>
+                        <outlet property="iconPickerLabel" destination="3d7-Pf-zmo" id="edit-sb-icon-lbl"/>
+                        <outlet property="iconPickerStackView" destination="74T-ZX-2BO" id="edit-sb-icon-row"/>
                         <outlet property="intervalLabel" destination="3du-Cf-GVL" id="f9D-Wo-0rc"/>
                         <outlet property="intervalPicker" destination="J7R-5B-7Np" id="E3p-hv-UZf"/>
                         <outlet property="intervalPickerHeight" destination="Rx0-h7-QcA" id="cNk-sF-2x0"/>
@@ -3988,7 +4139,7 @@ spend on?</string>
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="dumbbell.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="MMa-bp-bZU">
-                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333409" width="24" height="20.666666666666671"/>
+                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333407" width="24" height="20.666666666666671"/>
                                                         <color key="tintColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="24" id="Gek-ve-aqQ"/>
@@ -4392,7 +4543,7 @@ spend on?</string>
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="dumbbell.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="zfa-hM-wzR">
-                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333409" width="24" height="20.666666666666671"/>
+                                                        <rect key="frame" x="69.333333333333329" y="15.333333333333407" width="24" height="20.666666666666671"/>
                                                         <color key="tintColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="24" id="Ui5-V1-TtH"/>

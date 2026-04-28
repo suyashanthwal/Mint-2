@@ -229,7 +229,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         categories        = db.fetchCategories()
         goals             = db.fetchGoals()
         recurringPayments = db.fetchRecurringPayments()
-        bills             = db.fetchUpcomingBills()
+        bills             = db.fetchBills()
         currentBudget     = db.fetchCurrentBudget()
 
         buildSubsAndBillsList()
@@ -270,6 +270,8 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     private func buildSubsAndBillsList() {
         let calendar     = Calendar.current
         let now          = Date()
+        let startOfToday = calendar.startOfDay(for: now)
+        let currentMonthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? startOfToday
         let currentMonth = calendar.component(.month, from: now)
         let currentYear  = calendar.component(.year,  from: now)
      
@@ -282,7 +284,10 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         for bill in bills {
             let billMonth = calendar.component(.month, from: bill.billDate)
             let billYear  = calendar.component(.year,  from: bill.billDate)
-            guard billMonth == currentMonth && billYear == currentYear else { continue }
+            let billDay = calendar.startOfDay(for: bill.billDate)
+            let isCurrentMonth = billMonth == currentMonth && billYear == currentYear
+            let isOverdueUnpaid = !bill.isPaid && billDay < currentMonthStart
+            guard isCurrentMonth || isOverdueUnpaid else { continue }
             items.append(.bill(bill))
         }
      
@@ -490,6 +495,112 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in onConfirm() })
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true)
+    }
+
+    private func toggleBillPaymentState(for bill: Bill) {
+        let db = DatabaseManager.shared
+        let nextPaidState = !bill.isPaid
+
+        db.updateBillPaymentStatus(id: bill.id, isPaid: nextPaidState)
+        db.removeBillPaymentTransaction(billId: bill.id)
+
+        if nextPaidState {
+            _ = db.insertExpenseTransaction(
+                name: bill.name,
+                amount: bill.amount,
+                timestamp: Date(),
+                categoryId: bill.categoryId,
+                status: true,
+                expenseType: "bill",
+                source: .manual,
+                note: db.billPaymentNote(for: bill.id)
+            )
+            BillSubscriptionReminderManager.shared.cancelReminder(forBillId: bill.id)
+        } else if let refreshedBill = db.fetchBill(id: bill.id) {
+            BillSubscriptionReminderManager.shared.scheduleReminder(for: refreshedBill)
+        }
+
+        db.resetMonthlyExpense()
+        NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+        NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
+        reloadAll()
+    }
+
+    private func markSubscriptionAsPaid(_ payment: RecurringPayment) {
+        guard let categoryId = payment.categoryId else {
+            showAlert(
+                title: "Missing Category",
+                message: "This subscription needs a category before it can be marked as paid."
+            )
+            return
+        }
+
+        let db = DatabaseManager.shared
+        _ = db.insertExpenseTransaction(
+            name: payment.name,
+            amount: payment.amount,
+            timestamp: Date(),
+            categoryId: categoryId,
+            status: true,
+            expenseType: "subscription",
+            source: .manual,
+            note: "subscription-payment:\(payment.id.uuidString)"
+        )
+
+        let nextDate = advancedDate(from: payment.nextDate, duration: payment.duration)
+        db.updateRecurringPayment(
+            id: payment.id,
+            name: payment.name,
+            duration: payment.duration,
+            amount: payment.amount,
+            nextDate: nextDate,
+            isAlertEnabled: payment.isAlertEnabled,
+            isAddAutomatically: payment.isAddAutomatically,
+            isActive: payment.isActive,
+            note: payment.note
+        )
+
+        let updatedPayment = RecurringPayment(
+            id: payment.id,
+            name: payment.name,
+            categoryId: payment.categoryId,
+            duration: payment.duration,
+            amount: payment.amount,
+            nextDate: nextDate,
+            isActive: payment.isActive,
+            isAlertEnabled: payment.isAlertEnabled,
+            isAddAutomatically: payment.isAddAutomatically,
+            repeatCount: payment.repeatCount,
+            totalAmount: payment.totalAmount,
+            icon: payment.icon,
+            note: payment.note,
+            isIncome: payment.isIncome,
+            lastDate: payment.lastDate
+        )
+        BillSubscriptionReminderManager.shared.scheduleReminder(for: updatedPayment)
+
+        NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+        NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
+        reloadAll()
+    }
+
+    private func advancedDate(from date: Date, duration: PaymentDuration) -> Date {
+        let calendar = Calendar.current
+
+        switch duration {
+        case .daily:
+            return calendar.date(byAdding: .day, value: 1, to: date) ?? date
+        case .weekly:
+            return calendar.date(byAdding: .day, value: 7, to: date) ?? date
+        case .monthly:
+            return calendar.date(byAdding: .month, value: 1, to: date) ?? date
+        case .quarterly:
+            return calendar.date(byAdding: .month, value: 3, to: date) ?? date
+        case .halfYearly:
+            return calendar.date(byAdding: .month, value: 6, to: date) ?? date
+        case .yearly:
+            return calendar.date(byAdding: .year, value: 1, to: date) ?? date
+        }
     }
 
     private func showBudgetOnboarding() { startOnboarding() }
@@ -909,32 +1020,48 @@ extension BudgetViewController {
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
                 switch item {
                 case .subscription(let payment):
+                    let markPaid = UIAction(
+                        title: "Mark as Paid",
+                        image: UIImage(systemName: "checkmark.circle")
+                    ) { [weak self] _ in
+                        self?.markSubscriptionAsPaid(payment)
+                    }
                     let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
                         self?.openEditSubscription(payment: payment)
                     }
                     let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"),
                                           attributes: .destructive) { [weak self] _ in
                         self?.confirmDelete(title: payment.name) {
+                            BillSubscriptionReminderManager.shared.cancelReminder(forSubscriptionId: payment.id)
                             DatabaseManager.shared.deleteRecurringPayment(id: payment.id)
                             NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
                             self?.reloadAll()
                         }
                     }
-                    return UIMenu(title: payment.name, children: [edit, delete])
+                    return UIMenu(title: payment.name, children: [markPaid, edit, delete])
  
                 case .bill(let bill):
+                    let markPaidTitle = bill.isPaid ? "Mark as Not Paid" : "Mark as Paid"
+                    let markPaidImage = bill.isPaid ? "arrow.uturn.backward.circle" : "checkmark.circle"
+                    let markPaid = UIAction(
+                        title: markPaidTitle,
+                        image: UIImage(systemName: markPaidImage)
+                    ) { [weak self] _ in
+                        self?.toggleBillPaymentState(for: bill)
+                    }
                     let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
                         self?.openEditBill(bill: bill)
                     }
                     let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"),
                                           attributes: .destructive) { [weak self] _ in
                         self?.confirmDelete(title: bill.name) {
+                            BillSubscriptionReminderManager.shared.cancelReminder(forBillId: bill.id)
                             DatabaseManager.shared.deleteBill(id: bill.id)
                             NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
                             self?.reloadAll()
                         }
                     }
-                    return UIMenu(title: bill.name, children: [edit, delete])
+                    return UIMenu(title: bill.name, children: [markPaid, edit, delete])
                 }
             }
  

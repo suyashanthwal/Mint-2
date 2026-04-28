@@ -32,7 +32,9 @@ class ProfileViewController: UIViewController {
             let center = UNUserNotificationCenter.current()
             center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
                 DispatchQueue.main.async {
-                    if !granted {
+                    if granted {
+                        BillSubscriptionReminderManager.shared.refreshAllReminders()
+                    } else {
                         sender.setOn(false, animated: true)
                         if let url = URL(string: UIApplication.openSettingsURLString) {
                             UIApplication.shared.open(url)
@@ -41,6 +43,7 @@ class ProfileViewController: UIViewController {
                 }
             }
         } else {
+            BillSubscriptionReminderManager.shared.cancelAllManagedReminders()
             showAlert(title: "Notifications", message: "To fully disable notifications, go to Settings.")
         }
     }

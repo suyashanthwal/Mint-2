@@ -210,6 +210,90 @@ class ReportsViewController: UIViewController {
         recurringPayments.filter { $0.isActive && !$0.isIncome }
     }
 
+    private func recurringEventDates(for subscription: RecurringPayment, year: Int, month: Int) -> [Date] {
+        let calendar = Calendar.current
+        guard let monthStart = calendar.date(from: DateComponents(year: year, month: month, day: 1)),
+              let dayRange = calendar.range(of: .day, in: .month, for: monthStart)
+        else { return [] }
+
+        let monthEnd = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart) ?? monthStart
+        let anchorDate = calendar.startOfDay(for: subscription.nextDate)
+        guard monthEnd >= anchorDate else { return [] }
+
+        switch subscription.duration {
+        case .daily:
+            let startDay = calendar.isDate(anchorDate, equalTo: monthStart, toGranularity: .month)
+                ? calendar.component(.day, from: anchorDate)
+                : dayRange.lowerBound
+            return (startDay..<dayRange.upperBound).compactMap {
+                calendar.date(from: DateComponents(year: year, month: month, day: $0))
+            }
+
+        case .weekly:
+            let weekday = calendar.component(.weekday, from: anchorDate)
+            return dayRange.compactMap { day -> Date? in
+                guard let candidate = calendar.date(from: DateComponents(year: year, month: month, day: day)),
+                      candidate >= anchorDate,
+                      calendar.component(.weekday, from: candidate) == weekday
+                else { return nil }
+                return candidate
+            }
+
+        case .monthly, .quarterly, .halfYearly, .yearly:
+            let anchorMonthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: anchorDate)) ?? anchorDate
+            let anchorComponents = calendar.dateComponents([.year, .month, .day], from: anchorDate)
+            guard let anchorYear = anchorComponents.year,
+                  let anchorMonth = anchorComponents.month,
+                  let anchorDay = anchorComponents.day,
+                  monthStart >= anchorMonthStart
+            else { return [] }
+
+            let monthDelta = (year - anchorYear) * 12 + (month - anchorMonth)
+            let stride: Int
+
+            switch subscription.duration {
+            case .monthly:
+                stride = 1
+            case .quarterly:
+                stride = 3
+            case .halfYearly:
+                stride = 6
+            case .yearly:
+                stride = 12
+            case .daily, .weekly:
+                stride = 1
+            }
+
+            guard monthDelta >= 0, monthDelta % stride == 0 else { return [] }
+            let day = min(anchorDay, dayRange.upperBound - 1)
+            return calendar.date(from: DateComponents(year: year, month: month, day: day)).map { [$0] } ?? []
+        }
+    }
+
+    private func nextRecurringEventDate(for subscription: RecurringPayment, onOrAfter date: Date) -> Date? {
+        let calendar = Calendar.current
+        let searchStart = calendar.startOfDay(for: date)
+        let startComponents = calendar.dateComponents([.year, .month], from: min(subscription.nextDate, searchStart))
+
+        guard let startYear = startComponents.year,
+              let startMonth = startComponents.month
+        else { return subscription.nextDate }
+
+        for offset in 0..<24 {
+            guard let monthDate = calendar.date(byAdding: .month, value: offset, to: calendar.date(from: DateComponents(year: startYear, month: startMonth, day: 1)) ?? searchStart) else {
+                continue
+            }
+            let year = calendar.component(.year, from: monthDate)
+            let month = calendar.component(.month, from: monthDate)
+            if let occurrence = recurringEventDates(for: subscription, year: year, month: month)
+                .first(where: { calendar.startOfDay(for: $0) >= searchStart }) {
+                return occurrence
+            }
+        }
+
+        return nil
+    }
+
     private func setupUI() {
         view.backgroundColor = AppColors.background
         MainScrollView.backgroundColor = AppColors.background
@@ -423,7 +507,7 @@ class ReportsViewController: UIViewController {
         let eventDates = bills
             .filter { !$0.isPaid }
             .map(\.billDate) +
-            activeRecurringExpenses.map(\.nextDate)
+            activeRecurringExpenses.compactMap { nextRecurringEventDate(for: $0, onOrAfter: Date()) }
 
         let preferredReportDate: Date = {
             let sortedEventDates = eventDates.sorted()
@@ -447,12 +531,9 @@ class ReportsViewController: UIViewController {
         )
 
         let subscriptionDays = Set(
-            activeRecurringExpenses.compactMap { subscription -> Int? in
-                let components = calendar.dateComponents([.year, .month, .day], from: subscription.nextDate)
-                guard components.year == calendarYear,
-                      components.month == calendarMonth
-                else { return nil }
-                return components.day
+            activeRecurringExpenses.flatMap { subscription in
+                recurringEventDates(for: subscription, year: calendarYear, month: calendarMonth)
+                    .compactMap { calendar.component(.day, from: $0) }
             }
         )
 
@@ -683,7 +764,12 @@ class ReportsViewController: UIViewController {
             ).day
         }
 
+        let reportYear = calendar.component(.year, from: today)
+        let reportMonth = calendar.component(.month, from: today)
         let activeSubscriptions = activeRecurringExpenses.sorted { $0.nextDate < $1.nextDate }
+        let subscriptionsOccurringThisMonth = activeSubscriptions.filter {
+            !recurringEventDates(for: $0, year: reportYear, month: reportMonth).isEmpty
+        }
 
         return ReportsInsightsRequest(
             summary: .init(
@@ -714,8 +800,10 @@ class ReportsViewController: UIViewController {
                 nextBillAmount: nextBill?.amount,
                 nextBillDueDate: nextBill.map { db.databaseDateOnlyString(from: $0.billDate) },
                 daysUntilNextBill: daysUntilNextBill,
-                activeSubscriptionCount: activeSubscriptions.count,
-                monthlySubscriptionTotal: activeSubscriptions.reduce(0) { $0 + $1.amount }
+                activeSubscriptionCount: subscriptionsOccurringThisMonth.count,
+                monthlySubscriptionTotal: subscriptionsOccurringThisMonth.reduce(0) { total, subscription in
+                    total + (Double(recurringEventDates(for: subscription, year: reportYear, month: reportMonth).count) * subscription.amount)
+                }
             )
         )
     }

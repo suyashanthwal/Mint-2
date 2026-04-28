@@ -134,13 +134,27 @@ extension DatabaseManager {
         amount: Double,
         billDate: Date,
         range: BillingRange,
+        icon: String? = nil,
+        isAlertEnabled: Bool? = nil,
         note: String?
     ) {
-        let query = """
-        UPDATE bills
-        SET name = ?, amount = ?, bill_date = ?, range = ?, note = ?
-        WHERE id = ?;
-        """
+        let query: String
+        if icon != nil || isAlertEnabled != nil {
+            query = """
+            UPDATE bills
+            SET name = ?, amount = ?, bill_date = ?, range = ?,
+                icon = COALESCE(?, icon),
+                is_alert_enabled = COALESCE(?, is_alert_enabled),
+                note = ?
+            WHERE id = ?;
+            """
+        } else {
+            query = """
+            UPDATE bills
+            SET name = ?, amount = ?, bill_date = ?, range = ?, note = ?
+            WHERE id = ?;
+            """
+        }
 
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
@@ -154,12 +168,33 @@ extension DatabaseManager {
         sqlite3_bind_double(stmt, 2, amount)
         sqlite3_bind_text(stmt,   3, (dateStr        as NSString).utf8String, -1, nil)
         sqlite3_bind_text(stmt,   4, (range.rawValue as NSString).utf8String, -1, nil)
-        if let note = note, !note.isEmpty {
-            sqlite3_bind_text(stmt, 5, (note as NSString).utf8String, -1, nil)
+
+        let noteIndex: Int32
+        let idIndex: Int32
+        if icon != nil || isAlertEnabled != nil {
+            if let icon {
+                sqlite3_bind_text(stmt, 5, (icon as NSString).utf8String, -1, nil)
+            } else {
+                sqlite3_bind_null(stmt, 5)
+            }
+            if let isAlertEnabled {
+                sqlite3_bind_int(stmt, 6, isAlertEnabled ? 1 : 0)
+            } else {
+                sqlite3_bind_null(stmt, 6)
+            }
+            noteIndex = 7
+            idIndex = 8
         } else {
-            sqlite3_bind_null(stmt, 5)
+            noteIndex = 5
+            idIndex = 6
         }
-        sqlite3_bind_text(stmt, 6, (id.uuidString as NSString).utf8String, -1, nil)
+
+        if let note = note, !note.isEmpty {
+            sqlite3_bind_text(stmt, noteIndex, (note as NSString).utf8String, -1, nil)
+        } else {
+            sqlite3_bind_null(stmt, noteIndex)
+        }
+        sqlite3_bind_text(stmt, idIndex, (id.uuidString as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
             print("Bill updated: \(name)")
