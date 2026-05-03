@@ -56,7 +56,7 @@ final class CustomTabBarController: UITabBarController {
     private func setupVCs() {
         let sb = UIStoryboard(name: "Main", bundle: nil)
 
-        let home    = sb.instantiateViewController(withIdentifier: "HomeViewController")
+        let home    = sb.instantiateViewController(withIdentifier: "NewHomeViewController")
         let budget  = sb.instantiateViewController(withIdentifier: "BudgetViewController")
         let reports = sb.instantiateViewController(withIdentifier: "ReportsViewController")
         let goals   = sb.instantiateViewController(withIdentifier: "GoalsViewController")

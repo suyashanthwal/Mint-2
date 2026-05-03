@@ -2,35 +2,46 @@
 import UIKit
 
 enum AppColors {
-    static let background        = UIColor(hex: "#f8faf8")
+    static let background        = UIColor(hex: "#070819")
     
-    static let card              = UIColor(hex: "#ffffff")
+    static let card              = UIColor(hex: "#121A34")
 
-    static let sectionBackground = UIColor(hex: "#f1f4f2")
+    static let sectionBackground = UIColor(hex: "#0B0D21")
 
-    static let inputBackground   = UIColor(hex: "#e4e9e7")
+    static let inputBackground   = UIColor(hex: "#1A2442")
 
-    static let brand             = UIColor(hex: "#406845")
+    static let brand             = UIColor(hex: "#7C2DFF")
 
-    static let brandLight        = UIColor(hex: "#c3e8ca")
+    static let brandLight        = UIColor(hex: "#B38CFF")
 
     static let brandText         = UIColor(hex: "#ffffff")
 
-    static let brandLightText    = UIColor(hex: "#1a3b1f")
+    static let brandLightText    = UIColor(hex: "#F6F1FF")
 
-    static let textPrimary       = UIColor(hex: "#2d3432")
+    static let textPrimary       = UIColor(hex: "#F7F7FF")
 
-    static let textSecondary     = UIColor(hex: "#59615f")
+    static let textSecondary     = UIColor(hex: "#D7D6F0")
 
-    static let error             = UIColor(hex: "#b3261e")
+    static let error             = UIColor(hex: "#FF5A68")
 
-    static let errorBackground   = UIColor(hex: "#f9dedc")
+    static let errorBackground   = UIColor(hex: "#301526")
     
-    static let errorText         = UIColor(hex: "#410e0b")
+    static let errorText         = UIColor(hex: "#FFE6EA")
+
+    static let cardBorder        = UIColor(hex: "#2A3B76")
+
+    static let orange            = UIColor(hex: "#FF8A00")
+
+    static let success           = UIColor(hex: "#34D26D")
 
     static let brandGradient: [CGColor] = [
-        UIColor(hex: "#406845").cgColor,
-        UIColor(hex: "#345c3a").cgColor
+        UIColor(hex: "#5E17EB").cgColor,
+        UIColor(hex: "#9B2CFF").cgColor
+    ]
+
+    static let goalGradient: [CGColor] = [
+        UIColor(hex: "#6AA85A").cgColor,
+        UIColor(hex: "#C7E8C9").cgColor
     ]
 }
 

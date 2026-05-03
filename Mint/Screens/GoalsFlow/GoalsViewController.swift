@@ -397,6 +397,7 @@ extension GoalsViewController: UICollectionViewDataSource {
                 guard let self else { return }
                 if let url = self.saveImageToDisk(image, for: goal) {
                     self.ongoingGoals[indexPath.item].pickedImageURL = url
+                    NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
                 }
             }
 

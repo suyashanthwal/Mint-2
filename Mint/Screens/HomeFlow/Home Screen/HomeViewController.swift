@@ -1,5 +1,6 @@
 
 import UIKit
+import SDWebImage
 
 class HomeViewController: UIViewController, UICollectionViewDelegate {
 
@@ -22,6 +23,9 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var MonthlyView: UIView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var amountLabel: UILabel!
+    @IBOutlet weak var budgetAmountLabel: UILabel?
+    @IBOutlet weak var monthlyRemainingLabel: UILabel?
+    @IBOutlet weak var profileButton: UIButton?
 
     @IBOutlet private weak var confirmCardView: UIView!
     @IBOutlet private weak var confirmSectionContainerView: UIView!
@@ -32,22 +36,26 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var AverageUpAndDownLabel: UILabel!
     @IBOutlet weak var dailyAverage: UILabel!
 
+    @IBOutlet weak var averageCardsView: UIView!
+    @IBOutlet weak var goalsCardView: UIView!
     @IBOutlet weak var GoalNameLabel: UILabel!
     @IBOutlet weak var SavedSoFarLabel: UILabel!
+    @IBOutlet weak var goalImageView: UIImageView?
+    @IBOutlet weak var streakCountLabel: UILabel?
+    @IBOutlet weak var streakCaptionLabel: UILabel?
+    @IBOutlet weak var streakFireImageView: UIImageView?
+    @IBOutlet weak var goalProgressContainerView: UIView?
     
     private var hasCheckedOnboarding = false
-    let circularProgress = CircularProgressView()
     private var transactions: [Transaction] = []
     private var allTransactions: [Transaction] = []
     private var pendingTransactions: [BufferedTransaction] = []
-    private var bills: [Bill] = []
     private var upcomingItems: [HomeUpcomingItem] = []
     private var allBills: [Bill] = []
     private var goals: [Goal] = []
     private var recurringPayments: [RecurringPayment] = []
     private var currentBudget: Budget?
-    private var monthlyProgressValue: CGFloat = 0
-    private var shouldRenderMonthlyProgressOnLaunch = true
+    private var selectedGoalProgress: CGFloat = 0
     private var categories: [Category] = []
     private let contextMenuFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let actionFeedbackGenerator = UINotificationFeedbackGenerator()
@@ -64,9 +72,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        todaycardview.applyShadow()
-        goalcardview.applyShadow()
-        MonthlyView.backgroundColor = .clear
+        setupDashboardAppearance()
 
         setupConfirmCollectionView()
         setupTransactionsCollectionView()
@@ -119,7 +125,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
                 tooltipBelow: true
             ),
             OnboardingStep(
-                view: goalcardview,
+                view: goalsCardView,
                 title: "Savings Goal",
                 message: "Monitor your progress toward a specific savings target.",
                 tooltipBelow: true
@@ -165,7 +171,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         pendingTransactions = db.fetchBufferedTransactions()
         allBills          = db.fetchBills()
         recurringPayments = db.fetchRecurringPayments()
-        bills             = upcomingBillsForHome()
         upcomingItems     = buildUpcomingItemsForHome()
         goals             = db.fetchGoals()
         currentBudget     = db.fetchCurrentBudget()
@@ -176,6 +181,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         updateMonthlyOverview()
         updateDailyAverageCard()
+        updateStreakCard()
         updateGoalCard()
 
         updateConfirmSectionVisibility()
@@ -184,20 +190,11 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         billsCollectionView.reloadData()
     }
 
-    private func upcomingBillsForHome() -> [Bill] {
-        let startOfToday = Calendar.current.startOfDay(for: Date())
-        return allBills
-            .filter { !$0.isPaid || $0.billDate >= startOfToday }
-            .sorted { lhs, rhs in
-                if lhs.isPaid != rhs.isPaid {
-                    return !lhs.isPaid && rhs.isPaid
-                }
-                return lhs.billDate < rhs.billDate
-            }
-    }
-
     private func buildUpcomingItemsForHome() -> [HomeUpcomingItem] {
-        let billItems = upcomingBillsForHome().map(HomeUpcomingItem.bill)
+        let startOfToday = Calendar.current.startOfDay(for: Date())
+        let billItems = allBills
+            .filter { !$0.isPaid || $0.billDate >= startOfToday }
+            .map(HomeUpcomingItem.bill)
         let subscriptionItems = recurringPayments
             .filter { $0.isActive && !$0.isIncome }
             .sorted { $0.nextDate < $1.nextDate }
@@ -261,7 +258,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         confirmCollectionView.collectionViewLayout.invalidateLayout()
         transactionsCollectionView.collectionViewLayout.invalidateLayout()
         billsCollectionView.collectionViewLayout.invalidateLayout()
-        renderMonthlyProgressIfNeeded()
+        applyDashboardGradients()
+        renderGoalProgress()
     }
 
     private func startOnboarding() {
@@ -341,84 +339,15 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
     private func updateMonthlyOverview() {
         let monthlyExpense = currentMonthExpenseTransactions().reduce(0) { $0 + $1.amount }
-        amountLabel.text = currencyFormatter.string(from: NSNumber(value: monthlyExpense)) ?? "₹0"
-
         let budgetAmount = currentBudget?.allocatedBudget ?? 0
-        monthlyProgressValue = budgetAmount > 0
-            ? CGFloat(min(monthlyExpense / budgetAmount, 1))
-            : 0
+        let remainingAmount = max(budgetAmount - monthlyExpense, 0)
+
+        amountLabel.text = compactCurrency(monthlyExpense)
+        budgetAmountLabel?.text = "/ \(compactCurrency(budgetAmount))"
+        monthlyRemainingLabel?.text = budgetAmount > 0
+            ? "you have \(compactCurrency(remainingAmount)) left"
+            : "set a budget to track this month"
     }
-
-    private func renderMonthlyProgressIfNeeded() {
-        guard shouldRenderMonthlyProgressOnLaunch else { return }
-        guard MonthlyView.bounds.width > 0, MonthlyView.bounds.height > 0 else { return }
-
-        renderMonthlyProgress()
-        shouldRenderMonthlyProgressOnLaunch = false
-    }
-
-    private func renderMonthlyProgress() {
-            guard MonthlyView.bounds.width > 0, MonthlyView.bounds.height > 0 else { return }
-
-            let monthlyExpense = currentMonthExpenseTransactions().reduce(0) { $0 + $1.amount }
-            let budgetAmount = currentBudget?.allocatedBudget ?? 0
-
-            guard budgetAmount > 0 else {
-                circularProgress.setupCircularProgress(
-                    on: MonthlyView,
-                    progress: 0,
-                    trackColor: UIColor.lightGray.withAlphaComponent(0.22),
-                    progressColor: AppColors.error,
-                    lineWidth: 10.0
-                )
-                return
-            }
-
-            let spentRatio = min(max(CGFloat(monthlyExpense / budgetAmount), 0), 1)
-            let remainingRatio = 1 - spentRatio
-
-            func mix(_ from: UIColor, _ to: UIColor, ratio: CGFloat) -> UIColor {
-                let t = min(max(ratio, 0), 1)
-
-                var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
-                var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
-
-                from.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
-                to.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
-
-                return UIColor(
-                    red: r1 + (r2 - r1) * t,
-                    green: g1 + (g2 - g1) * t,
-                    blue: b1 + (b2 - b1) * t,
-                    alpha: a1 + (a2 - a1) * t
-                )
-            }
-
-            let darkGreen = AppColors.brand
-            let softGreen = UIColor(hex: "#7FA487")
-            let softRed   = UIColor(hex: "#D96B66")
-            let darkRed   = AppColors.error
-
-            let progressColor: UIColor
-
-            if remainingRatio > 0.5 {
-                progressColor = darkGreen
-            } else if remainingRatio > 0.25 {
-                let t = (0.5 - remainingRatio) / 0.25
-                progressColor = mix(darkGreen, softGreen, ratio: t)
-            } else {
-                let t = (0.25 - remainingRatio) / 0.25
-                progressColor = mix(softRed, darkRed, ratio: t)
-            }
-
-            circularProgress.setupCircularProgress(
-                on: MonthlyView,
-                progress: remainingRatio,
-                trackColor: UIColor.lightGray.withAlphaComponent(0.22),
-                progressColor: progressColor,
-                lineWidth: 12.0
-            )
-        }
 
     private func updateDailyAverageCard() {
         let calendar = Calendar.current
@@ -426,43 +355,43 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let daysElapsed = max(calendar.component(.day, from: Date()), 1)
         let actualDailyAverage = monthlyExpense / Double(daysElapsed)
         let todaysSpending = todaysExpenseTransactions().reduce(0) { $0 + $1.amount }
+        let dailyBudget = currentDailyBudget()
 
-        dailyAverage.text = currencyFormatter.string(from: NSNumber(value: actualDailyAverage)) ?? "₹0"
-        
+        dailyAverage.text = compactCurrency(actualDailyAverage)
+
+        guard dailyBudget > 0 else {
+            AverageUpAndDownLabel.attributedText = nil
+            AverageUpAndDownLabel.text = "Set a budget to track today"
+            return
+        }
+
         if todaysSpending == 0 {
             AverageUpAndDownLabel.attributedText = nil
-            AverageUpAndDownLabel.text = "You haven’t spent anything today"
+            AverageUpAndDownLabel.text = "You haven't spent anything"
             return
         }
-        
-        guard actualDailyAverage > 0 else {
+
+        let streak = continuousUnderBudgetDays()
+        if streak >= 10, let daysEarlier = estimatedGoalAccelerationDays(), daysEarlier > 0 {
             AverageUpAndDownLabel.attributedText = nil
-            AverageUpAndDownLabel.text = todaysSpending > 0
-                ? "No daily average available yet"
-                : "No spending yet today"
+            AverageUpAndDownLabel.text = "Goal \(daysEarlier)d earlier"
             return
         }
-        
-        let differencePercent = Int(round((abs(todaysSpending - actualDailyAverage) / actualDailyAverage) * 100))
-        
-        if todaysSpending > actualDailyAverage {
-            AverageUpAndDownLabel.attributedText = highlightedPrefixText(
-                "\(differencePercent)%",
-                suffix: " more than your daily average",
-                color: AppColors.error,
-                in: AverageUpAndDownLabel
-            )
-        } else if todaysSpending < actualDailyAverage {
-            AverageUpAndDownLabel.attributedText = highlightedPrefixText(
-                "\(differencePercent)%",
-                suffix: " less than your daily average",
-                color: AppColors.brand,
-                in: AverageUpAndDownLabel
-            )
+
+        AverageUpAndDownLabel.attributedText = nil
+        if todaysSpending <= dailyBudget {
+            AverageUpAndDownLabel.text = streak >= 3 ? "Keep the streak alive" : "You are on track today"
+        } else if todaysSpending <= dailyBudget * 1.15 {
+            AverageUpAndDownLabel.text = "Slightly over today"
         } else {
-            AverageUpAndDownLabel.attributedText = nil
-            AverageUpAndDownLabel.text = "On track with your daily average"
+            AverageUpAndDownLabel.text = "Slow down for today"
         }
+    }
+
+    private func updateStreakCard() {
+        let streak = continuousUnderBudgetDays()
+        streakCountLabel?.text = "\(streak)x"
+        streakCaptionLabel?.text = streak == 1 ? "day under budget" : "days under budget"
     }
 
     private func updateGoalCard() {
@@ -477,19 +406,23 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         if let goal = displayedGoal {
             let progressPercent = Int(round(Double(goal.progress) * 100))
+            selectedGoalProgress = CGFloat(goal.progress)
             GoalNameLabel.text = goal.name
-            SavedSoFarLabel.attributedText = highlightedPrefixText(
-                "\(progressPercent)%",
-                suffix: " saved so far",
-                color: AppColors.brand,
-                in: SavedSoFarLabel
-            )
+            SavedSoFarLabel.attributedText = nil
+            SavedSoFarLabel.text = "\(progressPercent)%"
+            applyGoalImage(for: goal)
+            renderGoalProgress()
             return
         }
 
-        GoalNameLabel.text = "—"
+        selectedGoalProgress = 0
+        GoalNameLabel.text = "No goal yet"
         SavedSoFarLabel.attributedText = nil
-        SavedSoFarLabel.text = "No goals yet"
+        SavedSoFarLabel.text = "0%"
+        goalImageView?.image = UIImage(systemName: "target")
+        goalImageView?.contentMode = .scaleAspectFit
+        goalImageView?.tintColor = AppColors.textPrimary
+        renderGoalProgress()
     }
 
     private func currentMonthExpenseTransactions() -> [Transaction] {
@@ -512,41 +445,59 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         }
     }
 
-    private func currentMonthFixedExpenses() -> Double {
+    private func currentDailyBudget() -> Double {
+        guard let budgetAmount = currentBudget?.allocatedBudget, budgetAmount > 0 else { return 0 }
         let calendar = Calendar.current
-        let now = Date()
-
-        let recurringTotal = recurringPayments
-            .filter { $0.isActive && !$0.isIncome }
-            .reduce(0) { $0 + $1.amount }
-
-        let currentMonthBillsTotal = allBills
-            .filter {
-                calendar.isDate($0.billDate, equalTo: now, toGranularity: .month)
-            }
-            .reduce(0) { $0 + $1.amount }
-
-        return recurringTotal + currentMonthBillsTotal
+        let daysInMonth = calendar.range(of: .day, in: .month, for: Date())?.count ?? 30
+        return budgetAmount / Double(daysInMonth)
     }
 
-    func highlightedPrefixText(
-        _ prefix: String,
-        suffix: String,
-        color: UIColor,
-        in label: UILabel
-    ) -> NSAttributedString {
-        
-        let fullText = prefix + suffix
-        let attributedString = NSMutableAttributedString(string: fullText)
-        
-        let prefixRange = NSRange(location: 0, length: prefix.count)
-        
-        attributedString.addAttributes([
-            .foregroundColor: color,
-            .font: UIFont.boldSystemFont(ofSize: label.font.pointSize)
-        ], range: prefixRange)
-        
-        return attributedString
+    private func expenseTotal(on day: Date) -> Double {
+        let calendar = Calendar.current
+        return allTransactions
+            .filter { $0.type == .expense && calendar.isDate($0.timestamp, inSameDayAs: day) }
+            .reduce(0) { $0 + $1.amount }
+    }
+
+    private func continuousUnderBudgetDays() -> Int {
+        let dailyBudget = currentDailyBudget()
+        guard dailyBudget > 0 else { return 0 }
+
+        let calendar = Calendar.current
+        let startOfMonth = calendar.dateInterval(of: .month, for: Date())?.start ?? Date()
+        var day = calendar.startOfDay(for: Date())
+        var count = 0
+
+        while day >= startOfMonth {
+            if expenseTotal(on: day) <= dailyBudget {
+                count += 1
+                guard let previousDay = calendar.date(byAdding: .day, value: -1, to: day) else { break }
+                day = previousDay
+            } else {
+                break
+            }
+        }
+
+        return count
+    }
+
+    private func estimatedGoalAccelerationDays() -> Int? {
+        guard let goal = goals
+            .filter({ !$0.isCompleted && $0.progress < 1 })
+            .max(by: { $0.progress < $1.progress })
+        else { return nil }
+
+        let dailyBudget = currentDailyBudget()
+        guard dailyBudget > 0 else { return nil }
+
+        let calendar = Calendar.current
+        let daysElapsed = max(calendar.component(.day, from: Date()), 1)
+        let monthlyExpense = currentMonthExpenseTransactions().reduce(0) { $0 + $1.amount }
+        let averageDailySavings = max(dailyBudget - (monthlyExpense / Double(daysElapsed)), 0)
+        guard averageDailySavings > 0 else { return nil }
+
+        let days = Int((goal.amountToGo / averageDailySavings).rounded(.down))
+        return min(max(days, 1), 99)
     }
 
     private func toggleBillPaymentState(for billId: UUID) {
@@ -638,7 +589,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
     private func setupConfirmCollectionView() {
         confirmCardView.backgroundColor = AppColors.card
-        confirmCardView.layer.cornerRadius = 22
+        confirmCardView.layer.cornerRadius = 14
         confirmCardView.layer.masksToBounds = true
 
         confirmCollectionView.register(
@@ -647,7 +598,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         )
         confirmCollectionView.collectionViewLayout = generateConfirmLayout()
         confirmCollectionView.isScrollEnabled = false
-        confirmCollectionView.backgroundColor = .systemGray4
+        confirmCollectionView.backgroundColor = AppColors.card
         confirmCollectionView.showsVerticalScrollIndicator = false
         confirmCollectionView.dataSource = self
         confirmCollectionView.delegate = self
@@ -662,6 +613,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         transactionsCollectionView.isScrollEnabled = false
         transactionsCollectionView.layer.cornerRadius = 22
         transactionsCollectionView.layer.masksToBounds = true
+        transactionsCollectionView.backgroundColor = AppColors.card
         transactionsCollectionView.dataSource = self
         transactionsCollectionView.delegate   = self
     }
@@ -673,6 +625,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
             forCellWithReuseIdentifier: "UpcomingBillsCell"
         )
         billsCollectionView.collectionViewLayout = generateHorizontalLayout()
+        billsCollectionView.backgroundColor = .clear
         billsCollectionView.showsHorizontalScrollIndicator = false
         billsCollectionView.showsVerticalScrollIndicator = false
         billsCollectionView.alwaysBounceVertical = false
@@ -745,8 +698,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: upcomingItems.isEmpty ? .fractionalWidth(1.0) : .absolute(120),
-            heightDimension: .fractionalHeight(1.0)
+            widthDimension: upcomingItems.isEmpty ? .fractionalWidth(1.0) : .absolute(140),
+            heightDimension: upcomingItems.isEmpty ? .fractionalHeight(1.0) : .absolute(180)
         )
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
@@ -755,7 +708,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = upcomingItems.isEmpty ? .none : .continuous
-        section.interGroupSpacing = upcomingItems.isEmpty ? 0 : 12
+        section.interGroupSpacing = upcomingItems.isEmpty ? 0 : 16 // slightly more breathing room
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
 
         return UICollectionViewCompositionalLayout(section: section)
     }
@@ -835,11 +789,13 @@ extension HomeViewController: UICollectionViewDataSource {
                 withReuseIdentifier: "UpcomingBillsCell",
                 for: indexPath
             ) as! UpcomingBillsCollectionViewCell
+            let isFirst = indexPath.item == 0
+            let isLast = indexPath.item == upcomingItems.count - 1
             switch upcomingItems[indexPath.row] {
             case .bill(let bill):
-                cell.configureCell(with: bill)
+                cell.configureCell(with: bill, isFirst: isFirst, isLast: isLast)
             case .subscription(let subscription):
-                cell.configureCell(with: subscription)
+                cell.configureCell(with: subscription, isFirst: isFirst, isLast: isLast)
             }
             return cell
 
@@ -907,5 +863,180 @@ extension HomeViewController {
         }
 
         return nil
+    }
+}
+
+private extension HomeViewController {
+    func setupDashboardAppearance() {
+        view.backgroundColor = AppColors.background
+        scrollView.backgroundColor = AppColors.background
+        scrollView.indicatorStyle = .white
+        clearContainerBackgrounds(in: view)
+
+        styleLabels(in: view, color: AppColors.textPrimary)
+        styleLabels(in: goalcardview, color: .black)
+        [budgetAmountLabel, monthlyRemainingLabel, AverageUpAndDownLabel].forEach {
+            $0?.textColor = AppColors.textSecondary
+        }
+        styleCard(MonthlyView, cornerRadius: 18)
+        styleCard(averageCardsView, cornerRadius: 18, borderColor: AppColors.cardBorder)
+        styleCard(goalcardview, cornerRadius: 18, fillColor: AppColors.orange)
+        styleCard(goalsCardView, cornerRadius: 18)
+
+        MonthlyView.clipsToBounds = true
+        goalsCardView.clipsToBounds = true
+        averageCardsView.backgroundColor = AppColors.card
+        goalcardview.backgroundColor = AppColors.orange
+
+        goalImageView?.contentMode = .scaleAspectFit
+        goalProgressContainerView?.backgroundColor = .clear
+        goalProgressContainerView?.layer.cornerRadius = (goalProgressContainerView?.bounds.width ?? 100) / 2
+        goalProgressContainerView?.clipsToBounds = false
+        loadFireAnimation()
+        profileButton?.tintColor = AppColors.textPrimary
+        profileButton?.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
+    }
+
+    func applyDashboardGradients() {
+        MonthlyView.applyGradient(colors: AppColors.brandGradient, name: "monthlyGradient")
+        goalsCardView.applyGradient(colors: AppColors.goalGradient, name: "goalGradient")
+    }
+
+    func loadFireAnimation() {
+        guard let url = URL(string: "https://lottie.host/dea06fab-bb4c-4c95-ad29-66b83f17e78c/jmabSDGz4q.lottie") else {
+            streakFireImageView?.image = UIImage(systemName: "flame.fill")
+            return
+        }
+
+        streakFireImageView?.sd_setImage(
+            with: url,
+            placeholderImage: UIImage(systemName: "flame.fill")
+        )
+        streakFireImageView?.tintColor = AppColors.error
+    }
+
+    func renderGoalProgress() {
+        guard let container = goalProgressContainerView, container.bounds.width > 0 else { return }
+        container.layer.cornerRadius = min(container.bounds.width, container.bounds.height) / 2
+
+        container.layer.sublayers?
+            .filter { $0.name == "goalProgressTrack" || $0.name == "goalProgressRing" }
+            .forEach { $0.removeFromSuperlayer() }
+
+        let lineWidth: CGFloat = 4
+        let center = CGPoint(x: container.bounds.midX, y: container.bounds.midY)
+        let radius = (min(container.bounds.width, container.bounds.height) - lineWidth) / 2
+        let path = UIBezierPath(
+            arcCenter: center,
+            radius: radius,
+            startAngle: -.pi / 2,
+            endAngle: (.pi * 2) - (.pi / 2),
+            clockwise: true
+        )
+
+        let track = CAShapeLayer()
+        track.name = "goalProgressTrack"
+        track.path = path.cgPath
+        track.fillColor = UIColor.clear.cgColor
+        track.strokeColor = UIColor.white.withAlphaComponent(0.72).cgColor
+        track.lineWidth = lineWidth
+
+        let ring = CAShapeLayer()
+        ring.name = "goalProgressRing"
+        ring.path = path.cgPath
+        ring.fillColor = UIColor.clear.cgColor
+        ring.strokeColor = AppColors.success.cgColor
+        ring.lineWidth = lineWidth
+        ring.lineCap = .butt
+        ring.strokeEnd = min(max(selectedGoalProgress, 0), 1)
+
+        container.layer.addSublayer(track)
+        container.layer.addSublayer(ring)
+    }
+
+    func applyGoalImage(for goal: Goal) {
+        if let image = savedGoalImage(for: goal) {
+            goalImageView?.image = image
+            goalImageView?.contentMode = .scaleAspectFill
+            goalImageView?.tintColor = nil
+        } else if let imageName = goal.imageName, let image = UIImage(named: imageName) {
+            goalImageView?.image = image
+            goalImageView?.contentMode = .scaleAspectFill
+            goalImageView?.tintColor = nil
+        } else {
+            goalImageView?.image = UIImage(systemName: goal.iconName)
+            goalImageView?.contentMode = .scaleAspectFit
+            goalImageView?.tintColor = AppColors.textPrimary
+        }
+    }
+
+    func savedGoalImage(for goal: Goal) -> UIImage? {
+        let url = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("goal_\(goal.id.uuidString)_photo.jpg")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return UIImage(data: data)
+    }
+
+    func styleLabels(in rootView: UIView?, color: UIColor) {
+        guard let rootView else { return }
+        for subview in rootView.subviews {
+            if let label = subview as? UILabel {
+                label.textColor = color
+            }
+            styleLabels(in: subview, color: color)
+        }
+    }
+
+    func clearContainerBackgrounds(in rootView: UIView) {
+        for subview in rootView.subviews {
+            if !(subview is UILabel),
+               !(subview is UIImageView),
+               !(subview is UIControl),
+               !(subview is UICollectionView) {
+                subview.backgroundColor = .clear
+            }
+            clearContainerBackgrounds(in: subview)
+        }
+    }
+
+    func styleCard(
+        _ cardView: UIView?,
+        cornerRadius: CGFloat,
+        fillColor: UIColor? = nil,
+        borderColor: UIColor? = nil
+    ) {
+        guard let cardView else { return }
+        cardView.backgroundColor = fillColor ?? AppColors.card
+        cardView.layer.cornerRadius = cornerRadius
+        cardView.layer.masksToBounds = true
+        cardView.layer.borderWidth = borderColor == nil ? 0 : 1
+        cardView.layer.borderColor = borderColor?.cgColor
+    }
+
+    @objc func showProfile() {
+        let profile = storyboard?.instantiateViewController(withIdentifier: "ProfileViewController")
+        guard let profile else { return }
+        navigationController?.pushViewController(profile, animated: true)
+    }
+
+    func compactCurrency(_ amount: Double) -> String {
+        let rounded = Int(amount.rounded())
+        return "₹\(rounded.formatted(.number.grouping(.automatic)))"
+    }
+}
+
+private extension UIView {
+    func applyGradient(colors: [CGColor], name: String) {
+        let gradient = (layer.sublayers?.first { $0.name == name } as? CAGradientLayer) ?? CAGradientLayer()
+        gradient.name = name
+        gradient.colors = colors
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        gradient.frame = bounds
+
+        if gradient.superlayer == nil {
+            layer.insertSublayer(gradient, at: 0)
+        }
     }
 }
