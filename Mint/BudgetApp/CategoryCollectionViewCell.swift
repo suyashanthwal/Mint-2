@@ -1,0 +1,61 @@
+import UIKit
+
+struct BudgetCategoryItem {
+    let title: String
+    let amount: String
+    let symbolName: String
+    let progress: Float
+    let accentColor: UIColor
+    let backgroundColor: UIColor
+    let iconColor: UIColor
+}
+
+final class CategoryCollectionViewCell: UICollectionViewCell {
+    static let reuseIdentifier = "CategoryCollectionViewCell"
+
+    @IBOutlet private weak var cardView: UIView!
+    @IBOutlet private weak var iconContainerView: UIView!
+    @IBOutlet private weak var iconImageView: UIImageView!
+    @IBOutlet private weak var titleLabel: UILabel!
+    @IBOutlet private weak var amountLabel: UILabel!
+    @IBOutlet private weak var progressTrackView: UIView!
+    @IBOutlet private weak var progressFillView: UIView!
+    @IBOutlet private weak var progressFillWidthConstraint: NSLayoutConstraint!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        setupUI()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        iconContainerView.layer.cornerRadius = iconContainerView.bounds.height / 2
+        progressTrackView.layer.cornerRadius = progressTrackView.bounds.height / 2
+        progressFillView.layer.cornerRadius = progressFillView.bounds.height / 2
+    }
+
+    private func setupUI() {
+        contentView.backgroundColor = .clear
+        cardView.layer.cornerRadius = 10
+        cardView.layer.borderWidth = 1
+        titleLabel.textColor = AppColors.textPrimary
+        amountLabel.textColor = AppColors.textPrimary
+        iconImageView.tintColor = AppColors.brandText
+        progressTrackView.clipsToBounds = true
+        progressFillView.clipsToBounds = true
+    }
+
+    func configure(with item: BudgetCategoryItem) {
+        cardView.backgroundColor = item.backgroundColor
+        cardView.layer.borderColor = item.accentColor.cgColor
+        iconContainerView.backgroundColor = item.iconColor
+        iconImageView.image = UIImage(systemName: item.symbolName)
+        progressFillWidthConstraint.isActive = false
+        progressFillWidthConstraint = progressFillView.widthAnchor.constraint(equalTo: progressTrackView.widthAnchor, multiplier: CGFloat(item.progress))
+        progressFillWidthConstraint.isActive = true
+        progressFillView.backgroundColor = item.accentColor
+        progressTrackView.backgroundColor = item.accentColor.withAlphaComponent(0.32)
+        titleLabel.text = item.title
+        amountLabel.text = item.amount
+    }
+}
