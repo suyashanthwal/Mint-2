@@ -11,6 +11,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     private enum LayoutMetrics {
         static let compactListSpacing: CGFloat = 12
         static let compactCellHeight: CGFloat = 56
+        static let categoryGridCellHeight: CGFloat = 82
         static let compactGoalCellHeight: CGFloat = 88
         static let placeholderCellHeight: CGFloat = 88
     }
@@ -693,25 +694,53 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func setupPageControls() {
-            let categoriesPages = categories.isEmpty ? 0 : Int(ceil(Double(categories.count) / Double(itemsPerPage)))
-            let paymentsPages   = subsAndBillsItems.isEmpty ? 0 : Int(ceil(Double(subsAndBillsItems.count) / Double(itemsPerPage)))
-            let goalsPages      = goals.isEmpty ? 0 : Int(ceil(Double(goals.count) / Double(goalsItemsPerPage)))
-     
-            CategoriesPageControl.numberOfPages   = categoriesPages
-            SubsandBillsPageControl.numberOfPages = paymentsPages
-            GoalsPageControl.numberOfPages        = goalsPages
-     
-            [CategoriesPageControl, SubsandBillsPageControl, GoalsPageControl].forEach {
-                $0?.currentPage                   = 0
-                $0?.currentPageIndicatorTintColor = AppColors.brand
-                $0?.pageIndicatorTintColor        = AppColors.brand.withAlphaComponent(0.3)
-                $0?.isUserInteractionEnabled      = false
-            }
+        let categoriesPages = pageCount(for: categories.count, itemsPerPage: itemsPerPage)
+        let paymentsPages   = pageCount(for: subsAndBillsItems.count, itemsPerPage: itemsPerPage)
+        let goalsPages      = pageCount(for: goals.count, itemsPerPage: goalsItemsPerPage)
 
-            CategoriesPageControl.isHidden = categoriesPages <= 1
-            SubsandBillsPageControl.isHidden = paymentsPages <= 1
-            GoalsPageControl.isHidden = goalsPages <= 1
+        configurePageControl(CategoriesPageControl, pages: categoriesPages)
+        configurePageControl(SubsandBillsPageControl, pages: paymentsPages)
+        configurePageControl(GoalsPageControl, pages: goalsPages)
+    }
+
+    private func pageCount(for itemCount: Int, itemsPerPage: Int) -> Int {
+        guard itemCount > 0 else { return 0 }
+        return Int(ceil(Double(itemCount) / Double(itemsPerPage)))
+    }
+
+    private func configurePageControl(_ pageControl: UIPageControl, pages: Int) {
+        pageControl.numberOfPages = pages
+        pageControl.currentPage = min(pageControl.currentPage, max(pages - 1, 0))
+        pageControl.currentPageIndicatorTintColor = AppColors.brand
+        pageControl.pageIndicatorTintColor = AppColors.brand.withAlphaComponent(0.3)
+        pageControl.isHidden = pages <= 1
+        pageControl.isUserInteractionEnabled = pages > 1
+        pageControl.removeTarget(self, action: #selector(pageControlChanged(_:)), for: .valueChanged)
+        pageControl.addTarget(self, action: #selector(pageControlChanged(_:)), for: .valueChanged)
+    }
+
+    @objc private func pageControlChanged(_ sender: UIPageControl) {
+        if sender == CategoriesPageControl {
+            scroll(CategoriesCollectionView, toPage: sender.currentPage, itemCount: categories.count, itemsPerPage: itemsPerPage)
+        } else if sender == SubsandBillsPageControl {
+            scroll(SubsandBillsCollectionView, toPage: sender.currentPage, itemCount: subsAndBillsItems.count, itemsPerPage: itemsPerPage)
+        } else if sender == GoalsPageControl {
+            scroll(GoalsCollectionView, toPage: sender.currentPage, itemCount: goals.count, itemsPerPage: goalsItemsPerPage)
         }
+    }
+
+    private func scroll(_ collectionView: UICollectionView,
+                        toPage page: Int,
+                        itemCount: Int,
+                        itemsPerPage: Int) {
+        guard itemCount > 0 else { return }
+        let targetItem = min(max(page, 0) * itemsPerPage, itemCount - 1)
+        collectionView.scrollToItem(
+            at: IndexPath(item: targetItem, section: 0),
+            at: .left,
+            animated: true
+        )
+    }
 
     private func setupCollectionViews() {
             registerPlaceholderCell(for: CategoriesCollectionView)
@@ -749,9 +778,8 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         }
 
         private func updateCollectionLayouts() {
-            CategoriesCollectionView.collectionViewLayout = makeDynamicLayout(
+            CategoriesCollectionView.collectionViewLayout = makeCategoriesLayout(
                 itemCount: max(categories.count, 1),
-                cellHeight: categories.isEmpty ? LayoutMetrics.placeholderCellHeight : LayoutMetrics.compactCellHeight,
                 pageControl: CategoriesPageControl
             )
             SubsandBillsCollectionView.collectionViewLayout = makeDynamicLayout(
@@ -764,6 +792,23 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
                 cellHeight: goals.isEmpty ? LayoutMetrics.placeholderCellHeight : LayoutMetrics.compactGoalCellHeight,
                 pageControl: GoalsPageControl,
                 itemsPerPage: goalsItemsPerPage
+            )
+        }
+
+        private func makeCategoriesLayout(itemCount: Int,
+                                          pageControl: UIPageControl) -> UICollectionViewLayout {
+            if categories.isEmpty {
+                return makeStaticVerticalLayout(
+                    itemCount: itemCount,
+                    cellHeight: LayoutMetrics.placeholderCellHeight
+                )
+            }
+
+            return generateHorizontalGridPageLayout(
+                rows: 2,
+                columns: 2,
+                cellHeight: LayoutMetrics.categoryGridCellHeight,
+                pageControl: pageControl
             )
         }
 
@@ -805,6 +850,52 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
             group.interItemSpacing = .fixed(LayoutMetrics.compactListSpacing)
 
             let section = NSCollectionLayoutSection(group: group)
+            return UICollectionViewCompositionalLayout(section: section)
+        }
+
+        private func generateHorizontalGridPageLayout(rows: Int,
+                                                      columns: Int,
+                                                      cellHeight: CGFloat,
+                                                      pageControl: UIPageControl) -> UICollectionViewLayout {
+            let spacing = LayoutMetrics.compactListSpacing
+
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0 / CGFloat(columns)),
+                heightDimension: .absolute(cellHeight)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+            let rowSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(cellHeight)
+            )
+            let rowGroup = NSCollectionLayoutGroup.horizontal(
+                layoutSize: rowSize,
+                repeatingSubitem: item,
+                count: columns
+            )
+            rowGroup.interItemSpacing = .fixed(spacing)
+
+            let groupHeight = (cellHeight * CGFloat(rows)) + (spacing * CGFloat(rows - 1))
+            let pageSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(groupHeight)
+            )
+            let pageGroup = NSCollectionLayoutGroup.vertical(
+                layoutSize: pageSize,
+                repeatingSubitem: rowGroup,
+                count: rows
+            )
+            pageGroup.interItemSpacing = .fixed(spacing)
+
+            let section = NSCollectionLayoutSection(group: pageGroup)
+            section.orthogonalScrollingBehavior = .groupPaging
+            section.visibleItemsInvalidationHandler = { [weak pageControl] _, contentOffset, environment in
+                let pageWidth = max(environment.container.effectiveContentSize.width, 1)
+                let page = Int(round(contentOffset.x / pageWidth))
+                pageControl?.currentPage = min(max(page, 0), max((pageControl?.numberOfPages ?? 1) - 1, 0))
+            }
+
             return UICollectionViewCompositionalLayout(section: section)
         }
 

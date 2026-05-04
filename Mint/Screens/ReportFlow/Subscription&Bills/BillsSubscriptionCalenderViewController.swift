@@ -52,6 +52,7 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         setupUI()
         setupCalendarCollectionView()
         setupBillsCollectionViews()
+        observeDataChanges()
         reloadFromDatabase()
     }
 
@@ -65,6 +66,23 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         super.viewDidLayoutSubviews()
         UpcomingcollectionViewHeight.constant = UpcomingBillsCollectionView.contentSize.height
         ActivecollectionViewHeight.constant = ActiveSubscriptionCollectionView.contentSize.height
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    private func observeDataChanges() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleBudgetDataChange),
+            name: .budgetDataDidChange,
+            object: nil
+        )
+    }
+
+    @objc private func handleBudgetDataChange() {
+        reloadFromDatabase()
     }
 
     private func setupUI() {

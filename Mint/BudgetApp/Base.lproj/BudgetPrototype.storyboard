@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="budgetVC">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Budget View Controller-->
+        <scene sceneID="scene-budget">
+            <objects>
+                <viewController storyboardIdentifier="BudgetViewController" id="budgetVC" customClass="NewBudgetViewController" customModule="Mint" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="rootView">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aSa-OY-v0W">
+                                <rect key="frame" x="0.0" y="118" width="393" height="50"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Budget" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Psr-4K-zEG">
+                                        <rect key="frame" x="20.000000000000007" y="8.3333333333333286" width="92.666666666666686" height="33.666666666666664"/>
+                                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uRc-IR-mhc">
+                                        <rect key="frame" x="339" y="8" width="34" height="34"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="34" id="4eq-BM-vo5"/>
+                                            <constraint firstAttribute="height" constant="34" id="KOd-5V-I5f"/>
+                                        </constraints>
+                                        <color key="tintColor" red="0.2260742188" green="0.3195800781" blue="0.2231445312" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain">
+                                            <imageReference key="image" image="person.circle.fill" catalog="system" symbolScale="large"/>
+                                            <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="24"/>
+                                        </buttonConfiguration>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="uRc-IR-mhc" secondAttribute="trailing" constant="20" id="4S1-66-oRb"/>
+                                    <constraint firstItem="Psr-4K-zEG" firstAttribute="centerY" secondItem="aSa-OY-v0W" secondAttribute="centerY" id="OB6-QT-VVM"/>
+                                    <constraint firstAttribute="height" constant="50" id="lO9-XL-9Lo"/>
+                                    <constraint firstItem="Psr-4K-zEG" firstAttribute="leading" secondItem="aSa-OY-v0W" secondAttribute="leading" constant="20" id="oOh-5C-asD"/>
+                                    <constraint firstItem="uRc-IR-mhc" firstAttribute="centerY" secondItem="aSa-OY-v0W" secondAttribute="centerY" id="yxm-uc-Wev"/>
+                                </constraints>
+                            </view>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="scrollView">
+                                <rect key="frame" x="0.0" y="168" width="393" height="684"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="28" translatesAutoresizingMaskIntoConstraints="NO" id="contentStack">
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1278"/>
+                                        <subviews>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="28" translatesAutoresizingMaskIntoConstraints="NO" id="19M-UI-1VN">
+                                                <rect key="frame" x="0.0" y="0.0" width="393" height="1278"/>
+                                                <subviews>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="totalCard">
+                                                        <rect key="frame" x="0.0" y="0.0" width="393" height="158"/>
+                                                        <subviews>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XfO-cd-dQw">
+                                                                <rect key="frame" x="20" y="20" width="353" height="138"/>
+                                                                <subviews>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="TOTAL BUDGET" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="totalTitle">
+                                                                        <rect key="frame" x="12" y="12.000000000000002" width="135" height="21.666666666666671"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="editButton">
+                                                                        <rect key="frame" x="315" y="8" width="30" height="30"/>
+                                                                        <state key="normal" title="Edit"/>
+                                                                    </button>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="15 days left" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="daysLeft">
+                                                                        <rect key="frame" x="12" y="108" width="84" height="18"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="right" text="7k spent" textAlignment="right" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="spentLabel">
+                                                                        <rect key="frame" x="278" y="108" width="63" height="18"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="₹36,000" lineBreakMode="tailTruncation" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="totalAmount">
+                                                                        <rect key="frame" x="8" y="47.666666666666657" width="150.66666666666666" height="43"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="36"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                </subviews>
+                                                                <constraints>
+                                                                    <constraint firstItem="daysLeft" firstAttribute="leading" secondItem="XfO-cd-dQw" secondAttribute="leading" constant="12" id="5Rt-Bu-9cd"/>
+                                                                    <constraint firstItem="totalTitle" firstAttribute="leading" secondItem="XfO-cd-dQw" secondAttribute="leading" constant="12" id="FaJ-Gw-Eqc"/>
+                                                                    <constraint firstItem="editButton" firstAttribute="centerY" secondItem="totalTitle" secondAttribute="centerY" id="IHE-Uf-yHr"/>
+                                                                    <constraint firstItem="totalAmount" firstAttribute="leading" secondItem="XfO-cd-dQw" secondAttribute="leading" constant="8" id="Kn7-GR-kS5"/>
+                                                                    <constraint firstAttribute="bottom" secondItem="spentLabel" secondAttribute="bottom" constant="12" id="RFm-1U-DDG"/>
+                                                                    <constraint firstItem="totalAmount" firstAttribute="centerY" secondItem="XfO-cd-dQw" secondAttribute="centerY" id="S2j-CY-gjv"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="editButton" secondAttribute="trailing" constant="8" id="VRs-mM-QaH"/>
+                                                                    <constraint firstAttribute="bottom" secondItem="daysLeft" secondAttribute="bottom" constant="12" id="WWJ-XA-hBW"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="spentLabel" secondAttribute="trailing" constant="12" id="n0Q-xm-DCz"/>
+                                                                    <constraint firstItem="totalTitle" firstAttribute="top" secondItem="XfO-cd-dQw" secondAttribute="top" constant="12" id="wqg-y3-TjF"/>
+                                                                </constraints>
+                                                            </view>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstItem="XfO-cd-dQw" firstAttribute="top" secondItem="totalCard" secondAttribute="top" constant="20" id="2nq-Sh-DuB"/>
+                                                            <constraint firstAttribute="trailing" secondItem="XfO-cd-dQw" secondAttribute="trailing" constant="20" id="5R4-nj-iBH"/>
+                                                            <constraint firstAttribute="bottom" secondItem="XfO-cd-dQw" secondAttribute="bottom" id="E2B-nT-Qxn"/>
+                                                            <constraint firstAttribute="height" constant="158" id="OXP-Gr-KIr"/>
+                                                            <constraint firstItem="XfO-cd-dQw" firstAttribute="leading" secondItem="totalCard" secondAttribute="leading" constant="20" id="Ue0-4N-68t"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ulg-cM-qQb">
+                                                        <rect key="frame" x="0.0" y="186" width="393" height="166"/>
+                                                        <subviews>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="18" translatesAutoresizingMaskIntoConstraints="NO" id="metricGrid">
+                                                                <rect key="frame" x="20" y="0.0" width="353" height="166"/>
+                                                                <subviews>
+                                                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="18" translatesAutoresizingMaskIntoConstraints="NO" id="metricRow1">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="74"/>
+                                                                        <subviews>
+                                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="metricFixed">
+                                                                                <rect key="frame" x="0.0" y="0.0" width="167.66666666666666" height="74"/>
+                                                                                <subviews>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Fixed" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fixedTitle">
+                                                                                        <rect key="frame" x="10.000000000000004" y="14" width="46.333333333333343" height="23"/>
+                                                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="19"/>
+                                                                                    </label>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="₹12,000" lineBreakMode="tailTruncation" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="fixedAmount">
+                                                                                        <rect key="frame" x="10" y="43" width="147.66666666666666" height="28.666666666666671"/>
+                                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                                                                    </label>
+                                                                                </subviews>
+                                                                                <constraints>
+                                                                                    <constraint firstItem="fixedAmount" firstAttribute="leading" secondItem="fixedTitle" secondAttribute="leading" id="m1al"/>
+                                                                                    <constraint firstAttribute="trailing" secondItem="fixedAmount" secondAttribute="trailing" constant="10" id="m1ar"/>
+                                                                                    <constraint firstItem="fixedAmount" firstAttribute="top" secondItem="fixedTitle" secondAttribute="bottom" constant="6" id="m1at"/>
+                                                                                    <constraint firstAttribute="height" constant="74" id="m1h"/>
+                                                                                    <constraint firstItem="fixedTitle" firstAttribute="leading" secondItem="metricFixed" secondAttribute="leading" constant="10" id="m1tl"/>
+                                                                                    <constraint firstItem="fixedTitle" firstAttribute="top" secondItem="metricFixed" secondAttribute="top" constant="14" id="m1tt"/>
+                                                                                </constraints>
+                                                                            </view>
+                                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="metricSpend">
+                                                                                <rect key="frame" x="185.66666666666663" y="0.0" width="167.33333333333337" height="74"/>
+                                                                                <subviews>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="To spend" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="spendTitle">
+                                                                                        <rect key="frame" x="10" y="14" width="79.333333333333329" height="23"/>
+                                                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="19"/>
+                                                                                    </label>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="₹15,000" lineBreakMode="tailTruncation" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="spendAmount">
+                                                                                        <rect key="frame" x="10" y="43" width="147.33333333333334" height="28.666666666666671"/>
+                                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                                                                    </label>
+                                                                                </subviews>
+                                                                                <constraints>
+                                                                                    <constraint firstItem="spendAmount" firstAttribute="leading" secondItem="spendTitle" secondAttribute="leading" id="m2al"/>
+                                                                                    <constraint firstAttribute="trailing" secondItem="spendAmount" secondAttribute="trailing" constant="10" id="m2ar"/>
+                                                                                    <constraint firstItem="spendAmount" firstAttribute="top" secondItem="spendTitle" secondAttribute="bottom" constant="6" id="m2at"/>
+                                                                                    <constraint firstItem="spendTitle" firstAttribute="leading" secondItem="metricSpend" secondAttribute="leading" constant="10" id="m2tl"/>
+                                                                                    <constraint firstItem="spendTitle" firstAttribute="top" secondItem="metricSpend" secondAttribute="top" constant="14" id="m2tt"/>
+                                                                                </constraints>
+                                                                            </view>
+                                                                        </subviews>
+                                                                    </stackView>
+                                                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="18" translatesAutoresizingMaskIntoConstraints="NO" id="metricRow2">
+                                                                        <rect key="frame" x="0.0" y="92" width="353" height="74"/>
+                                                                        <subviews>
+                                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="metricRecurring">
+                                                                                <rect key="frame" x="0.0" y="0.0" width="167.66666666666666" height="74"/>
+                                                                                <subviews>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Recurring" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="recurringTitle">
+                                                                                        <rect key="frame" x="10" y="14" width="84.666666666666671" height="23"/>
+                                                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="19"/>
+                                                                                    </label>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="₹8,000" lineBreakMode="tailTruncation" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="recurringAmount">
+                                                                                        <rect key="frame" x="10" y="43" width="147.66666666666666" height="28.666666666666671"/>
+                                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                                                                    </label>
+                                                                                </subviews>
+                                                                                <constraints>
+                                                                                    <constraint firstItem="recurringAmount" firstAttribute="leading" secondItem="recurringTitle" secondAttribute="leading" id="m3al"/>
+                                                                                    <constraint firstAttribute="trailing" secondItem="recurringAmount" secondAttribute="trailing" constant="10" id="m3ar"/>
+                                                                                    <constraint firstItem="recurringAmount" firstAttribute="top" secondItem="recurringTitle" secondAttribute="bottom" constant="6" id="m3at"/>
+                                                                                    <constraint firstItem="recurringTitle" firstAttribute="leading" secondItem="metricRecurring" secondAttribute="leading" constant="10" id="m3tl"/>
+                                                                                    <constraint firstItem="recurringTitle" firstAttribute="top" secondItem="metricRecurring" secondAttribute="top" constant="14" id="m3tt"/>
+                                                                                </constraints>
+                                                                            </view>
+                                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="metricSaving">
+                                                                                <rect key="frame" x="185.66666666666663" y="0.0" width="167.33333333333337" height="74"/>
+                                                                                <subviews>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Saving Target" lineBreakMode="tailTruncation" minimumScaleFactor="0.75" translatesAutoresizingMaskIntoConstraints="NO" id="savingTitle">
+                                                                                        <rect key="frame" x="10" y="14" width="147.33333333333334" height="23"/>
+                                                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="19"/>
+                                                                                    </label>
+                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="₹1,000" lineBreakMode="tailTruncation" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="savingAmount">
+                                                                                        <rect key="frame" x="10" y="43" width="147.33333333333334" height="28.666666666666671"/>
+                                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                                                                    </label>
+                                                                                </subviews>
+                                                                                <constraints>
+                                                                                    <constraint firstItem="savingAmount" firstAttribute="leading" secondItem="savingTitle" secondAttribute="leading" id="m4al"/>
+                                                                                    <constraint firstAttribute="trailing" secondItem="savingAmount" secondAttribute="trailing" constant="10" id="m4ar"/>
+                                                                                    <constraint firstItem="savingAmount" firstAttribute="top" secondItem="savingTitle" secondAttribute="bottom" constant="6" id="m4at"/>
+                                                                                    <constraint firstItem="savingTitle" firstAttribute="leading" secondItem="metricSaving" secondAttribute="leading" constant="10" id="m4tl"/>
+                                                                                    <constraint firstAttribute="trailing" secondItem="savingTitle" secondAttribute="trailing" constant="10" id="m4tr"/>
+                                                                                    <constraint firstItem="savingTitle" firstAttribute="top" secondItem="metricSaving" secondAttribute="top" constant="14" id="m4tt"/>
+                                                                                </constraints>
+                                                                            </view>
+                                                                        </subviews>
+                                                                    </stackView>
+                                                                </subviews>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="166" id="S4n-Fa-qpX"/>
+                                                                </constraints>
+                                                            </stackView>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstAttribute="bottom" secondItem="metricGrid" secondAttribute="bottom" id="2qk-bs-aza"/>
+                                                            <constraint firstItem="metricGrid" firstAttribute="top" secondItem="ulg-cM-qQb" secondAttribute="top" id="BBT-bH-7VI"/>
+                                                            <constraint firstItem="metricGrid" firstAttribute="leading" secondItem="ulg-cM-qQb" secondAttribute="leading" constant="20" id="BVb-T9-2xY"/>
+                                                            <constraint firstAttribute="trailing" secondItem="metricGrid" secondAttribute="trailing" constant="20" id="Wtj-Lw-cmX"/>
+                                                            <constraint firstAttribute="height" constant="166" id="Z3L-0i-nIA"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gkv-9y-lwd">
+                                                        <rect key="frame" x="0.0" y="380" width="393" height="380"/>
+                                                        <subviews>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="categoriesSection">
+                                                                <rect key="frame" x="20" y="0.0" width="353" height="380"/>
+                                                                <subviews>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="CATEGORIES" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="categoriesTitle">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="40"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="40" id="CGa-Uz-c8s"/>
+                                                                        </constraints>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                                    </label>
+                                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="categoriesCollection">
+                                                                        <rect key="frame" x="0.0" y="54" width="353" height="300"/>
+                                                                        <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="300" id="catHeight"/>
+                                                                        </constraints>
+                                                                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="18" minimumInteritemSpacing="18" id="catLayout">
+                                                                            <size key="itemSize" width="164" height="122"/>
+                                                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                                        </collectionViewFlowLayout>
+                                                                    </collectionView>
+                                                                    <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="3" translatesAutoresizingMaskIntoConstraints="NO" id="Od8-TB-MMy">
+                                                                        <rect key="frame" x="0.0" y="368" width="353" height="12"/>
+                                                                    </pageControl>
+                                                                </subviews>
+                                                            </stackView>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstItem="categoriesSection" firstAttribute="top" secondItem="gkv-9y-lwd" secondAttribute="top" id="1DK-X2-hh2"/>
+                                                            <constraint firstAttribute="trailing" secondItem="categoriesSection" secondAttribute="trailing" constant="20" id="6d5-6A-Xyu"/>
+                                                            <constraint firstAttribute="bottom" secondItem="categoriesSection" secondAttribute="bottom" id="T3O-0e-ft4"/>
+                                                            <constraint firstItem="categoriesSection" firstAttribute="leading" secondItem="gkv-9y-lwd" secondAttribute="leading" constant="20" id="gye-Ga-hce"/>
+                                                            <constraint firstAttribute="height" constant="380" id="hst-Ip-hkR"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oKN-cm-Ele">
+                                                        <rect key="frame" x="0.0" y="788" width="393" height="240"/>
+                                                        <subviews>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="subsSection">
+                                                                <rect key="frame" x="20" y="0.0" width="353" height="240"/>
+                                                                <subviews>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="SUBS &amp; BILLS" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="subsTitle">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="40"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="40" id="7wp-TN-i0o"/>
+                                                                        </constraints>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                                    </label>
+                                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="subsCollection">
+                                                                        <rect key="frame" x="0.0" y="54" width="353" height="186"/>
+                                                                        <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+                                                                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="18" minimumInteritemSpacing="18" id="subsLayout">
+                                                                            <size key="itemSize" width="128" height="180"/>
+                                                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                                        </collectionViewFlowLayout>
+                                                                    </collectionView>
+                                                                </subviews>
+                                                            </stackView>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstItem="subsSection" firstAttribute="leading" secondItem="oKN-cm-Ele" secondAttribute="leading" constant="20" id="2MK-Ls-OQ3"/>
+                                                            <constraint firstItem="subsSection" firstAttribute="top" secondItem="oKN-cm-Ele" secondAttribute="top" id="eHe-Q2-T8Q"/>
+                                                            <constraint firstAttribute="bottom" secondItem="subsSection" secondAttribute="bottom" id="oAJ-yg-ifw"/>
+                                                            <constraint firstAttribute="height" constant="240" id="sDU-iI-26c"/>
+                                                            <constraint firstAttribute="trailing" secondItem="subsSection" secondAttribute="trailing" constant="20" id="uii-FJ-YvI"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wwy-NR-1Le">
+                                                        <rect key="frame" x="0.0" y="1056" width="393" height="222"/>
+                                                        <subviews>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="goalsSection">
+                                                                <rect key="frame" x="20" y="0.0" width="353" height="222"/>
+                                                                <subviews>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="SAVING GOALS" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="goalsTitle">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="22"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                                    </label>
+                                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="goalsCollection">
+                                                                        <rect key="frame" x="0.0" y="36" width="353" height="186"/>
+                                                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="186" id="goalsHeight"/>
+                                                                        </constraints>
+                                                                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="14" minimumInteritemSpacing="14" id="goalsLayout">
+                                                                            <size key="itemSize" width="347" height="86"/>
+                                                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                                        </collectionViewFlowLayout>
+                                                                    </collectionView>
+                                                                </subviews>
+                                                            </stackView>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstItem="goalsSection" firstAttribute="leading" secondItem="wwy-NR-1Le" secondAttribute="leading" constant="20" id="Phz-ib-4K1"/>
+                                                            <constraint firstItem="goalsSection" firstAttribute="top" secondItem="wwy-NR-1Le" secondAttribute="top" id="Ra5-wn-gey"/>
+                                                            <constraint firstAttribute="bottom" secondItem="goalsSection" secondAttribute="bottom" id="ZdX-Dw-4gn"/>
+                                                            <constraint firstAttribute="height" constant="222" id="ofP-Co-fPE"/>
+                                                            <constraint firstAttribute="trailing" secondItem="goalsSection" secondAttribute="trailing" constant="20" id="pH9-ku-wHx"/>
+                                                        </constraints>
+                                                    </view>
+                                                </subviews>
+                                            </stackView>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="scrollContent" firstAttribute="bottom" secondItem="contentStack" secondAttribute="bottom" id="stackBottom"/>
+                                    <constraint firstItem="contentStack" firstAttribute="leading" secondItem="scrollContent" secondAttribute="leading" id="stackLeading"/>
+                                    <constraint firstItem="contentStack" firstAttribute="top" secondItem="scrollContent" secondAttribute="top" id="stackTop"/>
+                                    <constraint firstItem="scrollContent" firstAttribute="trailing" secondItem="contentStack" secondAttribute="trailing" id="stackTrailing"/>
+                                    <constraint firstItem="contentStack" firstAttribute="width" secondItem="scrollFrame" secondAttribute="width" id="stackWidth"/>
+                                </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="scrollContent"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="scrollFrame"/>
+                            </scrollView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="safeArea"/>
+                        <constraints>
+                            <constraint firstItem="scrollView" firstAttribute="top" secondItem="aSa-OY-v0W" secondAttribute="bottom" id="2n1-W6-cfC"/>
+                            <constraint firstItem="aSa-OY-v0W" firstAttribute="trailing" secondItem="safeArea" secondAttribute="trailing" id="DCq-rm-qfy"/>
+                            <constraint firstItem="aSa-OY-v0W" firstAttribute="leading" secondItem="safeArea" secondAttribute="leading" id="jUx-48-GHq"/>
+                            <constraint firstItem="aSa-OY-v0W" firstAttribute="top" secondItem="safeArea" secondAttribute="top" id="rHC-EF-6dU"/>
+                            <constraint firstAttribute="bottom" secondItem="scrollView" secondAttribute="bottom" id="scrollBottom"/>
+                            <constraint firstItem="scrollView" firstAttribute="leading" secondItem="safeArea" secondAttribute="leading" id="scrollLeading"/>
+                            <constraint firstItem="scrollView" firstAttribute="trailing" secondItem="safeArea" secondAttribute="trailing" id="scrollTrailing"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="categoriesCollectionView" destination="categoriesCollection" id="outCatCollection"/>
+                        <outlet property="categoriesTitleLabel" destination="categoriesTitle" id="outCatTitle"/>
+                        <outlet property="contentStackView" destination="contentStack" id="outContentStack"/>
+                        <outlet property="daysLeftLabel" destination="daysLeft" id="outDays"/>
+                        <outlet property="editButton" destination="editButton" id="outEdit"/>
+                        <outlet property="goalsCollectionView" destination="goalsCollection" id="outGoalsCollection"/>
+                        <outlet property="headerView" destination="aSa-OY-v0W" id="ekv-0E-HNR"/>
+                        <outlet property="profileButton" destination="uRc-IR-mhc" id="pbu-e8-oGb"/>
+                        <outlet property="savingGoalsTitleLabel" destination="goalsTitle" id="outGoalsTitle"/>
+                        <outlet property="scrollView" destination="scrollView" id="outScroll"/>
+                        <outlet property="spentLabel" destination="spentLabel" id="outSpent"/>
+                        <outlet property="subsAndBillsCollectionView" destination="subsCollection" id="outSubsCollection"/>
+                        <outlet property="subsAndBillsTitleLabel" destination="subsTitle" id="outSubsTitle"/>
+                        <outlet property="titleLabel" destination="Psr-4K-zEG" id="VrG-SP-5JZ"/>
+                        <outlet property="totalBudgetAmountLabel" destination="totalAmount" id="outAmount"/>
+                        <outlet property="totalBudgetTitleLabel" destination="totalTitle" id="outTotalTitle"/>
+                        <outlet property="totalSpendingCardView" destination="XfO-cd-dQw" id="gJW-yY-eKw"/>
+                        <outletCollection property="metricTitleLabels" destination="fixedTitle" collectionClass="NSMutableArray" id="outFixedTitle"/>
+                        <outletCollection property="metricTitleLabels" destination="spendTitle" collectionClass="NSMutableArray" id="outSpendTitle"/>
+                        <outletCollection property="metricCardViews" destination="metricSpend" collectionClass="NSMutableArray" id="outSpendCard"/>
+                        <outletCollection property="metricCardViews" destination="metricFixed" collectionClass="NSMutableArray" id="outFixedCard"/>
+                        <outletCollection property="metricCardViews" destination="metricRecurring" collectionClass="NSMutableArray" id="outRecurringCard"/>
+                        <outletCollection property="metricAmountLabels" destination="recurringAmount" collectionClass="NSMutableArray" id="outRecurringAmount"/>
+                        <outletCollection property="metricAmountLabels" destination="savingAmount" collectionClass="NSMutableArray" id="outSavingAmount"/>
+                        <outletCollection property="metricAmountLabels" destination="spendAmount" collectionClass="NSMutableArray" id="outSpendAmount"/>
+                        <outletCollection property="metricTitleLabels" destination="recurringTitle" collectionClass="NSMutableArray" id="outRecurringTitle"/>
+                        <outletCollection property="metricTitleLabels" destination="savingTitle" collectionClass="NSMutableArray" id="outSavingTitle"/>
+                        <outletCollection property="metricAmountLabels" destination="fixedAmount" collectionClass="NSMutableArray" id="outFixedAmount"/>
+                        <outletCollection property="metricCardViews" destination="metricSaving" collectionClass="NSMutableArray" id="outSavingCard"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="firstResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="159.54198473282443" y="119.71830985915494"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="person.circle.fill" catalog="system" width="128" height="123"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGroupedBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>
