@@ -17,8 +17,13 @@ class ConfirmationTransactionsCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
+        clipsToBounds = false
+        contentView.clipsToBounds = false
         BillName.textColor = AppColors.textPrimary
         BillDate.textColor = AppColors.textSecondary
+        BillName.font = MintFont.space(size: BillName.font.pointSize, weight: .semibold)
+        BillDate.font = MintFont.space(size: BillDate.font.pointSize, weight: .regular)
+        BillAmount.font = MintFont.space(size: BillAmount.font.pointSize, weight: .heavy)
         contentView.backgroundColor = AppColors.card
         noButton.tintColor = AppColors.error
         yesButton.tintColor = AppColors.brand
@@ -54,6 +59,7 @@ class ConfirmationTransactionsCollectionViewCell: UICollectionViewCell {
 
         BillAmount.text = bill.amount.formatted(.currency(code: "INR"))
         BillAmount.textColor = AppColors.textPrimary
+        normalizeTextAppearance()
 
         BillIcon.image = UIImage(systemName: bill.icon)?
             .withRenderingMode(.alwaysTemplate)
@@ -100,6 +106,7 @@ class ConfirmationTransactionsCollectionViewCell: UICollectionViewCell {
                 )
             }
         }
+        normalizeTextAppearance()
     }
 
     func configureCell(with bufferedTransaction: BufferedTransaction, categories: [Category]) {
@@ -122,5 +129,19 @@ class ConfirmationTransactionsCollectionViewCell: UICollectionViewCell {
     private func applyIconAppearance(tint: UIColor, background: UIColor) {
         BillIcon.tintColor = tint
         BillIconBackgroundView.backgroundColor = background
+    }
+
+    private func normalizeTextAppearance() {
+        [BillName, BillDate, BillAmount].forEach { label in
+            guard let label, let text = label.text else { return }
+            label.attributedText = NSAttributedString(
+                string: text,
+                attributes: [
+                    .font: label.font as Any,
+                    .foregroundColor: label.textColor as Any,
+                    .kern: 0
+                ]
+            )
+        }
     }
 }

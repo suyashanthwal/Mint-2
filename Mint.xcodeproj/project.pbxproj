@@ -7,12 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F1858AB82FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F1858AB72FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf */; };
+		F1858AB92FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F1858AB62FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf */; };
 		F1E251612F8641780080379B /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = F1E251602F8641780080379B /* DGCharts */; };
 		F1E251632F8660000080379B /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = F1E251622F8660000080379B /* SDWebImage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		ACE05F6D2F70357B0000D8D3 /* Mint.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mint.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1858AB62FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-VariableFont_wght.ttf"; sourceTree = "<group>"; };
+		F1858AB72FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Syne-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -54,6 +58,8 @@
 			children = (
 				ACE05F6F2F70357B0000D8D3 /* Mint */,
 				ACE05F6E2F70357B0000D8D3 /* Products */,
+				F1858AB62FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf */,
+				F1858AB72FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf */,
 			);
 			sourceTree = "<group>";
 		};
@@ -135,6 +141,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1858AB82FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf in Resources */,
+				F1858AB92FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,7 +166,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 42D7UMUD94;
+				DEVELOPMENT_TEAM = H57W4Q745B;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Mint/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is being used to scan the QR codes";
@@ -173,7 +181,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Suyash.Mint;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Anushk.Mint;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -192,7 +200,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 42D7UMUD94;
+				DEVELOPMENT_TEAM = H57W4Q745B;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Mint/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is being used to scan the QR codes";
@@ -207,7 +215,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Suyash.Mint;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Anushk.Mint;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

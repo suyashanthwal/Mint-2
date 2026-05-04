@@ -1,5 +1,6 @@
 
 import UIKit
+import CoreText
 import SDWebImage
 
 class HomeViewController: UIViewController, UICollectionViewDelegate {
@@ -20,6 +21,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var recentcardview: UIView!
     @IBOutlet weak var upcomingcardview: UIView!
 
+    @IBOutlet private weak var dashboardLabel: UILabel?
     @IBOutlet weak var MonthlyView: UIView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var amountLabel: UILabel!
@@ -33,18 +35,25 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet private weak var billsCollectionView: UICollectionView!
     @IBOutlet weak var confirmCollectionView: UICollectionView!
     
-    @IBOutlet weak var AverageUpAndDownLabel: UILabel!
     @IBOutlet weak var dailyAverage: UILabel!
+    @IBOutlet private weak var dailyAverageTitleLabel: UILabel?
+    @IBOutlet private weak var dailyAverageUnitLabel: UILabel?
 
     @IBOutlet weak var averageCardsView: UIView!
     @IBOutlet weak var goalsCardView: UIView!
+    @IBOutlet private weak var savingGoalsTitleLabel: UILabel?
     @IBOutlet weak var GoalNameLabel: UILabel!
     @IBOutlet weak var SavedSoFarLabel: UILabel!
+    @IBOutlet private weak var completedLabel: UILabel?
     @IBOutlet weak var goalImageView: UIImageView?
+    @IBOutlet private weak var streakTitleLabel: UILabel?
     @IBOutlet weak var streakCountLabel: UILabel?
     @IBOutlet weak var streakCaptionLabel: UILabel?
     @IBOutlet weak var streakFireImageView: UIImageView?
     @IBOutlet weak var goalProgressContainerView: UIView?
+    @IBOutlet private weak var upcomingBillsTitleLabel: UILabel?
+    @IBOutlet private weak var confirmTransactionsTitleLabel: UILabel?
+    @IBOutlet private weak var recentTransactionsTitleLabel: UILabel?
     
     private var hasCheckedOnboarding = false
     private var transactions: [Transaction] = []
@@ -63,6 +72,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private var spotlightView: OnboardingSpotlightView?
     private var currentOnboardingStep = 0
     private var onboardingSteps: [OnboardingStep] = []
+
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        .lightContent
+    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -183,6 +196,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         updateDailyAverageCard()
         updateStreakCard()
         updateGoalCard()
+        applyDashboardTypography()
 
         updateConfirmSectionVisibility()
         confirmCollectionView.reloadData()
@@ -259,6 +273,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         transactionsCollectionView.collectionViewLayout.invalidateLayout()
         billsCollectionView.collectionViewLayout.invalidateLayout()
         applyDashboardGradients()
+        updateGoalImageMask()
         renderGoalProgress()
     }
 
@@ -345,7 +360,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         amountLabel.text = compactCurrency(monthlyExpense)
         budgetAmountLabel?.text = "/ \(compactCurrency(budgetAmount))"
         monthlyRemainingLabel?.text = budgetAmount > 0
-            ? "you have \(compactCurrency(remainingAmount)) left"
+            ? "you have \(compactShortCurrency(remainingAmount)) left"
             : "set a budget to track this month"
     }
 
@@ -354,38 +369,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let monthlyExpense = currentMonthExpenseTransactions().reduce(0) { $0 + $1.amount }
         let daysElapsed = max(calendar.component(.day, from: Date()), 1)
         let actualDailyAverage = monthlyExpense / Double(daysElapsed)
-        let todaysSpending = todaysExpenseTransactions().reduce(0) { $0 + $1.amount }
-        let dailyBudget = currentDailyBudget()
 
         dailyAverage.text = compactCurrency(actualDailyAverage)
-
-        guard dailyBudget > 0 else {
-            AverageUpAndDownLabel.attributedText = nil
-            AverageUpAndDownLabel.text = "Set a budget to track today"
-            return
-        }
-
-        if todaysSpending == 0 {
-            AverageUpAndDownLabel.attributedText = nil
-            AverageUpAndDownLabel.text = "You haven't spent anything"
-            return
-        }
-
-        let streak = continuousUnderBudgetDays()
-        if streak >= 10, let daysEarlier = estimatedGoalAccelerationDays(), daysEarlier > 0 {
-            AverageUpAndDownLabel.attributedText = nil
-            AverageUpAndDownLabel.text = "Goal \(daysEarlier)d earlier"
-            return
-        }
-
-        AverageUpAndDownLabel.attributedText = nil
-        if todaysSpending <= dailyBudget {
-            AverageUpAndDownLabel.text = streak >= 3 ? "Keep the streak alive" : "You are on track today"
-        } else if todaysSpending <= dailyBudget * 1.15 {
-            AverageUpAndDownLabel.text = "Slightly over today"
-        } else {
-            AverageUpAndDownLabel.text = "Slow down for today"
-        }
     }
 
     private func updateStreakCard() {
@@ -590,7 +575,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private func setupConfirmCollectionView() {
         confirmCardView.backgroundColor = AppColors.card
         confirmCardView.layer.cornerRadius = 14
-        confirmCardView.layer.masksToBounds = true
+        confirmCardView.layer.masksToBounds = false
 
         confirmCollectionView.register(
             UINib(nibName: "ConfirmationTransactionsCollectionViewCell", bundle: nil),
@@ -598,7 +583,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         )
         confirmCollectionView.collectionViewLayout = generateConfirmLayout()
         confirmCollectionView.isScrollEnabled = false
-        confirmCollectionView.backgroundColor = AppColors.card
+        confirmCollectionView.backgroundColor = .white
+        confirmCollectionView.layer.cornerRadius = 14
+        confirmCollectionView.layer.masksToBounds = true
+        confirmCollectionView.clipsToBounds = true
         confirmCollectionView.showsVerticalScrollIndicator = false
         confirmCollectionView.dataSource = self
         confirmCollectionView.delegate = self
@@ -611,9 +599,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         )
         transactionsCollectionView.collectionViewLayout = generateVerticalLayout()
         transactionsCollectionView.isScrollEnabled = false
-        transactionsCollectionView.layer.cornerRadius = 22
+        transactionsCollectionView.layer.cornerRadius = 14
         transactionsCollectionView.layer.masksToBounds = true
-        transactionsCollectionView.backgroundColor = AppColors.card
+        transactionsCollectionView.clipsToBounds = true
+        transactionsCollectionView.backgroundColor = .white
         transactionsCollectionView.dataSource = self
         transactionsCollectionView.delegate   = self
     }
@@ -629,6 +618,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         billsCollectionView.showsHorizontalScrollIndicator = false
         billsCollectionView.showsVerticalScrollIndicator = false
         billsCollectionView.alwaysBounceVertical = false
+        billsCollectionView.clipsToBounds = false
+        billsCollectionView.layer.masksToBounds = false
         billsCollectionView.dataSource = self
         billsCollectionView.delegate   = self
         billsCollectionView.bounces = false
@@ -698,7 +689,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: upcomingItems.isEmpty ? .fractionalWidth(1.0) : .absolute(140),
+            widthDimension: upcomingItems.isEmpty ? .fractionalWidth(1.0) : .absolute(110),
             heightDimension: upcomingItems.isEmpty ? .fractionalHeight(1.0) : .absolute(180)
         )
         let group = NSCollectionLayoutGroup.horizontal(
@@ -708,8 +699,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = upcomingItems.isEmpty ? .none : .continuous
-        section.interGroupSpacing = upcomingItems.isEmpty ? 0 : 16 // slightly more breathing room
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+        section.interGroupSpacing = upcomingItems.isEmpty ? 0 : 20
+        section.contentInsets = .zero
 
         return UICollectionViewCompositionalLayout(section: section)
     }
@@ -814,6 +805,17 @@ extension HomeViewController: UICollectionViewDataSource {
 }
 
 extension HomeViewController {
+    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) else { return }
+        collectionView.superview?.bringSubviewToFront(collectionView)
+        view.bringSubviewToFront(scrollView)
+        cell.layer.zPosition = 1000
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) else { return }
+        cell.layer.zPosition = 0
+    }
 
     func collectionView(_ collectionView: UICollectionView,
                         contextMenuConfigurationForItemAt indexPath: IndexPath,
@@ -872,46 +874,68 @@ private extension HomeViewController {
         scrollView.backgroundColor = AppColors.background
         scrollView.indicatorStyle = .white
         clearContainerBackgrounds(in: view)
+        applyUpperLayoutSizing()
 
         styleLabels(in: view, color: AppColors.textPrimary)
         styleLabels(in: goalcardview, color: .black)
-        [budgetAmountLabel, monthlyRemainingLabel, AverageUpAndDownLabel].forEach {
+        styleLabels(in: goalsCardView, color: AppColors.textPrimary)
+        [budgetAmountLabel, monthlyRemainingLabel].forEach {
             $0?.textColor = AppColors.textSecondary
         }
-        styleCard(MonthlyView, cornerRadius: 18)
-        styleCard(averageCardsView, cornerRadius: 18, borderColor: AppColors.cardBorder)
-        styleCard(goalcardview, cornerRadius: 18, fillColor: AppColors.orange)
-        styleCard(goalsCardView, cornerRadius: 18)
+        styleCard(MonthlyView, cornerRadius: 14)
+        styleCard(averageCardsView, cornerRadius: 14, borderColor: AppColors.cardBorder)
+        styleCard(goalcardview, cornerRadius: 14, fillColor: AppColors.orange)
+        styleCard(goalsCardView, cornerRadius: 14)
 
         MonthlyView.clipsToBounds = true
         goalsCardView.clipsToBounds = true
+        upcomingcardview.clipsToBounds = false
+        upcomingcardview.layer.masksToBounds = false
+        recentcardview.clipsToBounds = false
+        recentcardview.layer.masksToBounds = false
+        confirmSectionContainerView.clipsToBounds = false
+        confirmSectionContainerView.layer.masksToBounds = false
         averageCardsView.backgroundColor = AppColors.card
         goalcardview.backgroundColor = AppColors.orange
+        applyDashboardTypography()
+        installCornerRefreshIcon(on: MonthlyView, tintColor: AppColors.textPrimary)
+        installCornerRefreshIcon(on: goalsCardView, tintColor: AppColors.textPrimary)
+        hideButtons(in: goalsCardView)
+        hideButtons(in: upcomingcardview)
 
         goalImageView?.contentMode = .scaleAspectFit
+        goalImageView?.clipsToBounds = true
         goalProgressContainerView?.backgroundColor = .clear
         goalProgressContainerView?.layer.cornerRadius = (goalProgressContainerView?.bounds.width ?? 100) / 2
         goalProgressContainerView?.clipsToBounds = false
         loadFireAnimation()
-        profileButton?.tintColor = AppColors.textPrimary
+        profileButton?.backgroundColor = AppColors.textPrimary
+        profileButton?.tintColor = AppColors.background
+        profileButton?.layer.cornerRadius = 19
+        profileButton?.clipsToBounds = true
+        profileButton?.setImage(UIImage(systemName: "person.crop.circle"), for: .normal)
         profileButton?.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
     }
 
     func applyDashboardGradients() {
-        MonthlyView.applyGradient(colors: AppColors.brandGradient, name: "monthlyGradient")
-        goalsCardView.applyGradient(colors: AppColors.goalGradient, name: "goalGradient")
+        MonthlyView.applyGradient(
+            colors: [
+                UIColor(hex: "#641AEF").cgColor,
+                UIColor(hex: "#9428FF").cgColor
+            ],
+            name: "monthlyGradient"
+        )
+        goalsCardView.applyGradient(
+            colors: [
+                UIColor(hex: "#3F823D").cgColor,
+                UIColor(hex: "#89DF74").cgColor
+            ],
+            name: "goalGradient"
+        )
     }
 
     func loadFireAnimation() {
-        guard let url = URL(string: "https://lottie.host/dea06fab-bb4c-4c95-ad29-66b83f17e78c/jmabSDGz4q.lottie") else {
-            streakFireImageView?.image = UIImage(systemName: "flame.fill")
-            return
-        }
-
-        streakFireImageView?.sd_setImage(
-            with: url,
-            placeholderImage: UIImage(systemName: "flame.fill")
-        )
+        streakFireImageView?.image = UIImage(systemName: "flame.fill")
         streakFireImageView?.tintColor = AppColors.error
     }
 
@@ -938,20 +962,23 @@ private extension HomeViewController {
         track.name = "goalProgressTrack"
         track.path = path.cgPath
         track.fillColor = UIColor.clear.cgColor
-        track.strokeColor = UIColor.white.withAlphaComponent(0.72).cgColor
+        track.strokeColor = UIColor(hex: "#BFE9BA").withAlphaComponent(0.82).cgColor
         track.lineWidth = lineWidth
 
         let ring = CAShapeLayer()
         ring.name = "goalProgressRing"
         ring.path = path.cgPath
         ring.fillColor = UIColor.clear.cgColor
-        ring.strokeColor = AppColors.success.cgColor
+        ring.strokeColor = UIColor(hex: "#2AD66F").cgColor
         ring.lineWidth = lineWidth
         ring.lineCap = .butt
         ring.strokeEnd = min(max(selectedGoalProgress, 0), 1)
 
         container.layer.addSublayer(track)
         container.layer.addSublayer(ring)
+        if let goalImageView {
+            container.bringSubviewToFront(goalImageView)
+        }
     }
 
     func applyGoalImage(for goal: Goal) {
@@ -968,6 +995,7 @@ private extension HomeViewController {
             goalImageView?.contentMode = .scaleAspectFit
             goalImageView?.tintColor = AppColors.textPrimary
         }
+        updateGoalImageMask()
     }
 
     func savedGoalImage(for goal: Goal) -> UIImage? {
@@ -1014,6 +1042,210 @@ private extension HomeViewController {
         cardView.layer.borderColor = borderColor?.cgColor
     }
 
+    func applyUpperLayoutSizing() {
+        setHeightConstraint(on: MonthlyView.superview, to: 129)
+        setHeightConstraint(on: averageCardsView.superview?.superview, to: 115)
+        setHeightConstraint(on: goalsCardView.superview, to: 128)
+
+        if let cardsStack = MonthlyView.superview?.superview as? UIStackView {
+            cardsStack.spacing = 19
+        }
+    }
+
+    func applyDashboardTypography() {
+        applyBaseTypography(in: view)
+
+        dashboardLabel?.font = MintFont.space(size: 25, weight: .bold)
+        dashboardLabel?.textColor = AppColors.textPrimary
+        dashboardLabel?.removeCharacterSpacing()
+
+        titleLabel.font = MintFont.space(size: 16, weight: .bold)
+        titleLabel.textColor = AppColors.textPrimary
+        titleLabel.removeCharacterSpacing()
+
+        amountLabel.font = MintFont.space(size: 38, weight: .heavy)
+        amountLabel.textColor = AppColors.textPrimary
+        amountLabel.adjustsFontSizeToFitWidth = true
+        amountLabel.minimumScaleFactor = 0.78
+        amountLabel.removeCharacterSpacing()
+
+        budgetAmountLabel?.font = MintFont.space(size: 24, weight: .heavy)
+        budgetAmountLabel?.textColor = AppColors.textPrimary.withAlphaComponent(0.86)
+        budgetAmountLabel?.removeCharacterSpacing()
+
+        monthlyRemainingLabel?.font = MintFont.space(size: 16, weight: .medium)
+        monthlyRemainingLabel?.textColor = AppColors.textPrimary.withAlphaComponent(0.9)
+        monthlyRemainingLabel?.removeCharacterSpacing()
+
+        dailyAverageTitleLabel?.font = MintFont.space(size: 18, weight: .bold)
+        dailyAverageTitleLabel?.textColor = AppColors.textPrimary
+        dailyAverageTitleLabel?.removeCharacterSpacing()
+
+        dailyAverage.font = MintFont.space(size: 32, weight: .heavy)
+        dailyAverage.textColor = AppColors.textPrimary
+        dailyAverageUnitLabel?.font = MintFont.space(size: 11, weight: .bold)
+        dailyAverageUnitLabel?.textColor = AppColors.textSecondary
+        dailyAverage.removeCharacterSpacing()
+        dailyAverageUnitLabel?.removeCharacterSpacing()
+
+        streakTitleLabel?.font = MintFont.space(size: 18, weight: .bold)
+        streakTitleLabel?.textColor = .black
+        streakCountLabel?.font = MintFont.space(size: 24, weight: .heavy)
+        streakCountLabel?.textColor = .black
+        streakCaptionLabel?.font = MintFont.space(size: 14, weight: .bold)
+        streakCaptionLabel?.textColor = .black
+        streakCaptionLabel?.numberOfLines = 2
+        streakCaptionLabel?.textAlignment = .center
+        streakTitleLabel?.removeCharacterSpacing()
+        streakCountLabel?.removeCharacterSpacing()
+        streakCaptionLabel?.removeCharacterSpacing()
+
+        savingGoalsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        savingGoalsTitleLabel?.textColor = AppColors.textPrimary
+        savingGoalsTitleLabel?.removeCharacterSpacing()
+        GoalNameLabel.font = MintFont.space(size: 24, weight: .bold)
+        GoalNameLabel.textColor = AppColors.textPrimary
+        SavedSoFarLabel.font = MintFont.space(size: 38, weight: .heavy)
+        SavedSoFarLabel.textColor = AppColors.textPrimary
+        SavedSoFarLabel.adjustsFontSizeToFitWidth = true
+        SavedSoFarLabel.minimumScaleFactor = 0.82
+        completedLabel?.font = MintFont.space(size: 24, weight: .semibold)
+        completedLabel?.textColor = AppColors.textPrimary
+        GoalNameLabel.removeCharacterSpacing()
+        SavedSoFarLabel.removeCharacterSpacing()
+        completedLabel?.removeCharacterSpacing()
+
+        upcomingBillsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        upcomingBillsTitleLabel?.textColor = AppColors.textPrimary
+        upcomingBillsTitleLabel?.removeCharacterSpacing()
+
+        confirmTransactionsTitleLabel?.text = "CONFIRM TRANSACTIONS"
+        confirmTransactionsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        confirmTransactionsTitleLabel?.textColor = AppColors.textPrimary
+        confirmTransactionsTitleLabel?.removeCharacterSpacing()
+
+        recentTransactionsTitleLabel?.text = "RECENT TRANSACTIONS"
+        recentTransactionsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        recentTransactionsTitleLabel?.textColor = AppColors.textPrimary
+        recentTransactionsTitleLabel?.removeCharacterSpacing()
+
+        for label in labels(in: view) {
+            switch label.text {
+            case "Confirm Transactions":
+                label.text = "CONFIRM TRANSACTIONS"
+                label.font = MintFont.space(size: 14, weight: .bold)
+                label.textColor = AppColors.textPrimary
+                label.removeCharacterSpacing()
+            case "Recent Transactions":
+                label.text = "RECENT TRANSACTIONS"
+                label.font = MintFont.space(size: 14, weight: .bold)
+                label.textColor = AppColors.textPrimary
+                label.removeCharacterSpacing()
+            case "DAILY AVERAGE", "STREAK", "SAVING GOALS", "UPCOMING BILLS", "CONFIRM TRANSACTIONS", "RECENT TRANSACTIONS":
+                label.font = MintFont.space(size: 14, weight: .bold)
+                label.textColor = label.text == "STREAK" ? .black : AppColors.textPrimary
+                label.removeCharacterSpacing()
+            case "/ per day":
+                label.font = MintFont.space(size: 11, weight: .bold)
+                label.textColor = AppColors.textSecondary
+                label.removeCharacterSpacing()
+            case "Completed":
+                label.font = MintFont.space(size: 24, weight: .semibold)
+                label.textColor = AppColors.textPrimary
+                label.removeCharacterSpacing()
+            default:
+                break
+            }
+        }
+    }
+
+    func applyBaseTypography(in rootView: UIView?) {
+        guard let rootView else { return }
+        for label in labels(in: rootView) {
+            guard label !== amountLabel,
+                  label !== budgetAmountLabel,
+                  label !== dailyAverage,
+                  label !== streakCountLabel,
+                  label !== SavedSoFarLabel,
+                  label !== dashboardLabel,
+                  label !== dailyAverageTitleLabel,
+                  label !== dailyAverageUnitLabel,
+                  label !== savingGoalsTitleLabel,
+                  label !== completedLabel,
+                  label !== streakTitleLabel,
+                  label !== upcomingBillsTitleLabel,
+                  label !== confirmTransactionsTitleLabel,
+                  label !== recentTransactionsTitleLabel
+            else { continue }
+
+            label.font = MintFont.space(size: label.font.pointSize, weight: fontWeight(for: label.font))
+            label.removeCharacterSpacing()
+        }
+    }
+
+    func fontWeight(for font: UIFont) -> UIFont.Weight {
+        let traits = font.fontDescriptor.symbolicTraits
+        return traits.contains(.traitBold) ? .bold : .regular
+    }
+
+    func updateGoalImageMask() {
+        guard let imageView = goalImageView else { return }
+        imageView.layer.cornerRadius = min(imageView.bounds.width, imageView.bounds.height) / 2
+        imageView.layer.masksToBounds = true
+    }
+
+    func labels(in rootView: UIView?) -> [UILabel] {
+        guard let rootView else { return [] }
+        return rootView.subviews.flatMap { subview -> [UILabel] in
+            var result = labels(in: subview)
+            if let label = subview as? UILabel {
+                result.insert(label, at: 0)
+            }
+            return result
+        }
+    }
+
+    func hideButtons(in rootView: UIView?) {
+        guard let rootView else { return }
+        for subview in rootView.subviews {
+            if let button = subview as? UIButton {
+                button.isHidden = true
+            }
+            hideButtons(in: subview)
+        }
+    }
+
+    func installCornerRefreshIcon(on cardView: UIView?, tintColor: UIColor) {
+        guard let cardView else { return }
+        let tag = 711_004
+        if cardView.viewWithTag(tag) != nil { return }
+
+        let imageView = UIImageView(image: UIImage(systemName: "arrow.clockwise.circle"))
+        imageView.tag = tag
+        imageView.tintColor = tintColor.withAlphaComponent(0.9)
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(imageView)
+
+        NSLayoutConstraint.activate([
+            imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -10),
+            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
+            imageView.widthAnchor.constraint(equalToConstant: 18),
+            imageView.heightAnchor.constraint(equalToConstant: 18)
+        ])
+    }
+
+    func setHeightConstraint(on view: UIView?, to constant: CGFloat) {
+        guard let view else { return }
+        let constraints = view.constraints + (view.superview?.constraints ?? [])
+        for constraint in constraints where constraint.firstAttribute == .height {
+            if (constraint.firstItem as? UIView) === view || constraint.secondItem == nil {
+                constraint.constant = constant
+                return
+            }
+        }
+    }
+
     @objc func showProfile() {
         let profile = storyboard?.instantiateViewController(withIdentifier: "ProfileViewController")
         guard let profile else { return }
@@ -1023,6 +1255,14 @@ private extension HomeViewController {
     func compactCurrency(_ amount: Double) -> String {
         let rounded = Int(amount.rounded())
         return "₹\(rounded.formatted(.number.grouping(.automatic)))"
+    }
+
+    func compactShortCurrency(_ amount: Double) -> String {
+        let rounded = Int(amount.rounded())
+        if rounded >= 1000, rounded % 1000 == 0 {
+            return "\(rounded / 1000)k"
+        }
+        return compactCurrency(amount)
     }
 }
 
@@ -1037,6 +1277,140 @@ private extension UIView {
 
         if gradient.superlayer == nil {
             layer.insertSublayer(gradient, at: 0)
+        }
+    }
+}
+
+private extension UILabel {
+    func removeCharacterSpacing() {
+        guard let text else { return }
+        attributedText = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: font as Any,
+                .foregroundColor: textColor as Any,
+                .kern: 0
+            ]
+        )
+    }
+}
+
+enum MintFont {
+    static let weightAxisTag = fourCharacterCode("wght")
+
+    static func space(size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
+        customFont(
+            names: weightedNames(
+                family: "SpaceGrotesk",
+                spacedFamily: "Space Grotesk",
+                weight: weight
+            ),
+            size: size,
+            fallbackWeight: weight
+        )
+    }
+
+    private static func weightedNames(
+        family: String,
+        spacedFamily: String,
+        weight: UIFont.Weight
+    ) -> [String] {
+        let suffix: String
+        switch weight {
+        case .black, .heavy:
+            suffix = "ExtraBold"
+        case .bold:
+            suffix = "Bold"
+        case .semibold:
+            suffix = "SemiBold"
+        case .medium:
+            suffix = "Medium"
+        default:
+            suffix = "Regular"
+        }
+
+        return [
+            "\(family)-\(suffix)",
+            "\(spacedFamily)-\(suffix)",
+            "\(family)-VariableFont_wght",
+            "\(spacedFamily)-VariableFont_wght",
+            "\(family)-Regular",
+            "\(spacedFamily)-Regular",
+            family,
+            spacedFamily
+        ]
+    }
+
+    private static func fourCharacterCode(_ string: String) -> Int {
+        string.unicodeScalars.reduce(0) { partialResult, scalar in
+            (partialResult << 8) + Int(scalar.value)
+        }
+    }
+
+    private static func customFont(
+        names: [String],
+        size: CGFloat,
+        fallbackWeight: UIFont.Weight
+    ) -> UIFont {
+        for name in names {
+            if let font = UIFont(name: name, size: size) {
+                return font.withVariableWeight(fallbackWeight) ?? font
+            }
+        }
+        return .systemFont(ofSize: size, weight: fallbackWeight)
+    }
+}
+
+private extension UIFont {
+    func withVariableWeight(_ weight: UIFont.Weight) -> UIFont? {
+        let targetValue = weight.variableAxisValue
+        let ctFont = self as CTFont
+        guard let axes = CTFontCopyVariationAxes(ctFont) as? [[CFString: Any]] else {
+            return nil
+        }
+
+        let weightAxisTag = MintFont.weightAxisTag
+        guard let weightAxis = axes.first(where: { axis in
+            (axis[kCTFontVariationAxisIdentifierKey] as? NSNumber)?.intValue == weightAxisTag
+        }) else {
+            return nil
+        }
+
+        let minValue = (weightAxis[kCTFontVariationAxisMinimumValueKey] as? NSNumber)?.doubleValue ?? targetValue
+        let maxValue = (weightAxis[kCTFontVariationAxisMaximumValueKey] as? NSNumber)?.doubleValue ?? targetValue
+        let clampedValue = min(max(targetValue, minValue), maxValue)
+
+        let variationKey = UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
+        let descriptor = fontDescriptor.addingAttributes([
+            variationKey: [weightAxisTag: clampedValue]
+        ])
+        return UIFont(descriptor: descriptor, size: pointSize)
+    }
+}
+
+private extension UIFont.Weight {
+    var variableAxisValue: Double {
+        switch self {
+        case .ultraLight:
+            return 200
+        case .thin:
+            return 250
+        case .light:
+            return 300
+        case .regular:
+            return 400
+        case .medium:
+            return 500
+        case .semibold:
+            return 600
+        case .bold:
+            return 700
+        case .heavy:
+            return 800
+        case .black:
+            return 900
+        default:
+            return 400
         }
     }
 }
