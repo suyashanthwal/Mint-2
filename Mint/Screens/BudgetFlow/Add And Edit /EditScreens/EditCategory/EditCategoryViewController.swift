@@ -40,36 +40,34 @@ class EditCategoryViewController: UIViewController {
     }
 
     private func setupUI() {
-        view.backgroundColor = AppColors.background
+        view.backgroundColor = AppColors.card
         for v in AllView {
-            v.backgroundColor = AppColors.background
+            v.backgroundColor = AppColors.card
         }
 
         for v in InsideViews {
-            v.backgroundColor = AppColors.card
-            v.applyShadow()
+            v.applyAddEditInputContainerStyle()
         }
 
-        nameTextField.backgroundColor = AppColors.card
-        nameTextField.textColor       = AppColors.textPrimary
+        nameTextField.applyAddEditInputStyle()
 
-        limitTextField.backgroundColor = AppColors.card
-        limitTextField.textColor       = AppColors.textPrimary
-        limitTextField.keyboardType    = .numberPad
+        limitTextField.applyAddEditInputStyle(keyboardType: .numberPad)
 
-        remainingAmountTextField.backgroundColor          = AppColors.card
-        remainingAmountTextField.textColor                = AppColors.textPrimary
+        remainingAmountTextField.applyAddEditInputStyle()
         remainingAmountTextField.isUserInteractionEnabled = false
 
         iconPickerImageView.backgroundColor = .clear
         iconPickerImageView.tintColor       = selectedIconColor
         iconPickerLabel.backgroundColor     = .clear
+        iconPickerLabel.textColor           = AppColors.textPrimary
 
-        iconCollectionView.backgroundColor = AppColors.card
+        iconCollectionView.backgroundColor = AppColors.inputBackground
         iconCollectionView.clipsToBounds   = true
 
-        notesTextView.backgroundColor    = AppColors.card
-        notesTextView.layer.borderColor  = UIColor.systemGray5.cgColor
+        notesTextView.backgroundColor    = AppColors.inputBackground
+        notesTextView.textColor          = AppColors.textPrimary
+        notesTextView.font               = MintFont.space(matching: notesTextView.font)
+        notesTextView.layer.borderColor  = AppColors.cardBorder.cgColor
         notesTextView.layer.borderWidth  = 1
         notesTextView.layer.cornerRadius = 8
 
@@ -79,6 +77,8 @@ class EditCategoryViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(iconPickerTapped))
         iconPickerStackView.addGestureRecognizer(tap)
         iconPickerStackView.isUserInteractionEnabled = true
+
+        view.applyMintTypography()
     }
 
     private func setupColorWell() {

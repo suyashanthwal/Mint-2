@@ -64,21 +64,42 @@ class EditSubsAndBillsViewController: UIViewController {
     }
 
     func setupUI() {
+        view.backgroundColor = AppColors.card
         for backgroundView in AllBackgroundViews {
-            backgroundView.backgroundColor = AppColors.background
+            backgroundView.backgroundColor = AppColors.card
         }
         for card in AllCardViews {
-            card.backgroundColor = AppColors.card
-            card.applyShadow()
+            card.applyAddEditInputContainerStyle()
         }
-        nameTextField.backgroundColor   = AppColors.card
-        amountTextField.backgroundColor = AppColors.card
-        iconPickerImageView.tintColor   = AppColors.brand
-        iconCollectionView.backgroundColor = AppColors.card
+        nameTextField.applyAddEditInputStyle()
+        amountTextField.applyAddEditInputStyle(keyboardType: .numberPad)
+        notesTextView.applyAddEditInputStyle()
+        intervalLabel.textColor          = AppColors.textPrimary
+        selectedDateLabel.textColor      = AppColors.textPrimary
+        intervalTitleLabel.textColor     = AppColors.textPrimary
+        dueDateTitleLabel.textColor      = AppColors.textPrimary
+        datePicker.tintColor             = AppColors.brand
+        alertToggle.onTintColor          = AppColors.brand
+        autoAddToggle.onTintColor        = AppColors.brand
+        isActiveToggle.onTintColor       = AppColors.brand
+        iconPickerImageView.tintColor    = AppColors.brand
+        iconPickerLabel.textColor        = AppColors.textPrimary
+        iconCollectionView.backgroundColor = AppColors.inputBackground
         iconCollectionView.clipsToBounds = true
         iconCollectionViewHeightConstraint.constant = collapsedIconPickerHeight
         iconCollectionView.isHidden = true
+        styleIconPickerRow()
         setSelectedIcon(defaultIconName)
+        view.applyMintTypography()
+    }
+
+    private func styleIconPickerRow() {
+        iconPickerStackView.backgroundColor = AppColors.inputBackground
+        iconPickerStackView.superview?.backgroundColor = AppColors.inputBackground
+
+        let rowContainer = iconPickerStackView.superview?.superview
+        rowContainer?.applyAddEditInputContainerStyle()
+        rowContainer?.layer.cornerRadius = 16
     }
 
     func setupPickers() {
