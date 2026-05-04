@@ -97,10 +97,11 @@ extension EditGoalsViewController {
         targetDateTitleLabel.textColor = AppColors.textPrimary
         targetDateValueLabel.textColor = AppColors.textSecondary
         totalSavedLabel.textColor = AppColors.textPrimary
-        datePicker.tintColor = AppColors.brand
+        datePicker.applyMintDatePickerStyle()
         notesTextView.layer.cornerRadius = 12
         notesTextView.clipsToBounds = true
         view.applyMintTypography()
+        datePicker.applyMintDatePickerStyle()
     }
 
     func setupDatePicker() {

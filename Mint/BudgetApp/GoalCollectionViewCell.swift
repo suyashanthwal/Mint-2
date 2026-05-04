@@ -28,11 +28,15 @@ final class GoalCollectionViewCell: UICollectionViewCell {
         iconImageView.tintColor = AppColors.brandText
         titleLabel.textColor = AppColors.textPrimary
         amountLabel.textColor = AppColors.textPrimary
+        titleLabel.font = MintFont.space(size: 14, weight: .semibold)
+        amountLabel.font = MintFont.space(size: 14, weight: .semibold)
     }
 
     func configure(with item: BudgetGoalItem) {
         iconImageView.image = UIImage(systemName: item.symbolName)
         titleLabel.text = item.title
         amountLabel.text = item.amount
+        titleLabel.removeCharacterSpacing()
+        amountLabel.removeCharacterSpacing()
     }
 }

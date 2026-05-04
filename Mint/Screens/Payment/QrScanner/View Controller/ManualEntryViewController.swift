@@ -241,6 +241,7 @@ import UIKit
          picker.preferredDatePickerStyle = .wheels
          picker.maximumDate              = Date()
          picker.date                     = selectedDate
+         picker.applyMintDatePickerStyle()
          picker.translatesAutoresizingMaskIntoConstraints = false
          alert.view.addSubview(picker)
 

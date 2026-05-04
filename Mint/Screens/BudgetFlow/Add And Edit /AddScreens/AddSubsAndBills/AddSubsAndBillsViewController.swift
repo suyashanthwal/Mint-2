@@ -70,8 +70,6 @@ class AddSubsAndBillsViewController: UIViewController {
         for cards in AllCardViews {
             cards.applyAddEditInputContainerStyle()
         }
-        typeSegment.backgroundColor          = AppColors.sectionBackground
-        typeSegment.selectedSegmentTintColor = AppColors.brandLight
         nameTextField.applyAddEditInputStyle()
         amountTextField.applyAddEditInputStyle(keyboardType: .numberPad)
         notesTextView.applyAddEditInputStyle()
@@ -79,7 +77,7 @@ class AddSubsAndBillsViewController: UIViewController {
         selectedDateLabel.textColor          = AppColors.textPrimary
         intervalTitleLabel.textColor         = AppColors.textPrimary
         dueDateTitleLabel.textColor          = AppColors.textPrimary
-        datePicker.tintColor                 = AppColors.brand
+        datePicker.applyMintDatePickerStyle()
         autoAddToggle.onTintColor            = AppColors.brand
         alertToggle.onTintColor              = AppColors.brand
         iconPickerImageView.tintColor        = AppColors.brand
@@ -91,6 +89,8 @@ class AddSubsAndBillsViewController: UIViewController {
         styleIconPickerRow()
         setSelectedIcon(defaultIconName)
         view.applyMintTypography()
+        typeSegment.applyAddEditSegmentStyle()
+        datePicker.applyMintDatePickerStyle()
     }
 
     private func styleIconPickerRow() {

@@ -78,7 +78,7 @@ class EditSubsAndBillsViewController: UIViewController {
         selectedDateLabel.textColor      = AppColors.textPrimary
         intervalTitleLabel.textColor     = AppColors.textPrimary
         dueDateTitleLabel.textColor      = AppColors.textPrimary
-        datePicker.tintColor             = AppColors.brand
+        datePicker.applyMintDatePickerStyle()
         alertToggle.onTintColor          = AppColors.brand
         autoAddToggle.onTintColor        = AppColors.brand
         isActiveToggle.onTintColor       = AppColors.brand
@@ -91,6 +91,8 @@ class EditSubsAndBillsViewController: UIViewController {
         styleIconPickerRow()
         setSelectedIcon(defaultIconName)
         view.applyMintTypography()
+        typeSegment.applyAddEditSegmentStyle()
+        datePicker.applyMintDatePickerStyle()
     }
 
     private func styleIconPickerRow() {

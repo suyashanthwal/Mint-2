@@ -93,10 +93,11 @@ extension AddGoalsViewController {
         notesTextView.applyAddEditInputStyle()
         targetDateTitleLabel.textColor = AppColors.textPrimary
         targetDateValueLabel.textColor = AppColors.textSecondary
-        datePicker.tintColor = AppColors.brand
+        datePicker.applyMintDatePickerStyle()
         notesTextView.layer.cornerRadius = 12
         notesTextView.clipsToBounds = true
         view.applyMintTypography()
+        datePicker.applyMintDatePickerStyle()
     }
 
     func setupDatePicker() {

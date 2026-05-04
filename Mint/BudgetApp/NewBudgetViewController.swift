@@ -50,15 +50,21 @@ final class NewBudgetViewController: UIViewController {
     private var transactions: [Transaction] = []
     private var currentBudget: Budget?
     private var subsAndBillsItems: [NewBudgetSubsOrBillItem] = []
-    private var isBreakdownExpanded = true
+    private var isBreakdownExpanded = false
     private let categoriesPerPage = 4
     private let categoryGridRows = 2
     private let categoryGridColumns = 2
     private let categoryGridSpacing: CGFloat = 20
     private let categoryGridCellHeight: CGFloat = 140
-    private let expandedBudgetHeight: CGFloat = 456
-    private let collapsedBudgetHeight: CGFloat = 174
+    private let totalBudgetCardHeight: CGFloat = 128
     private let expandedBreakdownHeight: CGFloat = 282
+    private var totalBudgetCardHeightConstraint: NSLayoutConstraint?
+    private var expandedBudgetHeight: CGFloat {
+        totalBudgetCardHeight + expandedBreakdownHeight
+    }
+    private var collapsedBudgetHeight: CGFloat {
+        totalBudgetCardHeight
+    }
 
     private let currencyFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -82,11 +88,16 @@ final class NewBudgetViewController: UIViewController {
         applyBreakdownState(animated: false)
         observeDataChanges()
         reloadAll()
+        contentStackView.isLayoutMarginsRelativeArrangement = true
+        contentStackView.layoutMargins = UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0)
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        applyTotalBudgetGradient()
+        applyBudgetGradient()
+        categoriesCollectionView.collectionViewLayout.invalidateLayout()
+        subsAndBillsCollectionView.collectionViewLayout.invalidateLayout()
+        goalsCollectionView.collectionViewLayout.invalidateLayout()
     }
 
     deinit {
@@ -126,14 +137,17 @@ final class NewBudgetViewController: UIViewController {
         contentStackView.backgroundColor = AppColors.background
 
         titleLabel.textColor = AppColors.textPrimary
-        titleLabel.font = .systemFont(ofSize: 30, weight: .semibold)
+        titleLabel.font = MintFont.space(size: 25, weight: .bold)
+        titleLabel.removeCharacterSpacing()
 
         profileButton.tintColor = AppColors.background
         profileButton.backgroundColor = AppColors.textPrimary
         profileButton.layer.cornerRadius = 17
         profileButton.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
 
-        budgetOverviewContainerView?.backgroundColor = AppColors.budgetBreakdownBackground
+        enforceTotalBudgetCardHeight()
+        applyBudgetGradient()
+        budgetOverviewContainerView?.backgroundColor = AppColors.background
         budgetOverviewContainerView?.layer.cornerRadius = 18
         budgetOverviewContainerView?.layer.borderColor = AppColors.budgetBreakdownBorder.cgColor
         budgetOverviewContainerView?.layer.borderWidth = 1.5
@@ -158,7 +172,8 @@ final class NewBudgetViewController: UIViewController {
 
         breakdownContainerView?.backgroundColor = AppColors.budgetBreakdownBackground
         breakdownTitleLabel?.textColor = AppColors.textPrimary
-        breakdownTitleLabel?.font = .systemFont(ofSize: 22, weight: .bold)
+        breakdownTitleLabel?.font = MintFont.space(size: 16, weight: .bold)
+        breakdownTitleLabel?.removeCharacterSpacing()
         breakdownTopSpacingConstraint?.constant = 0
         breakdownCardsTopConstraint?.constant = 74
         var toggleConfig = UIButton.Configuration.plain()
@@ -174,13 +189,15 @@ final class NewBudgetViewController: UIViewController {
             $0.layer.borderColor = AppColors.budgetBreakdownBorder.cgColor
             $0.layer.borderWidth = 1.25
         }
-        metricTitleLabels.forEach { $0.textColor = AppColors.textPrimary }
-        metricAmountLabels.forEach { $0.textColor = AppColors.textPrimary }
+        applyMetricTypography()
 
         [categoriesTitleLabel, subsAndBillsTitleLabel, savingGoalsTitleLabel].forEach {
             $0?.textColor = AppColors.textPrimary
-            $0?.font = .systemFont(ofSize: 18, weight: .bold)
+            $0?.font = MintFont.space(size: 16, weight: .bold)
+            $0?.removeCharacterSpacing()
         }
+
+        applyBudgetTypography()
 
         configureAddButton(addCategoryButton, action: #selector(addCategoryTapped), accessibilityLabel: "Add category")
         configureAddButton(addSubsAndBillsButton, action: #selector(addSubsAndBillsTapped), accessibilityLabel: "Add subscription or bill")
@@ -188,6 +205,66 @@ final class NewBudgetViewController: UIViewController {
 
         categoriesPageControl.currentPageIndicatorTintColor = AppColors.brand
         categoriesPageControl.pageIndicatorTintColor = AppColors.brand.withAlphaComponent(0.3)
+    }
+
+    private func enforceTotalBudgetCardHeight() {
+        if totalBudgetCardHeightConstraint == nil {
+            let constraint = totalSpendingCardView.heightAnchor.constraint(equalToConstant: totalBudgetCardHeight)
+            constraint.priority = .required
+            constraint.isActive = true
+            totalBudgetCardHeightConstraint = constraint
+        }
+        totalBudgetCardHeightConstraint?.constant = totalBudgetCardHeight
+    }
+
+    private func applyBudgetGradient() {
+        totalSpendingCardView.applyGradient(
+            colors: [
+                UIColor(hex: "#641AEF").cgColor,
+                UIColor(hex: "#9428FF").cgColor
+            ],
+            name: "monthlyGradient"
+        )
+    }
+
+    private func applyBudgetTypography() {
+        totalBudgetTitleLabel.textColor = AppColors.brandText
+        totalBudgetTitleLabel.font = MintFont.space(size: 18, weight: .bold)
+        totalBudgetTitleLabel.removeCharacterSpacing()
+
+        totalBudgetAmountLabel.textColor = AppColors.brandText
+        totalBudgetAmountLabel.font = MintFont.space(size: 36, weight: .heavy)
+        totalBudgetAmountLabel.removeCharacterSpacing()
+
+        daysLeftLabel.textColor = AppColors.brandLightText
+        daysLeftLabel.font = MintFont.space(size: 14, weight: .semibold)
+        daysLeftLabel.removeCharacterSpacing()
+
+        spentLabel.textColor = AppColors.brandLightText
+        spentLabel.font = MintFont.space(size: 14, weight: .semibold)
+        spentLabel.removeCharacterSpacing()
+
+        editButton.titleLabel?.font = MintFont.space(size: 14, weight: .semibold)
+        if var config = editButton.configuration {
+            var title = AttributedString("Edit")
+            title.font = MintFont.space(size: 14, weight: .semibold)
+            config.attributedTitle = title
+            config.baseForegroundColor = AppColors.brandText
+            editButton.configuration = config
+        }
+    }
+
+    private func applyMetricTypography() {
+        metricTitleLabels.forEach {
+            $0.textColor = AppColors.textPrimary
+            $0.font = MintFont.space(size: 14, weight: .semibold)
+            $0.removeCharacterSpacing()
+        }
+        metricAmountLabels.forEach {
+            $0.textColor = AppColors.textPrimary
+            $0.font = MintFont.space(size: 14, weight: .bold)
+            $0.removeCharacterSpacing()
+        }
     }
 
     private func configureAddButton(_ button: UIButton?, action: Selector, accessibilityLabel: String) {
@@ -225,7 +302,7 @@ final class NewBudgetViewController: UIViewController {
             self.view.layoutIfNeeded()
         }
 
-        breakdownContainerView?.isHidden = false
+        if isBreakdownExpanded { breakdownContainerView?.isHidden = false }
         updateBreakdownChevron()
         guard animated else {
             updates()
@@ -243,11 +320,11 @@ final class NewBudgetViewController: UIViewController {
             }
         )
     }
-
+    
     private func updateBreakdownChevron() {
         let imageName = isBreakdownExpanded ? "chevron.up" : "chevron.down"
         let image = UIImage(systemName: imageName)?
-            .withConfiguration(UIImage.SymbolConfiguration(pointSize: 17, weight: .bold))
+            .withConfiguration(UIImage.SymbolConfiguration(pointSize: 10, weight: .bold))
         breakdownToggleButton?.setImage(image, for: .normal)
         breakdownToggleButton?.accessibilityLabel = isBreakdownExpanded ? "Collapse breakdown" : "Expand breakdown"
     }
@@ -388,6 +465,8 @@ final class NewBudgetViewController: UIViewController {
         setMetric(title: "To spend", amount: compactCurrency(remaining), at: 1)
         setMetric(title: "Recurring", amount: compactCurrency(recurringTotal), at: 2)
         setMetric(title: "Saving Target", amount: compactCurrency(goalsMonthlyTotal), at: 3)
+        applyMetricTypography()
+        applyBudgetTypography()
     }
 
     private func setMetric(title: String, amount: String, at index: Int) {
@@ -763,18 +842,6 @@ final class NewBudgetViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    private func applyTotalBudgetGradient() {
-        let gradientLayer = (totalSpendingCardView.layer.sublayers?
-            .first { $0.name == "totalBudgetGradient" } as? CAGradientLayer) ?? CAGradientLayer()
-        gradientLayer.name = "totalBudgetGradient"
-        gradientLayer.colors = AppColors.brandGradient
-        gradientLayer.startPoint = CGPoint(x: 0, y: 0.15)
-        gradientLayer.endPoint = CGPoint(x: 1, y: 0.85)
-        gradientLayer.frame = totalSpendingCardView.bounds
-        if gradientLayer.superlayer == nil {
-            totalSpendingCardView.layer.insertSublayer(gradientLayer, at: 0)
-        }
-    }
 }
 
 extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -821,7 +888,7 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
             return CGSize(width: max(width, 0), height: 132)
         }
         if collectionView == subsAndBillsCollectionView {
-            return CGSize(width: 128, height: 180)
+            return BillCollectionViewCell.itemSize
         }
         return CGSize(width: collectionView.bounds.width, height: 86)
     }
@@ -924,6 +991,20 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
                 }
             }
             return UIMenu(title: goal.name, children: [edit, delete])
+        }
+    }
+}
+private extension UIView {
+    func applyGradient(colors: [CGColor], name: String) {
+        let gradient = (layer.sublayers?.first { $0.name == name } as? CAGradientLayer) ?? CAGradientLayer()
+        gradient.name = name
+        gradient.colors = colors
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        gradient.frame = bounds
+
+        if gradient.superlayer == nil {
+            layer.insertSublayer(gradient, at: 0)
         }
     }
 }

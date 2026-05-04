@@ -267,6 +267,10 @@ extension UIView {
             segmentedControl.setTitleTextAttributes([.font: font], for: .selected)
         }
 
+        if let datePicker = self as? UIDatePicker {
+            datePicker.applyMintDatePickerStyle()
+        }
+
         subviews.forEach { $0.applyMintTypography() }
     }
 
@@ -275,6 +279,56 @@ extension UIView {
         layer.borderColor = AppColors.cardBorder.cgColor
         layer.borderWidth = 1
         applyShadow()
+    }
+}
+
+extension UISegmentedControl {
+    func applyAddEditSegmentStyle() {
+        backgroundColor = AppColors.sectionBackground
+        selectedSegmentTintColor = AppColors.inputBackground
+        tintColor = AppColors.brand
+
+        setTitleTextAttributes(
+            [
+                .foregroundColor: AppColors.textSecondary,
+                .font: MintFont.space(size: 14, weight: .semibold),
+                .kern: 0
+            ],
+            for: .normal
+        )
+        setTitleTextAttributes(
+            [
+                .foregroundColor: AppColors.textPrimary,
+                .font: MintFont.space(size: 14, weight: .bold),
+                .kern: 0
+            ],
+            for: .selected
+        )
+    }
+}
+
+extension UIDatePicker {
+    func applyMintDatePickerStyle() {
+        tintColor = AppColors.brand
+        backgroundColor = .clear
+        overrideUserInterfaceStyle = .dark
+        applyDatePickerTextColor()
+
+        DispatchQueue.main.async { [weak self] in
+            self?.applyDatePickerTextColor()
+        }
+    }
+
+    private func applyDatePickerTextColor() {
+        updateDatePickerTextColor(in: self)
+    }
+
+    private func updateDatePickerTextColor(in view: UIView) {
+        if let label = view as? UILabel {
+            label.textColor = AppColors.textPrimary
+        }
+
+        view.subviews.forEach { updateDatePickerTextColor(in: $0) }
     }
 }
 

@@ -4,6 +4,8 @@ import CoreText
 import SDWebImage
 
 class HomeViewController: UIViewController, UICollectionViewDelegate {
+    private let goalFallbackBackground = AppColors.sectionBackground
+    private let goalFallbackSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 36, weight: .semibold)
 
     private enum HomeUpcomingItem {
         case bill(Bill)
@@ -404,9 +406,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         GoalNameLabel.text = "No goal yet"
         SavedSoFarLabel.attributedText = nil
         SavedSoFarLabel.text = "0%"
-        goalImageView?.image = UIImage(systemName: "target")
-        goalImageView?.contentMode = .scaleAspectFit
-        goalImageView?.tintColor = AppColors.textPrimary
+        applyGoalPlaceholderIcon(systemName: "target")
         renderGoalProgress()
     }
 
@@ -690,7 +690,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: upcomingItems.isEmpty ? .fractionalWidth(1.0) : .absolute(110),
-            heightDimension: upcomingItems.isEmpty ? .fractionalHeight(1.0) : .absolute(180)
+            heightDimension: upcomingItems.isEmpty ? .fractionalHeight(1.0) : .absolute(185)
         )
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
@@ -986,16 +986,24 @@ private extension HomeViewController {
             goalImageView?.image = image
             goalImageView?.contentMode = .scaleAspectFill
             goalImageView?.tintColor = nil
+            goalImageView?.backgroundColor = .clear
         } else if let imageName = goal.imageName, let image = UIImage(named: imageName) {
             goalImageView?.image = image
             goalImageView?.contentMode = .scaleAspectFill
             goalImageView?.tintColor = nil
+            goalImageView?.backgroundColor = .clear
         } else {
-            goalImageView?.image = UIImage(systemName: goal.iconName)
-            goalImageView?.contentMode = .scaleAspectFit
-            goalImageView?.tintColor = AppColors.textPrimary
+            applyGoalPlaceholderIcon(systemName: goal.iconName)
         }
         updateGoalImageMask()
+    }
+
+    private func applyGoalPlaceholderIcon(systemName: String) {
+        goalImageView?.image = UIImage(systemName: systemName)?
+            .applyingSymbolConfiguration(goalFallbackSymbolConfiguration)
+        goalImageView?.contentMode = .center
+        goalImageView?.tintColor = AppColors.textPrimary
+        goalImageView?.backgroundColor = goalFallbackBackground
     }
 
     func savedGoalImage(for goal: Goal) -> UIImage? {
