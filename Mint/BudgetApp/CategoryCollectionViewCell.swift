@@ -36,11 +36,19 @@ final class CategoryCollectionViewCell: UICollectionViewCell {
 
     private func setupUI() {
         contentView.backgroundColor = .clear
-        cardView.layer.cornerRadius = 10
-        cardView.layer.borderWidth = 1
+        cardView.layer.cornerRadius = 18
+        cardView.layer.borderWidth = 2
+        cardView.clipsToBounds = true
         titleLabel.textColor = AppColors.textPrimary
+        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = 0.82
         amountLabel.textColor = AppColors.textPrimary
+        amountLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        amountLabel.adjustsFontSizeToFitWidth = true
+        amountLabel.minimumScaleFactor = 0.76
         iconImageView.tintColor = AppColors.brandText
+        iconImageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 28, weight: .bold)
         progressTrackView.clipsToBounds = true
         progressFillView.clipsToBounds = true
     }
@@ -49,7 +57,8 @@ final class CategoryCollectionViewCell: UICollectionViewCell {
         cardView.backgroundColor = item.backgroundColor
         cardView.layer.borderColor = item.accentColor.cgColor
         iconContainerView.backgroundColor = item.iconColor
-        iconImageView.image = UIImage(systemName: item.symbolName)
+        iconImageView.image = UIImage(systemName: item.symbolName)?.withRenderingMode(.alwaysTemplate)
+        iconImageView.tintColor = AppColors.brandText
         progressFillWidthConstraint.isActive = false
         progressFillWidthConstraint = progressFillView.widthAnchor.constraint(equalTo: progressTrackView.widthAnchor, multiplier: CGFloat(item.progress))
         progressFillWidthConstraint.isActive = true

@@ -12,7 +12,7 @@
         <!--Budget View Controller-->
         <scene sceneID="scene-budget">
             <objects>
-                <viewController storyboardIdentifier="BudgetViewController" id="budgetVC" customClass="BudgetViewController" customModule="BudgetApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="BudgetViewController" id="budgetVC" customClass="NewBudgetViewController" customModule="Mint" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="rootView">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

@@ -2,6 +2,8 @@
 import UIKit
 
 enum AppColors {
+    static let accent           = UIColor(named: "AccentColor") ?? UIColor(hex: "#7C2DFF")
+
     static let background        = UIColor(hex: "#070819")
     
     static let card              = UIColor(hex: "#121A34")
@@ -10,9 +12,15 @@ enum AppColors {
 
     static let inputBackground   = UIColor(hex: "#1A2442")
 
-    static let brand             = UIColor(hex: "#7C2DFF")
+    static let brand             = accent
 
-    static let brandLight        = UIColor(hex: "#B38CFF")
+    static let brandLight        = accent.withAlphaComponent(0.24)
+
+    static let budgetBreakdownBackground = UIColor(hex: "#171333")
+
+    static let budgetBreakdownCard = UIColor(hex: "#32117D")
+
+    static let budgetBreakdownBorder = UIColor(hex: "#7C2DFF")
 
     static let brandText         = UIColor(hex: "#ffffff")
 
@@ -35,8 +43,8 @@ enum AppColors {
     static let success           = UIColor(hex: "#34D26D")
 
     static let brandGradient: [CGColor] = [
-        UIColor(hex: "#5E17EB").cgColor,
-        UIColor(hex: "#9B2CFF").cgColor
+        accent.withAlphaComponent(0.78).cgColor,
+        accent.cgColor
     ]
 
     static let goalGradient: [CGColor] = [

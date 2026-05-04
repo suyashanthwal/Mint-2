@@ -17,10 +17,10 @@ class BudgetCategoriesCollectionViewCell: UICollectionViewCell {
         var configuration = UIButton.Configuration.filled()
         configuration.baseBackgroundColor = AppColors.brandLight
         configuration.baseForegroundColor = AppColors.brand
-        configuration.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
+        configuration.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10)
         configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var attributes = incoming
-            attributes.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+            attributes.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
             return attributes
         }
         button.configuration = configuration
@@ -35,12 +35,20 @@ class BudgetCategoriesCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = AppColors.card
         contentView.layer.cornerRadius = 16
         contentView.layer.masksToBounds = true
+        Name.font = .systemFont(ofSize: 13, weight: .semibold)
+        Name.adjustsFontSizeToFitWidth = true
+        Name.minimumScaleFactor = 0.82
+        Amount.font = .systemFont(ofSize: 12, weight: .bold)
+        Amount.adjustsFontSizeToFitWidth = true
+        Amount.minimumScaleFactor = 0.78
         setupSetLimitButton()
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
         onSetLimitTapped = nil
+        Amount.isHidden = true
+        setLimitButton.isHidden = true
     }
     
     func configureCategoryCell(category: Category) {
