@@ -12,6 +12,8 @@ class TPCCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
         categoryIcon.layer.cornerRadius = 8
         categoryIcon.clipsToBounds      = true
     }

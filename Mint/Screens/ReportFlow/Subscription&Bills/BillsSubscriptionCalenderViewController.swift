@@ -59,6 +59,7 @@ class BillsSubscriptionCalenderViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = false
+        applyReportNavigationTheme()
         reloadFromDatabase()
     }
 
@@ -86,13 +87,55 @@ class BillsSubscriptionCalenderViewController: UIViewController {
     }
 
     private func setupUI() {
+        applyReportBackgroundTheme(to: view)
         view.backgroundColor = AppColors.background
+        view.tintColor = AppColors.brand
+
+        previousMonthButton.tintColor = AppColors.brand
+        nextMonthButton.tintColor = AppColors.brand
         CalenderView.backgroundColor = AppColors.card
         CalenderView.applyShadow()
 
         MonthLabel.textColor = AppColors.textPrimary
         UpcomingBillsTotalAmountLabel.textColor = AppColors.textPrimary
         ActiveSubscriptionTotalAmountLabel.textColor = AppColors.textPrimary
+    }
+
+    private func applyReportBackgroundTheme(to parent: UIView) {
+        switch parent {
+        case is UIStackView:
+            parent.backgroundColor = .clear
+        case is UILabel, is UIButton:
+            parent.backgroundColor = .clear
+            return
+        case is UICollectionView:
+            parent.backgroundColor = .clear
+        case is UIScrollView:
+            parent.backgroundColor = AppColors.background
+        default:
+            parent.backgroundColor = AppColors.background
+        }
+
+        parent.subviews.forEach { applyReportBackgroundTheme(to: $0) }
+    }
+
+    private func applyReportNavigationTheme() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = AppColors.background
+        appearance.shadowColor = .clear
+        appearance.titleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary,
+            .font: UIFont.systemFont(ofSize: 20, weight: .semibold)
+        ]
+        appearance.largeTitleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary
+        ]
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.tintColor = AppColors.textPrimary
     }
 
     private func setupCalendarCollectionView() {

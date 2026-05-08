@@ -81,7 +81,12 @@ class ReportsViewController: UIViewController {
     @IBOutlet weak var CategoryBreakdownDataEntry: UICollectionView!
     @IBOutlet weak var CategoryBreakdown: UICollectionView!
     @IBOutlet weak var SubsAndBillsCard: UICollectionView?
-
+    
+    
+    @IBOutlet weak var CategoryBreakdownButton: UIButton!
+    @IBOutlet weak var SummaryButton: UIButton!
+    @IBOutlet weak var SubsAndBillsButton: UIButton!
+    
     private let db = DatabaseManager.shared
     private static let insightsBaseURLDefaultsKey = "mint_insights_base_url"
     private var insightsBaseURL: URL? {
@@ -100,6 +105,8 @@ class ReportsViewController: UIViewController {
     @IBOutlet weak var subsAndBillsInsightLabel: UILabel!
     @IBOutlet weak var categoryInsightLabel: UILabel!
     @IBOutlet weak var summaryInsightLabel: UILabel!
+    
+    
     private var transactions: [Transaction] = []
     private var categories: [Category] = []
     private var bills: [Bill] = []
@@ -191,10 +198,32 @@ class ReportsViewController: UIViewController {
             OnboardingHelper.markSeen(key: OnboardingKeys.reports)
         }
     }
+    
+    private func applyTopCornerRadius(to collectionView: UICollectionView) {
+        collectionView.layer.cornerRadius = 22
+        collectionView.layer.maskedCorners = [
+            .layerMinXMinYCorner,
+            .layerMaxXMinYCorner
+        ]
+        collectionView.clipsToBounds = true
+    }
+    
+    private func applyBottomCornerRadius(to collectionView: UICollectionView) {
+        collectionView.layer.cornerRadius = 22
+        collectionView.layer.maskedCorners = [
+            .layerMinXMaxYCorner, // bottom-left
+            .layerMaxXMaxYCorner  // bottom-right
+        ]
+        collectionView.clipsToBounds = true
+    }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        
         updateCardLayouts()
+        
+        applyBottomCornerRadius(to: CategoryBreakdownDataEntry)
+        applyTopCornerRadius(to: CategoryBreakdown)
     }
 
     deinit {
@@ -301,7 +330,12 @@ class ReportsViewController: UIViewController {
         CategoryBreakdownDataEntry.backgroundColor = AppColors.card
         CategoryBreakdown.backgroundColor = AppColors.card
         SubsAndBillsCard?.backgroundColor = AppColors.card
+        
+        CategoryBreakdownButton.tintColor = AppColors.accent
+        SummaryButton.tintColor = AppColors.accent
+        SubsAndBillsButton.tintColor = AppColors.accent
 
+        
         [summaryInsightVIew, categoryInsightView, subsAndBillsInsightView].forEach { insightView in
             insightView?.applyShadow()
             insightView?.isHidden = true
@@ -310,7 +344,8 @@ class ReportsViewController: UIViewController {
         [summaryInsightLabel, categoryInsightLabel, subsAndBillsInsightLabel].forEach { label in
             label?.textColor = AppColors.textPrimary
             label?.text = nil
-        }
+            
+            }
     }
 
     private func showReportsOnboarding() { startOnboarding() }
@@ -488,6 +523,7 @@ class ReportsViewController: UIViewController {
 
             return CategorySpending(
                 name: category.name,
+                icon: category.icon,
                 color: UIColor(hex: category.color),
                 amount: spent,
                 percent: percent
@@ -1015,7 +1051,6 @@ extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDel
             }
             return cell
         }
-
         return UICollectionViewCell()
     }
 

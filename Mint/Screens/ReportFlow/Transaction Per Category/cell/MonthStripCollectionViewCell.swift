@@ -7,6 +7,8 @@ class MonthStripCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
         MonthBackgroundView.layer.cornerRadius = 16
         MonthBackgroundView.clipsToBounds = true
     }

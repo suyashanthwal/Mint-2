@@ -10,6 +10,8 @@ class SubsAndBillsCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
         IconBackgroundView.clipsToBounds  = true
         IconImageView.tintColor           = AppColors.brand
         SubsAndBillsNameLabel.textColor   = AppColors.textPrimary

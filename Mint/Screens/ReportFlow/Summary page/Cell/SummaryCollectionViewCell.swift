@@ -8,6 +8,11 @@ class SummaryCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        contentView.subviews
+            .filter { !($0 is UILabel) }
+            .forEach { $0.backgroundColor = AppColors.cardBorder.withAlphaComponent(0.55) }
     }
 
     func configure(title: String, amount: Double, isPositive: Bool) {

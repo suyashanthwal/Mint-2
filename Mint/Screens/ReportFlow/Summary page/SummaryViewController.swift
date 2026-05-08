@@ -73,6 +73,7 @@ class SummaryViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = false
+        applyReportNavigationTheme()
         reloadFromDatabase(animateChart: false)
     }
 
@@ -81,12 +82,69 @@ class SummaryViewController: UIViewController {
     }
 
     private func setupSummaryUI() {
+        applyReportBackgroundTheme(to: view)
         view.backgroundColor = AppColors.background
+        view.tintColor = AppColors.brand
+
+        segmentedControl.backgroundColor = AppColors.sectionBackground
+        segmentedControl.selectedSegmentTintColor = AppColors.brand
+        segmentedControl.setTitleTextAttributes(
+            [
+                .foregroundColor: AppColors.textSecondary,
+                .font: UIFont.systemFont(ofSize: 13, weight: .medium)
+            ],
+            for: .normal
+        )
+        segmentedControl.setTitleTextAttributes(
+            [
+                .foregroundColor: AppColors.brandText,
+                .font: UIFont.systemFont(ofSize: 13, weight: .semibold)
+            ],
+            for: .selected
+        )
+
         AverageHeadingLabel.textColor = AppColors.textSecondary
         AmountLabel.textColor = AppColors.brand
         UPorDOWNPercentLabel.textColor = AppColors.textSecondary
         detailsHeadingLabel.textColor = AppColors.textPrimary
         monthlyDetailsCollectionView.backgroundColor = .clear
+    }
+
+    private func applyReportBackgroundTheme(to parent: UIView) {
+        switch parent {
+        case is UIStackView:
+            parent.backgroundColor = .clear
+        case is UILabel, is UIButton, is UISegmentedControl:
+            parent.backgroundColor = .clear
+            return
+        case is UICollectionView:
+            parent.backgroundColor = .clear
+        case is UIScrollView:
+            parent.backgroundColor = AppColors.background
+        default:
+            parent.backgroundColor = AppColors.background
+        }
+
+        parent.subviews.forEach { applyReportBackgroundTheme(to: $0) }
+    }
+
+    private func applyReportNavigationTheme() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = AppColors.background
+        appearance.shadowColor = .clear
+        appearance.titleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary,
+            .font: UIFont.systemFont(ofSize: 20, weight: .semibold)
+        ]
+        appearance.largeTitleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary
+        ]
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.tintColor = AppColors.textPrimary
     }
 
     private func setupChartAppearance() {

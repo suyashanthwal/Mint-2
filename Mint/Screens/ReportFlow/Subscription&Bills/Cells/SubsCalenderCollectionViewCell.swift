@@ -10,6 +10,8 @@ class SubsCalenderCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
         backgroundPill?.layer.cornerRadius = 10
         backgroundPill?.clipsToBounds      = true
         backgroundPill?.backgroundColor    = .clear
@@ -39,7 +41,7 @@ class SubsCalenderCollectionViewCell: UICollectionViewCell {
         }
 
         dateLabel.text   = "\(day)"
-        dateLabel.textColor = .black
+        dateLabel.textColor = AppColors.textPrimary
         dotView.isHidden = !hasBill
 
         if isSelected {

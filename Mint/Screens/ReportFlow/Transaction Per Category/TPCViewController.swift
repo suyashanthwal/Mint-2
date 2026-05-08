@@ -96,10 +96,12 @@ class TPCViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = false
+        applyReportNavigationTheme()
         reloadFromDatabase(animateChart: false, preserveSelection: true)
     }
 
     private func setupUI() {
+        applyReportBackgroundTheme(to: view)
         for view in AllBackgroundVIews { view.backgroundColor = AppColors.background }
         for card in AllCardVIews {
             card.backgroundColor = AppColors.card
@@ -110,6 +112,43 @@ class TPCViewController: UIViewController {
         MonthCollectionView.backgroundColor = .clear
         collectionView.backgroundColor = .clear
         view.backgroundColor = AppColors.background
+    }
+
+    private func applyReportBackgroundTheme(to parent: UIView) {
+        switch parent {
+        case is UIStackView:
+            parent.backgroundColor = .clear
+        case is UILabel, is UIButton:
+            parent.backgroundColor = .clear
+            return
+        case is UICollectionView:
+            parent.backgroundColor = .clear
+        case is UIScrollView:
+            parent.backgroundColor = AppColors.background
+        default:
+            parent.backgroundColor = AppColors.background
+        }
+
+        parent.subviews.forEach { applyReportBackgroundTheme(to: $0) }
+    }
+
+    private func applyReportNavigationTheme() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = AppColors.background
+        appearance.shadowColor = .clear
+        appearance.titleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary,
+            .font: UIFont.systemFont(ofSize: 20, weight: .semibold)
+        ]
+        appearance.largeTitleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary
+        ]
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.tintColor = AppColors.textPrimary
     }
 
     private func reloadFromDatabase(animateChart: Bool, preserveSelection: Bool) {
@@ -191,7 +230,7 @@ class TPCViewController: UIViewController {
         }
 
         let dataSet = PieChartDataSet(entries: entries)
-        dataSet.colors = categorySummaries.map { UIColor(hex: $0.category.color) ?? AppColors.brand }
+        dataSet.colors = categorySummaries.map { UIColor(hex: $0.category.color) }
         dataSet.drawValuesEnabled = false
         dataSet.sliceSpace = 4
         dataSet.selectionShift = 12
@@ -208,7 +247,7 @@ class TPCViewController: UIViewController {
     private func updatePieChartColors(selectedName: String?) {
         guard let dataSet = pieChartView.data?.dataSets.first as? PieChartDataSet else { return }
         dataSet.colors = categorySummaries.map { item in
-            let base = UIColor(hex: item.category.color) ?? AppColors.brand
+            let base = UIColor(hex: item.category.color)
             guard let selectedName else { return base }
             return item.category.name == selectedName ? base : base.withAlphaComponent(0.25)
         }
