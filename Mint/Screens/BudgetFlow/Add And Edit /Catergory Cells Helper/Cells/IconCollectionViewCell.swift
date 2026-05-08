@@ -12,10 +12,10 @@ class IconCollectionViewCell: UICollectionViewCell {
         }
         
         private func setupCell() {
-            backgroundCircle.backgroundColor = UIColor.systemGray5
+            backgroundCircle.backgroundColor = AppColors.brandLightText
             backgroundCircle.layer.cornerRadius = 25
 
-            iconImageView.tintColor = .darkGray
+            iconImageView.tintColor = AppColors.brand
             iconImageView.contentMode = .scaleAspectFit
         }
         

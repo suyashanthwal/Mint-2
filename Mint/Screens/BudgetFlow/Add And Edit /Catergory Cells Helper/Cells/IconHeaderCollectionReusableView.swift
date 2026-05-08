@@ -11,8 +11,8 @@ class IconHeaderCollectionReusableView: UICollectionReusableView {
         }
         
         private func setupHeader() {
-            titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-            titleLabel.textColor = .darkGray
+            titleLabel.font = MintFont.space(size: 14, weight: .semibold)
+            titleLabel.textColor = AppColors.textPrimary
         }
         
         func configure(with title: String) {

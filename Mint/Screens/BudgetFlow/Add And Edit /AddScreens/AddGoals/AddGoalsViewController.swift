@@ -78,19 +78,26 @@ extension AddGoalsViewController {
 
     func setupUI() {
         view.backgroundColor = AppColors.card
-        for views in AllCardsView {
-            views.backgroundColor = AppColors.card
-            views.applyShadow()
-        }
         for backgroundview in AllBackgroundView {
-            backgroundview.backgroundColor = AppColors.background
+            backgroundview.backgroundColor = AppColors.card
         }
-        nameTextField.backgroundColor = AppColors.card
-        amountTextField.backgroundColor = AppColors.card
-        amountTextField.keyboardType = .numberPad
-        monthlyTargetTextField.keyboardType = .numberPad
+        for views in AllCardsView {
+            views.applyAddEditInputContainerStyle()
+        }
+        for stackView in AllStackViews {
+            stackView.backgroundColor = AppColors.inputBackground
+        }
+        nameTextField.applyAddEditInputStyle()
+        amountTextField.applyAddEditInputStyle(keyboardType: .numberPad)
+        monthlyTargetTextField.applyAddEditInputStyle(keyboardType: .numberPad)
+        notesTextView.applyAddEditInputStyle()
+        targetDateTitleLabel.textColor = AppColors.textPrimary
+        targetDateValueLabel.textColor = AppColors.textSecondary
+        datePicker.applyMintDatePickerStyle()
         notesTextView.layer.cornerRadius = 12
         notesTextView.clipsToBounds = true
+        view.applyMintTypography()
+        datePicker.applyMintDatePickerStyle()
     }
 
     func setupDatePicker() {

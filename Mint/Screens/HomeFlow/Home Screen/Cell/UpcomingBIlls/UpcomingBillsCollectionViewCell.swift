@@ -2,7 +2,6 @@
 import UIKit
 
 class UpcomingBillsCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var Title: UILabel?
     @IBOutlet weak var Amount: UILabel?
     @IBOutlet weak var iconImageView: UIImageView?

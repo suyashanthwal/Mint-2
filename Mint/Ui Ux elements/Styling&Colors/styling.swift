@@ -1,5 +1,6 @@
 
 import UIKit
+import CoreText
 
 extension UIView {
     func applyShadow() {
@@ -157,5 +158,269 @@ extension NSMutableAttributedString {
         if let f = font { attrs[.font] = f }
         append(NSAttributedString(string: text, attributes: attrs))
         return self
+    }
+}
+
+enum MintFont {
+    fileprivate static let weightAxisTag = fourCharacterCode("wght")
+
+    static func space(size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
+        customFont(
+            names: weightedNames(
+                family: "SpaceGrotesk",
+                spacedFamily: "Space Grotesk",
+                weight: weight
+            ),
+            size: size,
+            fallbackWeight: weight
+        )
+    }
+
+    static func space(matching font: UIFont?, fallbackSize: CGFloat = 17) -> UIFont {
+        space(
+            size: font?.pointSize ?? fallbackSize,
+            weight: weight(for: font)
+        )
+    }
+
+    static func weight(for font: UIFont?) -> UIFont.Weight {
+        guard let font else { return .regular }
+        let traits = font.fontDescriptor.symbolicTraits
+        guard traits.contains(.traitBold) else { return .regular }
+        return .bold
+    }
+
+    private static func weightedNames(
+        family: String,
+        spacedFamily: String,
+        weight: UIFont.Weight
+    ) -> [String] {
+        let suffix: String
+        switch weight {
+        case .black, .heavy:
+            suffix = "ExtraBold"
+        case .bold:
+            suffix = "Bold"
+        case .semibold:
+            suffix = "SemiBold"
+        case .medium:
+            suffix = "Medium"
+        default:
+            suffix = "Regular"
+        }
+
+        return [
+            "\(family)-\(suffix)",
+            "\(spacedFamily)-\(suffix)",
+            "\(family)-VariableFont_wght",
+            "\(spacedFamily)-VariableFont_wght",
+            "\(family)-Regular",
+            "\(spacedFamily)-Regular",
+            family,
+            spacedFamily
+        ]
+    }
+
+    private static func fourCharacterCode(_ string: String) -> Int {
+        string.unicodeScalars.reduce(0) { partialResult, scalar in
+            (partialResult << 8) + Int(scalar.value)
+        }
+    }
+
+    private static func customFont(
+        names: [String],
+        size: CGFloat,
+        fallbackWeight: UIFont.Weight
+    ) -> UIFont {
+        for name in names {
+            if let font = UIFont(name: name, size: size) {
+                return font.withVariableWeight(fallbackWeight) ?? font
+            }
+        }
+        return .systemFont(ofSize: size, weight: fallbackWeight)
+    }
+}
+
+extension UIView {
+    func applyMintTypography() {
+        if let label = self as? UILabel {
+            label.font = MintFont.space(matching: label.font)
+            label.removeCharacterSpacing()
+        }
+
+        if let textField = self as? UITextField {
+            textField.font = MintFont.space(matching: textField.font)
+            textField.applyMintPlaceholderFont()
+        }
+
+        if let textView = self as? UITextView {
+            textView.font = MintFont.space(matching: textView.font)
+        }
+
+        if let button = self as? UIButton {
+            button.titleLabel?.font = MintFont.space(matching: button.titleLabel?.font)
+        }
+
+        if let segmentedControl = self as? UISegmentedControl {
+            let font = MintFont.space(size: 13, weight: .semibold)
+            segmentedControl.setTitleTextAttributes([.font: font], for: .normal)
+            segmentedControl.setTitleTextAttributes([.font: font], for: .selected)
+        }
+
+        if let datePicker = self as? UIDatePicker {
+            datePicker.applyMintDatePickerStyle()
+        }
+
+        subviews.forEach { $0.applyMintTypography() }
+    }
+
+    func applyAddEditInputContainerStyle() {
+        backgroundColor = AppColors.inputBackground
+        layer.borderColor = AppColors.cardBorder.cgColor
+        layer.borderWidth = 1
+        applyShadow()
+    }
+}
+
+extension UISegmentedControl {
+    func applyAddEditSegmentStyle() {
+        backgroundColor = AppColors.sectionBackground
+        selectedSegmentTintColor = AppColors.inputBackground
+        tintColor = AppColors.brand
+
+        setTitleTextAttributes(
+            [
+                .foregroundColor: AppColors.textSecondary,
+                .font: MintFont.space(size: 14, weight: .semibold),
+                .kern: 0
+            ],
+            for: .normal
+        )
+        setTitleTextAttributes(
+            [
+                .foregroundColor: AppColors.textPrimary,
+                .font: MintFont.space(size: 14, weight: .bold),
+                .kern: 0
+            ],
+            for: .selected
+        )
+    }
+}
+
+extension UIDatePicker {
+    func applyMintDatePickerStyle() {
+        tintColor = AppColors.brand
+        backgroundColor = .clear
+        overrideUserInterfaceStyle = .dark
+        applyDatePickerTextColor()
+
+        DispatchQueue.main.async { [weak self] in
+            self?.applyDatePickerTextColor()
+        }
+    }
+
+    private func applyDatePickerTextColor() {
+        updateDatePickerTextColor(in: self)
+    }
+
+    private func updateDatePickerTextColor(in view: UIView) {
+        if let label = view as? UILabel {
+            label.textColor = AppColors.textPrimary
+        }
+
+        view.subviews.forEach { updateDatePickerTextColor(in: $0) }
+    }
+}
+
+extension UITextField {
+    func applyAddEditInputStyle(keyboardType: UIKeyboardType? = nil) {
+        backgroundColor = AppColors.inputBackground
+        textColor = AppColors.textPrimary
+        tintColor = AppColors.brand
+        font = MintFont.space(matching: font)
+        if let keyboardType {
+            self.keyboardType = keyboardType
+        }
+        applyMintPlaceholderFont()
+    }
+
+    func applyMintPlaceholderFont(placeholder: String? = nil) {
+        let placeholderText = placeholder ?? self.placeholder ?? attributedPlaceholder?.string
+        guard let placeholderText else { return }
+        attributedPlaceholder = NSAttributedString(
+            string: placeholderText,
+            attributes: [
+                .foregroundColor: AppColors.textSecondary,
+                .font: font as Any
+            ]
+        )
+    }
+}
+
+extension UILabel {
+    func removeCharacterSpacing() {
+        guard let text else { return }
+        attributedText = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: font as Any,
+                .foregroundColor: textColor as Any,
+                .kern: 0
+            ]
+        )
+    }
+}
+
+private extension UIFont {
+    func withVariableWeight(_ weight: UIFont.Weight) -> UIFont? {
+        let targetValue = weight.variableAxisValue
+        let ctFont = self as CTFont
+        guard let axes = CTFontCopyVariationAxes(ctFont) as? [[CFString: Any]] else {
+            return nil
+        }
+
+        let weightAxisTag = MintFont.weightAxisTag
+        guard let weightAxis = axes.first(where: { axis in
+            (axis[kCTFontVariationAxisIdentifierKey] as? NSNumber)?.intValue == weightAxisTag
+        }) else {
+            return nil
+        }
+
+        let minValue = (weightAxis[kCTFontVariationAxisMinimumValueKey] as? NSNumber)?.doubleValue ?? targetValue
+        let maxValue = (weightAxis[kCTFontVariationAxisMaximumValueKey] as? NSNumber)?.doubleValue ?? targetValue
+        let clampedValue = min(max(targetValue, minValue), maxValue)
+
+        let variationKey = UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
+        let descriptor = fontDescriptor.addingAttributes([
+            variationKey: [weightAxisTag: clampedValue]
+        ])
+        return UIFont(descriptor: descriptor, size: pointSize)
+    }
+}
+
+private extension UIFont.Weight {
+    var variableAxisValue: Double {
+        switch self {
+        case .ultraLight:
+            return 200
+        case .thin:
+            return 250
+        case .light:
+            return 300
+        case .regular:
+            return 400
+        case .medium:
+            return 500
+        case .semibold:
+            return 600
+        case .bold:
+            return 700
+        case .heavy:
+            return 800
+        case .black:
+            return 900
+        default:
+            return 400
+        }
     }
 }

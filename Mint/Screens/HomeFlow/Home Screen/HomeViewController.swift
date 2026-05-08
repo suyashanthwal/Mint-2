@@ -4,6 +4,8 @@ import CoreText
 import SDWebImage
 
 class HomeViewController: UIViewController, UICollectionViewDelegate {
+    private let goalFallbackBackground = AppColors.sectionBackground
+    private let goalFallbackSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 36, weight: .semibold)
 
     private enum HomeUpcomingItem {
         case bill(Bill)
@@ -404,9 +406,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         GoalNameLabel.text = "No goal yet"
         SavedSoFarLabel.attributedText = nil
         SavedSoFarLabel.text = "0%"
-        goalImageView?.image = UIImage(systemName: "target")
-        goalImageView?.contentMode = .scaleAspectFit
-        goalImageView?.tintColor = AppColors.textPrimary
+        applyGoalPlaceholderIcon(systemName: "target")
         renderGoalProgress()
     }
 
@@ -690,7 +690,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: upcomingItems.isEmpty ? .fractionalWidth(1.0) : .absolute(110),
-            heightDimension: upcomingItems.isEmpty ? .fractionalHeight(1.0) : .absolute(180)
+            heightDimension: upcomingItems.isEmpty ? .fractionalHeight(1.0) : .absolute(185)
         )
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
@@ -986,16 +986,24 @@ private extension HomeViewController {
             goalImageView?.image = image
             goalImageView?.contentMode = .scaleAspectFill
             goalImageView?.tintColor = nil
+            goalImageView?.backgroundColor = .clear
         } else if let imageName = goal.imageName, let image = UIImage(named: imageName) {
             goalImageView?.image = image
             goalImageView?.contentMode = .scaleAspectFill
             goalImageView?.tintColor = nil
+            goalImageView?.backgroundColor = .clear
         } else {
-            goalImageView?.image = UIImage(systemName: goal.iconName)
-            goalImageView?.contentMode = .scaleAspectFit
-            goalImageView?.tintColor = AppColors.textPrimary
+            applyGoalPlaceholderIcon(systemName: goal.iconName)
         }
         updateGoalImageMask()
+    }
+
+    private func applyGoalPlaceholderIcon(systemName: String) {
+        goalImageView?.image = UIImage(systemName: systemName)?
+            .applyingSymbolConfiguration(goalFallbackSymbolConfiguration)
+        goalImageView?.contentMode = .center
+        goalImageView?.tintColor = AppColors.textPrimary
+        goalImageView?.backgroundColor = goalFallbackBackground
     }
 
     func savedGoalImage(for goal: Goal) -> UIImage? {
@@ -1277,140 +1285,6 @@ private extension UIView {
 
         if gradient.superlayer == nil {
             layer.insertSublayer(gradient, at: 0)
-        }
-    }
-}
-
-private extension UILabel {
-    func removeCharacterSpacing() {
-        guard let text else { return }
-        attributedText = NSAttributedString(
-            string: text,
-            attributes: [
-                .font: font as Any,
-                .foregroundColor: textColor as Any,
-                .kern: 0
-            ]
-        )
-    }
-}
-
-enum MintFont {
-    static let weightAxisTag = fourCharacterCode("wght")
-
-    static func space(size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
-        customFont(
-            names: weightedNames(
-                family: "SpaceGrotesk",
-                spacedFamily: "Space Grotesk",
-                weight: weight
-            ),
-            size: size,
-            fallbackWeight: weight
-        )
-    }
-
-    private static func weightedNames(
-        family: String,
-        spacedFamily: String,
-        weight: UIFont.Weight
-    ) -> [String] {
-        let suffix: String
-        switch weight {
-        case .black, .heavy:
-            suffix = "ExtraBold"
-        case .bold:
-            suffix = "Bold"
-        case .semibold:
-            suffix = "SemiBold"
-        case .medium:
-            suffix = "Medium"
-        default:
-            suffix = "Regular"
-        }
-
-        return [
-            "\(family)-\(suffix)",
-            "\(spacedFamily)-\(suffix)",
-            "\(family)-VariableFont_wght",
-            "\(spacedFamily)-VariableFont_wght",
-            "\(family)-Regular",
-            "\(spacedFamily)-Regular",
-            family,
-            spacedFamily
-        ]
-    }
-
-    private static func fourCharacterCode(_ string: String) -> Int {
-        string.unicodeScalars.reduce(0) { partialResult, scalar in
-            (partialResult << 8) + Int(scalar.value)
-        }
-    }
-
-    private static func customFont(
-        names: [String],
-        size: CGFloat,
-        fallbackWeight: UIFont.Weight
-    ) -> UIFont {
-        for name in names {
-            if let font = UIFont(name: name, size: size) {
-                return font.withVariableWeight(fallbackWeight) ?? font
-            }
-        }
-        return .systemFont(ofSize: size, weight: fallbackWeight)
-    }
-}
-
-private extension UIFont {
-    func withVariableWeight(_ weight: UIFont.Weight) -> UIFont? {
-        let targetValue = weight.variableAxisValue
-        let ctFont = self as CTFont
-        guard let axes = CTFontCopyVariationAxes(ctFont) as? [[CFString: Any]] else {
-            return nil
-        }
-
-        let weightAxisTag = MintFont.weightAxisTag
-        guard let weightAxis = axes.first(where: { axis in
-            (axis[kCTFontVariationAxisIdentifierKey] as? NSNumber)?.intValue == weightAxisTag
-        }) else {
-            return nil
-        }
-
-        let minValue = (weightAxis[kCTFontVariationAxisMinimumValueKey] as? NSNumber)?.doubleValue ?? targetValue
-        let maxValue = (weightAxis[kCTFontVariationAxisMaximumValueKey] as? NSNumber)?.doubleValue ?? targetValue
-        let clampedValue = min(max(targetValue, minValue), maxValue)
-
-        let variationKey = UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
-        let descriptor = fontDescriptor.addingAttributes([
-            variationKey: [weightAxisTag: clampedValue]
-        ])
-        return UIFont(descriptor: descriptor, size: pointSize)
-    }
-}
-
-private extension UIFont.Weight {
-    var variableAxisValue: Double {
-        switch self {
-        case .ultraLight:
-            return 200
-        case .thin:
-            return 250
-        case .light:
-            return 300
-        case .regular:
-            return 400
-        case .medium:
-            return 500
-        case .semibold:
-            return 600
-        case .bold:
-            return 700
-        case .heavy:
-            return 800
-        case .black:
-            return 900
-        default:
-            return 400
         }
     }
 }

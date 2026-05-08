@@ -74,18 +74,19 @@ class EditTransactionViewController: UIViewController {
     }
 
     private func setupUI() {
-        view.backgroundColor = AppColors.background
-        TransactionAmount.keyboardType = .decimalPad
-        TransactionAmount.backgroundColor = AppColors.card
-        TransactionAmount.textColor = AppColors.textPrimary
+        view.backgroundColor = AppColors.card
+        TransactionAmount.applyAddEditInputStyle(keyboardType: .decimalPad)
 
-        TransactionDateandTime.tintColor = AppColors.brand
+        TransactionDateandTime.applyMintDatePickerStyle()
         CategoryButton.showsMenuAsPrimaryAction = true
         CategoryButton.setTitleColor(AppColors.textPrimary, for: .normal)
+        CategoryButton.titleLabel?.font = MintFont.space(matching: CategoryButton.titleLabel?.font)
         
         for v in CardView {
-            v.backgroundColor = AppColors.card
+            v.applyAddEditInputContainerStyle()
         }
+        view.applyMintTypography()
+        TransactionDateandTime.applyMintDatePickerStyle()
     }
 
     private func loadCategories() {

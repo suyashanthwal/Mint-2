@@ -1,4 +1,3 @@
-
 import UIKit
 
 class AddCategoryViewController: UIViewController {
@@ -40,35 +39,49 @@ class AddCategoryViewController: UIViewController {
     }
 
     private func setupUI() {
+        
+        nameTextField.attributedPlaceholder = NSAttributedString(
+            string: "Name",
+            attributes: [
+                .foregroundColor: AppColors.textSecondary
+            ]
+        )
+        
+        limitTextField.attributedPlaceholder = NSAttributedString(
+            string: "₹0",
+            attributes: [
+                .foregroundColor: AppColors.textSecondary
+            ]
+        )
 
-        view.backgroundColor = AppColors.background
+        view.backgroundColor = AppColors.card
         for v in AllView {
-            v.backgroundColor = AppColors.background
+            v.backgroundColor = AppColors.card
         }
 
         for v in InsideViews {
-            v.backgroundColor = AppColors.card
+            v.backgroundColor = AppColors.inputBackground
+            v.layer.borderColor = AppColors.cardBorder.cgColor
+            v.layer.borderWidth = 1
             v.applyShadow()
         }
 
         for eachStack in InsideStackView {
-            eachStack.backgroundColor = AppColors.card
+            eachStack.backgroundColor = AppColors.inputBackground
         }
 
-        nameTextField.backgroundColor = AppColors.card
-        nameTextField.textColor       = AppColors.textPrimary
+        nameTextField.applyAddEditInputStyle()
 
-        limitTextField.backgroundColor = AppColors.card
-        limitTextField.textColor       = AppColors.textPrimary
-        limitTextField.keyboardType    = .numberPad
+        limitTextField.applyAddEditInputStyle(keyboardType: .numberPad)
 
         iconPickerImageView.tintColor       = selectedIconColor
+        iconPickerLabel.textColor           = AppColors.textPrimary
 
-        iconCollectionView.backgroundColor = AppColors.card
+        iconCollectionView.backgroundColor = AppColors.inputBackground
         iconCollectionView.clipsToBounds   = true
 
-        notesTextView.backgroundColor    = AppColors.card
-        notesTextView.layer.borderColor  = UIColor.systemGray5.cgColor
+        notesTextView.backgroundColor    = AppColors.inputBackground
+        notesTextView.layer.borderColor  = AppColors.cardBorder.cgColor
         notesTextView.layer.borderWidth  = 1
         notesTextView.layer.cornerRadius = 8
 
@@ -78,6 +91,8 @@ class AddCategoryViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(iconPickerTapped))
         iconPickerStackView.addGestureRecognizer(tap)
         iconPickerStackView.isUserInteractionEnabled = true
+
+        view.applyMintTypography()
     }
 
     private func setupColorWell() {

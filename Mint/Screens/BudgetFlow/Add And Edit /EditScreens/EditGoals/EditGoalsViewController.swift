@@ -83,19 +83,25 @@ class EditGoalsViewController: UIViewController {
 extension EditGoalsViewController {
 
     func setupUI() {
+        view.backgroundColor = AppColors.card
         for views in AllBackgroundViews {
-            views.backgroundColor = AppColors.background
+            views.backgroundColor = AppColors.card
         }
         for views in AllInsideViews {
-            views.backgroundColor = AppColors.card
-            views.applyShadow()
+            views.applyAddEditInputContainerStyle()
         }
-        amountTextField.keyboardType = .numberPad
-        amountTextField.backgroundColor = AppColors.card
-        nameTextField.backgroundColor = AppColors.card
-        monthlyTargetTextField.keyboardType = .numberPad
+        nameTextField.applyAddEditInputStyle()
+        amountTextField.applyAddEditInputStyle(keyboardType: .numberPad)
+        monthlyTargetTextField.applyAddEditInputStyle(keyboardType: .numberPad)
+        notesTextView.applyAddEditInputStyle()
+        targetDateTitleLabel.textColor = AppColors.textPrimary
+        targetDateValueLabel.textColor = AppColors.textSecondary
+        totalSavedLabel.textColor = AppColors.textPrimary
+        datePicker.applyMintDatePickerStyle()
         notesTextView.layer.cornerRadius = 12
         notesTextView.clipsToBounds = true
+        view.applyMintTypography()
+        datePicker.applyMintDatePickerStyle()
     }
 
     func setupDatePicker() {

@@ -40,11 +40,11 @@ final class CategoryCollectionViewCell: UICollectionViewCell {
         cardView.layer.borderWidth = 2
         cardView.clipsToBounds = true
         titleLabel.textColor = AppColors.textPrimary
-        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.font = MintFont.space(size: 14, weight: .bold)
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.minimumScaleFactor = 0.82
         amountLabel.textColor = AppColors.textPrimary
-        amountLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        amountLabel.font = MintFont.space(size: 14, weight: .semibold)
         amountLabel.adjustsFontSizeToFitWidth = true
         amountLabel.minimumScaleFactor = 0.76
         iconImageView.tintColor = AppColors.brandText
@@ -66,5 +66,7 @@ final class CategoryCollectionViewCell: UICollectionViewCell {
         progressTrackView.backgroundColor = item.accentColor.withAlphaComponent(0.32)
         titleLabel.text = item.title
         amountLabel.text = item.amount
+        titleLabel.removeCharacterSpacing()
+        amountLabel.removeCharacterSpacing()
     }
 }
