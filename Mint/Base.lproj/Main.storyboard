@@ -40,8 +40,8 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="What is your monthly Income?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5EJ-bA-ydh">
-                                <rect key="frame" x="20" y="532" width="353" height="28.666666666666629"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                <rect key="frame" x="20" y="532" width="353" height="67"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                 <color key="textColor" red="0.1764705882" green="0.20392156859999999" blue="0.1960784314" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -52,7 +52,7 @@
                                 </constraints>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="q2X-Sx-CzT">
-                                <rect key="frame" x="20" y="646.66666666666663" width="353" height="50"/>
+                                <rect key="frame" x="20" y="685" width="353" height="50"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="₹" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WUd-Ip-uYo">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
@@ -88,7 +88,7 @@
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QTj-jK-aJC">
-                                <rect key="frame" x="20" y="580.66666666666663" width="353" height="36"/>
+                                <rect key="frame" x="20" y="619" width="353" height="36"/>
                                 <string key="text">This helps us understand your spending 
 capacity.</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
@@ -96,7 +96,7 @@ capacity.</string>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Trl-rw-mp6">
-                                <rect key="frame" x="20" y="726.66666666666663" width="353" height="50"/>
+                                <rect key="frame" x="20" y="765" width="353" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="CNa-tE-Qdy"/>
                                 </constraints>
@@ -192,7 +192,7 @@ capacity.</string>
                                 <rect key="frame" x="20" y="494" width="353" height="270"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rnl-cE-bgP">
-                                        <rect key="frame" x="16" y="66.666666666666629" width="321" height="40.666666666666657"/>
+                                        <rect key="frame" x="16" y="71.666666666666629" width="321" height="40.666666666666657"/>
                                         <string key="text">See exactly where your money goes
 with our effortless categorization.</string>
                                         <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="17"/>
@@ -200,7 +200,7 @@ with our effortless categorization.</string>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hYB-2m-Pt5">
-                                        <rect key="frame" x="26.666666666666657" y="127.33333333333337" width="300" height="50"/>
+                                        <rect key="frame" x="26.666666666666657" y="132.33333333333337" width="300" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="1Au-94-eC9"/>
                                             <constraint firstAttribute="height" constant="50" id="xST-bC-rZH"/>
@@ -214,8 +214,8 @@ with our effortless categorization.</string>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Track Every Expense" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="i0r-LY-HU9">
-                                        <rect key="frame" x="16" y="30" width="321" height="28.666666666666671"/>
-                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                        <rect key="frame" x="16" y="29.999999999999996" width="321" height="33.666666666666657"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
@@ -225,7 +225,7 @@ with our effortless categorization.</string>
                                         <color key="currentPageIndicatorTintColor" red="0.21103484989999999" green="0.31228515620000002" blue="0.2083372788" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                     </pageControl>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zzc-Za-w5T">
-                                        <rect key="frame" x="20" y="185.33333333333337" width="313" height="34.333333333333343"/>
+                                        <rect key="frame" x="20" y="190.33333333333337" width="313" height="34.333333333333343"/>
                                         <color key="tintColor" red="0.21103484989999999" green="0.31228515620000002" blue="0.2083372788" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="skip"/>
@@ -325,25 +325,25 @@ with our effortless categorization.</string>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sign In" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MZa-I0-4cs">
-                                        <rect key="frame" x="147" y="278" width="99" height="40.666666666666686"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                        <rect key="frame" x="153.33333333333334" y="278" width="86.666666666666657" height="33.666666666666686"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Continue your journey to financial clarity" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mJB-DR-nWc">
-                                        <rect key="frame" x="44" y="318.66666666666669" width="305" height="20.333333333333314"/>
+                                        <rect key="frame" x="44" y="311.66666666666669" width="305" height="20.333333333333314"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email Address" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cdt-Ul-JAZ">
-                                        <rect key="frame" x="20.000000000000007" y="359" width="107.66666666666669" height="20.333333333333314"/>
+                                        <rect key="frame" x="20.000000000000007" y="352" width="107.66666666666669" height="20.333333333333314"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bLf-c9-ab7">
-                                        <rect key="frame" x="20" y="387.33333333333331" width="353" height="50"/>
+                                        <rect key="frame" x="20" y="380.33333333333331" width="353" height="50"/>
                                         <subviews>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="name@email.com" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ss3-ws-M2n">
                                                 <rect key="frame" x="8" y="0.0" width="337" height="50"/>
@@ -370,13 +370,13 @@ with our effortless categorization.</string>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="o9J-eD-uJh">
-                                        <rect key="frame" x="20" y="457.33333333333331" width="73.333333333333329" height="20.333333333333314"/>
+                                        <rect key="frame" x="20" y="450.33333333333331" width="73.333333333333329" height="20.333333333333314"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XSZ-5t-FCq">
-                                        <rect key="frame" x="20" y="485.66666666666669" width="353" height="50.000000000000057"/>
+                                        <rect key="frame" x="20" y="478.66666666666669" width="353" height="50.000000000000057"/>
                                         <subviews>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="h22-mA-NQQ">
                                                 <rect key="frame" x="8" y="0.0" width="297" height="50"/>
@@ -390,7 +390,7 @@ with our effortless categorization.</string>
                                                 <state key="normal" title="Button"/>
                                                 <buttonConfiguration key="configuration" style="plain" image="eye" catalog="system">
                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
-                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                     </preferredSymbolConfiguration>
                                                 </buttonConfiguration>
                                             </button>
@@ -413,27 +413,27 @@ with our effortless categorization.</string>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="OR CONTINUE WITH" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BFj-tR-LO0">
-                                        <rect key="frame" x="133.33333333333334" y="645.66666666666663" width="126.33333333333334" height="15.666666666666629"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                        <rect key="frame" x="137.66666666666666" y="638.66666666666663" width="117.66666666666666" height="14.333333333333371"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YvG-Mb-Mgc">
-                                        <rect key="frame" x="19.999999999999993" y="653" width="105.33333333333331" height="1"/>
+                                        <rect key="frame" x="20.000000000000007" y="645.33333333333337" width="109.66666666666669" height="1"/>
                                         <color key="backgroundColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="1" id="qdk-Ow-3qE"/>
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Oe9-Bv-5MZ">
-                                        <rect key="frame" x="267.66666666666669" y="653" width="105.33333333333331" height="1"/>
+                                        <rect key="frame" x="263.33333333333331" y="645.33333333333337" width="109.66666666666669" height="1"/>
                                         <color key="backgroundColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="1" id="LUV-tt-w4c"/>
                                         </constraints>
                                     </view>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sN5-VP-pvU">
-                                        <rect key="frame" x="89.666666666666686" y="681.33333333333337" width="214" height="50"/>
+                                        <rect key="frame" x="89.666666666666686" y="673" width="214" height="50"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U2M-eU-gfy">
                                                 <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
@@ -464,7 +464,7 @@ with our effortless categorization.</string>
                                         </constraints>
                                     </stackView>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NWU-Nd-s01">
-                                        <rect key="frame" x="65.333333333333343" y="751.33333333333337" width="262.66666666666663" height="34.333333333333371"/>
+                                        <rect key="frame" x="65.333333333333343" y="743" width="262.66666666666663" height="34.333333333333371"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Don't have an account?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xC5-s4-Vzt">
                                                 <rect key="frame" x="0.0" y="0.0" width="178.66666666666666" height="34.333333333333336"/>
@@ -484,15 +484,15 @@ with our effortless categorization.</string>
                                         </subviews>
                                     </stackView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="80P-lF-vSR">
-                                        <rect key="frame" x="252" y="453.33333333333331" width="125" height="28.333333333333314"/>
+                                        <rect key="frame" x="252" y="446.33333333333331" width="125" height="28.333333333333314"/>
                                         <color key="tintColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="Forgot Password?">
-                                            <fontDescription key="titleFontDescription" style="UICTFontTextStyleCaption1"/>
+                                            <fontDescription key="titleFontDescription" type="system" pointSize="12"/>
                                         </buttonConfiguration>
                                     </button>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SKv-E0-n7Y">
-                                        <rect key="frame" x="20" y="565.66666666666663" width="353" height="50"/>
+                                        <rect key="frame" x="20" y="558.66666666666663" width="353" height="50"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xxS-BL-Ece">
                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="50"/>
@@ -593,25 +593,25 @@ with our effortless categorization.</string>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sign Up" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="igv-qc-VOW">
-                                        <rect key="frame" x="138.66666666666666" y="268" width="116" height="40.666666666666686"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                        <rect key="frame" x="146.66666666666666" y="268" width="99.666666666666657" height="33.666666666666686"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Start your journey towards financial literacy" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aIU-qg-bB1">
-                                        <rect key="frame" x="32.666666666666657" y="308.66666666666669" width="328" height="20.333333333333314"/>
+                                        <rect key="frame" x="32.666666666666657" y="301.66666666666669" width="328" height="20.333333333333314"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email Address" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="65t-wN-gIr">
-                                        <rect key="frame" x="20.000000000000007" y="349" width="107.66666666666669" height="20.333333333333314"/>
+                                        <rect key="frame" x="20.000000000000007" y="342" width="107.66666666666669" height="20.333333333333314"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tOh-gS-biO">
-                                        <rect key="frame" x="20" y="377.33333333333331" width="353" height="50"/>
+                                        <rect key="frame" x="20" y="370.33333333333331" width="353" height="50"/>
                                         <subviews>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="name@email.com" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="YjY-H6-E8c">
                                                 <rect key="frame" x="8" y="0.0" width="337" height="50"/>
@@ -638,19 +638,19 @@ with our effortless categorization.</string>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="faT-1K-a0D">
-                                        <rect key="frame" x="20" y="447.33333333333331" width="73.333333333333329" height="20.333333333333314"/>
+                                        <rect key="frame" x="20" y="440.33333333333331" width="73.333333333333329" height="20.333333333333314"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Confirm Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IiS-VZ-lDP">
-                                        <rect key="frame" x="20" y="545.66666666666663" width="138.66666666666666" height="20.333333333333371"/>
+                                        <rect key="frame" x="20" y="538.66666666666663" width="138.66666666666666" height="20.333333333333371"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ztW-JY-R2L">
-                                        <rect key="frame" x="20" y="475.66666666666669" width="353" height="50.000000000000057"/>
+                                        <rect key="frame" x="20" y="468.66666666666669" width="353" height="50.000000000000057"/>
                                         <subviews>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="97A-UR-Y77">
                                                 <rect key="frame" x="8" y="0.0" width="297" height="50"/>
@@ -664,7 +664,7 @@ with our effortless categorization.</string>
                                                 <state key="normal" title="Button"/>
                                                 <buttonConfiguration key="configuration" style="plain" image="eye" catalog="system">
                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
-                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                     </preferredSymbolConfiguration>
                                                 </buttonConfiguration>
                                             </button>
@@ -687,27 +687,27 @@ with our effortless categorization.</string>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="OR CONTINUE WITH" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L2j-TV-RQd">
-                                        <rect key="frame" x="133.33333333333334" y="734" width="126.33333333333334" height="15.666666666666629"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                        <rect key="frame" x="137.66666666666666" y="727" width="117.66666666666666" height="14.333333333333371"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9mg-cd-R4S">
-                                        <rect key="frame" x="19.999999999999993" y="741.33333333333337" width="105.33333333333331" height="1"/>
+                                        <rect key="frame" x="20.000000000000007" y="733.66666666666663" width="109.66666666666669" height="1"/>
                                         <color key="backgroundColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="1" id="wsZ-mo-k77"/>
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oYo-Jm-4h7">
-                                        <rect key="frame" x="267.66666666666669" y="741.33333333333337" width="105.33333333333331" height="1"/>
+                                        <rect key="frame" x="263.33333333333331" y="733.66666666666663" width="109.66666666666669" height="1"/>
                                         <color key="backgroundColor" red="0.2587890625" green="0.37646487360000003" blue="0.2548828125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="1" id="OEW-Nu-BKH"/>
                                         </constraints>
                                     </view>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="r2V-Aa-3Ed">
-                                        <rect key="frame" x="89.666666666666671" y="769.66666666666663" width="213.66666666666663" height="50"/>
+                                        <rect key="frame" x="89.666666666666671" y="761.33333333333337" width="213.66666666666663" height="50"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YWD-VP-3Ic">
                                                 <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
@@ -738,7 +738,7 @@ with our effortless categorization.</string>
                                         </constraints>
                                     </stackView>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZaP-cY-Qce">
-                                        <rect key="frame" x="57.333333333333343" y="839.66666666666663" width="278.33333333333326" height="34.333333333333371"/>
+                                        <rect key="frame" x="57.333333333333343" y="831.33333333333337" width="278.33333333333326" height="34.333333333333371"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Already have an account?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lw0-1r-Trt">
                                                 <rect key="frame" x="0.0" y="0.0" width="195" height="34.333333333333336"/>
@@ -758,7 +758,7 @@ with our effortless categorization.</string>
                                         </subviews>
                                     </stackView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3B3-WY-bPx">
-                                        <rect key="frame" x="20" y="654" width="353" height="50"/>
+                                        <rect key="frame" x="20" y="647" width="353" height="50"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Rw-KG-fxO">
                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="50"/>
@@ -793,7 +793,7 @@ with our effortless categorization.</string>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ROx-FI-J4D">
-                                        <rect key="frame" x="20" y="574" width="353" height="50"/>
+                                        <rect key="frame" x="20" y="567" width="353" height="50"/>
                                         <subviews>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="re-enter password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="V8K-ad-SKT">
                                                 <rect key="frame" x="8" y="0.0" width="295" height="50"/>
@@ -810,7 +810,7 @@ with our effortless categorization.</string>
                                                 <state key="normal" title="Button"/>
                                                 <buttonConfiguration key="configuration" style="plain" image="eye" catalog="system">
                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
-                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                     </preferredSymbolConfiguration>
                                                 </buttonConfiguration>
                                             </button>
@@ -1037,7 +1037,7 @@ with our effortless categorization.</string>
                                                                             </view>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Notifications" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ww4-vr-kmD">
                                                                                 <rect key="frame" x="48" y="0.0" width="165" height="60"/>
-                                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                 <nil key="textColor"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
@@ -1088,7 +1088,7 @@ with our effortless categorization.</string>
                                                                             </view>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Backup &amp; restore" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wja-sC-iER">
                                                                                 <rect key="frame" x="48" y="0.0" width="165" height="60"/>
-                                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                 <nil key="textColor"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
@@ -1233,7 +1233,7 @@ with our effortless categorization.</string>
                                                                             <constraint firstAttribute="height" constant="40" id="oQz-GT-8ep"/>
                                                                         </constraints>
                                                                         <color key="textColor" red="0.96862745098039216" green="0.96862745098039216" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                     </textField>
                                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="R43-9L-VaZ">
@@ -1250,7 +1250,7 @@ with our effortless categorization.</string>
                                                                             <constraint firstAttribute="height" constant="40" id="hBm-Tz-Yto"/>
                                                                         </constraints>
                                                                         <color key="textColor" red="0.96862745100000003" green="0.96862745100000003" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                     </textField>
                                                                 </subviews>
@@ -1354,14 +1354,14 @@ with our effortless categorization.</string>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="40" id="Dyj-Rq-zgL"/>
                                                                         </constraints>
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                         <color key="textColor" red="0.96862745100000003" green="0.96862745100000003" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="OWl-Gw-Gtc">
                                                                         <rect key="frame" x="0.0" y="48" width="337" height="88"/>
                                                                         <color key="textColor" systemColor="labelColor"/>
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                                     </textView>
                                                                 </subviews>
@@ -2270,7 +2270,7 @@ with our effortless categorization.</string>
                                                                             </label>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w83-KG-uzB">
                                                                                 <rect key="frame" x="301" y="0.0" width="36" height="40"/>
-                                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                 <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
@@ -2313,7 +2313,7 @@ with our effortless categorization.</string>
                                                                     <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Monthly Target" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="RDu-7p-sS4">
                                                                         <rect key="frame" x="222.66666666666666" y="0.0" width="114.33333333333334" height="32"/>
                                                                         <color key="textColor" systemColor="secondaryLabelColor"/>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                     </textField>
                                                                 </subviews>
@@ -2350,7 +2350,7 @@ with our effortless categorization.</string>
                                                                     </label>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Saved" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xRV-aw-KFj">
                                                                         <rect key="frame" x="290" y="0.0" width="47" height="40"/>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
@@ -3083,7 +3083,7 @@ with our effortless categorization.</string>
                                                                     </label>
                                                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Poj-XO-7pZ" userLabel="Remaining amount">
                                                                         <rect key="frame" x="332" y="9" width="5" height="22"/>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                     </textField>
                                                                 </subviews>
@@ -3342,7 +3342,7 @@ with our effortless categorization.</string>
                                 </constraints>
                                 <string key="text">What do you usually
 spend on?</string>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                 <color key="textColor" red="0.1764705882" green="0.20392156859999999" blue="0.1960784314" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -3746,7 +3746,7 @@ spend on?</string>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="Vob-KM-xsX"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                 <color key="textColor" red="0.1764705882" green="0.20392156859999999" blue="0.1960784314" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -4476,20 +4476,20 @@ spend on?</string>
                                                                 </connections>
                                                             </button>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nc9-BP-Ioz">
-                                                                <rect key="frame" x="0.0" y="45" width="27" height="15.666666666666664"/>
-                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                                                <rect key="frame" x="0.0" y="45" width="25.333333333333332" height="14.333333333333336"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                 <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="/" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9Gz-Fb-q9v">
-                                                                <rect key="frame" x="35" y="45" width="4" height="15.666666666666664"/>
-                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                                                <rect key="frame" x="33.333333333333336" y="45" width="3.6666666666666643" height="14.333333333333336"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                 <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Total" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wsQ-va-vN5">
-                                                                <rect key="frame" x="47" y="45" width="29.666666666666671" height="15.666666666666664"/>
-                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                                                <rect key="frame" x="45" y="45" width="27.666666666666671" height="14.333333333333336"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                 <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
@@ -4719,12 +4719,12 @@ spend on?</string>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="R9S-SD-RXS">
-                                                                <rect key="frame" x="289" y="41.333333333333314" width="64" height="34.333333333333343"/>
+                                                                <rect key="frame" x="290.66666666666669" y="41.333333333333314" width="62.333333333333314" height="34.333333333333343"/>
                                                                 <color key="tintColor" red="0.2260742188" green="0.3195800781" blue="0.2231445312" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                 <state key="normal" title="Button"/>
                                                                 <buttonConfiguration key="configuration" style="filled" title="Edit" imagePadding="3" cornerStyle="capsule">
                                                                     <imageReference key="image" image="pencil" catalog="system" symbolScale="small"/>
-                                                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleFootnote"/>
+                                                                    <fontDescription key="titleFontDescription" type="system" pointSize="12"/>
                                                                 </buttonConfiguration>
                                                                 <connections>
                                                                     <action selector="editButtonTapped:" destination="paF-ti-4Hd" eventType="touchUpInside" id="8ZX-hy-ClS"/>
@@ -5158,8 +5158,8 @@ spend on?</string>
                                                                 <rect key="frame" x="0.0" y="4" width="353" height="40"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CATEGORY BREAKDOWN" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PCm-xm-bky">
-                                                                        <rect key="frame" x="0.0" y="11.666666666666686" width="165.66666666666666" height="17"/>
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                        <rect key="frame" x="0.0" y="10.333333333333313" width="195.66666666666666" height="19.333333333333329"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                         <color key="textColor" red="0.97254901959999995" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
@@ -5327,8 +5327,8 @@ spend on?</string>
                                                                 <rect key="frame" x="0.0" y="4" width="353" height="40"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SUMMARY" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bSQ-px-cVC">
-                                                                        <rect key="frame" x="0.0" y="11.666666666666629" width="70.333333333333329" height="17"/>
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                        <rect key="frame" x="0.0" y="10.333333333333369" width="83.666666666666671" height="19.333333333333329"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                         <color key="textColor" red="0.97254901959999995" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
@@ -5465,8 +5465,8 @@ spend on?</string>
                                                                 <rect key="frame" x="0.0" y="4" width="353" height="40"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SUBSCRIPTION &amp; BILLS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6BH-6s-Jrp">
-                                                                        <rect key="frame" x="0.0" y="11.666666666666742" width="155.66666666666666" height="17"/>
-                                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                        <rect key="frame" x="0.0" y="10.333333333333256" width="184.33333333333334" height="19.333333333333329"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                         <color key="textColor" red="0.97254901959999995" green="0.98039215690000003" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
@@ -5689,13 +5689,13 @@ spend on?</string>
                                                         <rect key="frame" x="16" y="16" width="361" height="368"/>
                                                         <subviews>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Spending Breakdown" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5AS-ZR-pIz">
-                                                                <rect key="frame" x="16" y="16" width="329" height="24"/>
-                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                                                <rect key="frame" x="16" y="15.999999999999998" width="329" height="19.333333333333329"/>
+                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="RBR-IC-Y1j">
-                                                                <rect key="frame" x="0.0" y="56" width="361" height="296"/>
+                                                                <rect key="frame" x="0.0" y="51.333333333333371" width="361" height="300.66666666666669"/>
                                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="DyW-1S-vHz">
                                                                     <size key="itemSize" width="128" height="128"/>
@@ -5741,7 +5741,7 @@ spend on?</string>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="AH3-3m-njd" firstAttribute="width" secondItem="1bS-Ne-ENO" secondAttribute="width" id="9UJ-EE-eFn"/>
-                                    <constraint firstItem="AH3-3m-njd" firstAttribute="bottom" secondItem="tSm-9U-NCu" secondAttribute="bottom" constant="-100" id="CcN-th-TE7"/>
+                                    <constraint firstItem="AH3-3m-njd" firstAttribute="bottom" secondItem="tSm-9U-NCu" secondAttribute="bottom" id="CcN-th-TE7"/>
                                     <constraint firstItem="AH3-3m-njd" firstAttribute="leading" secondItem="tSm-9U-NCu" secondAttribute="leading" id="OLX-1P-7Bb"/>
                                     <constraint firstItem="AH3-3m-njd" firstAttribute="trailing" secondItem="tSm-9U-NCu" secondAttribute="trailing" id="ZU7-7w-7cb"/>
                                     <constraint firstItem="AH3-3m-njd" firstAttribute="top" secondItem="tSm-9U-NCu" secondAttribute="top" id="xSh-Gk-7be"/>
@@ -5762,8 +5762,9 @@ spend on?</string>
                     <navigationItem key="navigationItem" title="Category Breakdown" id="xwR-On-lCK"/>
                     <connections>
                         <outlet property="MonthCollectionView" destination="CfS-ED-eLf" id="lBx-cD-guj"/>
+                        <outlet property="PerCategoryCollectionView" destination="RBR-IC-Y1j" id="6CI-IG-1G5"/>
+                        <outlet property="perCategorySectionHeightConstraint" destination="5NH-P7-9eV" id="RaW-zt-L6E"/>
                         <outlet property="SpendingBreakdownHeadingLabel" destination="5AS-ZR-pIz" id="ygm-QB-4CB"/>
-                        <outlet property="collectionView" destination="RBR-IC-Y1j" id="6CI-IG-1G5"/>
                         <outlet property="pieChartView" destination="OfZ-gV-zc6" id="Psp-F4-fUV"/>
                         <outletCollection property="AllBackgroundVIews" destination="dIu-ZN-b3d" collectionClass="NSMutableArray" id="sbU-HE-XbL"/>
                         <outletCollection property="AllBackgroundVIews" destination="CLS-SG-S0L" collectionClass="NSMutableArray" id="xoQ-iw-p25"/>
@@ -5887,8 +5888,8 @@ spend on?</string>
                                                 <rect key="frame" x="0.0" y="364" width="393" height="300"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current Bill" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E5Z-2R-1Xf">
-                                                        <rect key="frame" x="16" y="16" width="94" height="24"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                                        <rect key="frame" x="16" y="16" width="87.666666666666671" height="24"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
@@ -5939,8 +5940,8 @@ spend on?</string>
                                                 <rect key="frame" x="0.0" y="688" width="393" height="300"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Active Subscriptions" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AeL-6S-qYF">
-                                                        <rect key="frame" x="16" y="16" width="173" height="24"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                                        <rect key="frame" x="16" y="16" width="160.33333333333334" height="24"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
@@ -6013,12 +6014,14 @@ spend on?</string>
                     <navigationItem key="navigationItem" title="Subscription And Bills" id="vc3-fs-Qo6"/>
                     <connections>
                         <outlet property="ActiveSubscriptionCollectionView" destination="53h-vU-TeI" id="CXV-S8-ZZX"/>
+                        <outlet property="ActiveSubscriptionTitleLabel" destination="AeL-6S-qYF" id="SLw-Ir-Nq0"/>
                         <outlet property="ActiveSubscriptionTotalAmountLabel" destination="L3h-iV-bJZ" id="dgz-lb-do9"/>
                         <outlet property="ActivecollectionViewHeight" destination="xi4-Ox-0Qz" id="BKv-JX-efI"/>
                         <outlet property="CalenderCollectionView" destination="U0C-85-ktK" id="j6e-zU-9H2"/>
                         <outlet property="CalenderView" destination="HxM-oC-uEZ" id="nIg-y3-lfZ"/>
                         <outlet property="MonthLabel" destination="YA4-n4-Ims" id="Qj5-Ln-t5B"/>
                         <outlet property="UpcomingBillsCollectionView" destination="k7R-tG-iXd" id="8uE-Je-wJY"/>
+                        <outlet property="UpcomingBillsTitleLabel" destination="E5Z-2R-1Xf" id="Y98-0J-VdM"/>
                         <outlet property="UpcomingBillsTotalAmountLabel" destination="to4-Mn-mlO" id="UAV-DU-XbN"/>
                         <outlet property="UpcomingcollectionViewHeight" destination="R2b-9u-LCt" id="fl6-eM-vU6"/>
                         <outlet property="nextMonthButton" destination="DwS-7p-VMd" id="hV8-8F-kMm"/>
@@ -6065,23 +6068,23 @@ spend on?</string>
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="130"/>
                                                         <subviews>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6bY-et-2kF">
-                                                                <rect key="frame" x="176.33333333333334" y="0.0" width="40.666666666666657" height="43.333333333333336"/>
-                                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                                                <rect key="frame" x="175.33333333333334" y="0.0" width="42.333333333333343" height="43.333333333333336"/>
+                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6En-yl-d7g">
-                                                                <rect key="frame" x="146" y="43.333333333333314" width="101.33333333333331" height="43.333333333333343"/>
-                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="40"/>
+                                                                <rect key="frame" x="151" y="43.333333333333314" width="91.333333333333314" height="43.333333333333343"/>
+                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="36"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="F5d-mf-hV0">
-                                                                <rect key="frame" x="178.33333333333334" y="86.666666666666686" width="36.666666666666657" height="43.333333333333343"/>
+                                                                <rect key="frame" x="181" y="86.666666666666686" width="31" height="43.333333333333343"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cdt-BO-qKS">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="36.666666666666664" height="43.333333333333336"/>
-                                                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="31" height="43.333333333333336"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
@@ -6119,8 +6122,8 @@ spend on?</string>
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="40"/>
                                                         <subviews>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4hu-33-tb4">
-                                                                <rect key="frame" x="8" y="9.333333333333373" width="47" height="21.666666666666671"/>
-                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                                <rect key="frame" x="8" y="10.333333333333369" width="42.333333333333336" height="19.333333333333329"/>
+                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
@@ -6178,7 +6181,7 @@ spend on?</string>
                                 <constraints>
                                     <constraint firstItem="RIs-3j-IFr" firstAttribute="width" secondItem="WaN-Gl-jAK" secondAttribute="width" id="aVX-sw-GX6"/>
                                     <constraint firstItem="RIs-3j-IFr" firstAttribute="leading" secondItem="Rjc-Dq-Cf1" secondAttribute="leading" id="igE-2T-db5"/>
-                                    <constraint firstItem="RIs-3j-IFr" firstAttribute="bottom" secondItem="Rjc-Dq-Cf1" secondAttribute="bottom" constant="-100" id="lE8-rb-N99"/>
+                                    <constraint firstItem="RIs-3j-IFr" firstAttribute="bottom" secondItem="Rjc-Dq-Cf1" secondAttribute="bottom" id="lE8-rb-N99"/>
                                     <constraint firstItem="RIs-3j-IFr" firstAttribute="top" secondItem="Rjc-Dq-Cf1" secondAttribute="top" id="nUk-Ew-JzW"/>
                                     <constraint firstItem="RIs-3j-IFr" firstAttribute="trailing" secondItem="Rjc-Dq-Cf1" secondAttribute="trailing" id="r78-ZM-kHb"/>
                                 </constraints>
@@ -6202,7 +6205,9 @@ spend on?</string>
                         <outlet property="UPorDOWNPercentLabel" destination="Cdt-BO-qKS" id="4J4-0p-DF1"/>
                         <outlet property="barChartView" destination="zHg-tq-YfD" id="CBM-pa-fz1"/>
                         <outlet property="detailsHeadingLabel" destination="4hu-33-tb4" id="W3q-Tj-pQ0"/>
+                        <outlet property="detailsSectionHeightConstraint" destination="22j-BD-vVF" id="JOU-Uh-VmX"/>
                         <outlet property="monthlyDetailsCollectionView" destination="Vlb-9k-CtP" id="E2h-GM-5QX"/>
+                        <outlet property="scrollView" destination="khM-Gi-KbU" id="Q3A-Ih-wH3"/>
                         <outlet property="segmentedControl" destination="F28-oT-piR" id="R9e-zg-7m3"/>
                     </connections>
                 </viewController>
@@ -6274,16 +6279,16 @@ spend on?</string>
                                                                 <rect key="frame" x="12" y="12" width="337" height="50"/>
                                                                 <subviews>
                                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" spacing="-2" translatesAutoresizingMaskIntoConstraints="NO" id="pUY-Tp-f1F">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="91.333333333333329" height="50"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="80" height="50"/>
                                                                         <subviews>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="November" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7UD-sj-Kaq">
-                                                                                <rect key="frame" x="0.0" y="0.0" width="91.333333333333329" height="28.333333333333332"/>
-                                                                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
+                                                                                <rect key="frame" x="0.0" y="0.0" width="80" height="25.666666666666668"/>
+                                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                                 <nil key="textColor"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="2025" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7QR-T2-MD5">
-                                                                                <rect key="frame" x="0.0" y="26.333333333333343" width="91.333333333333329" height="23.666666666666671"/>
+                                                                                <rect key="frame" x="0.0" y="23.666666666666657" width="80" height="26.333333333333329"/>
                                                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                 <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                                 <nil key="highlightedColor"/>
@@ -6291,8 +6296,8 @@ spend on?</string>
                                                                         </subviews>
                                                                     </stackView>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="₹3,200" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ngW-MB-9p7">
-                                                                        <rect key="frame" x="91.333333333333329" y="0.0" width="245.66666666666669" height="50"/>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                                                        <rect key="frame" x="80" y="0.0" width="257" height="50"/>
+                                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="36"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
@@ -6434,8 +6439,8 @@ spend on?</string>
                                         <rect key="frame" x="8" y="30" width="377" height="56"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Entry" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KO5-rl-iEw">
-                                                <rect key="frame" x="131" y="0.0" width="115.33333333333331" height="28"/>
-                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                                <rect key="frame" x="123" y="0.0" width="131" height="28"/>
+                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
@@ -8066,8 +8071,8 @@ spend on?</string>
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="128"/>
                                                                         <subviews>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MONTHLY SPENT" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3rm-4b-L3h">
-                                                                                <rect key="frame" x="12" y="8.0000000000000018" width="153.66666666666666" height="21.666666666666671"/>
-                                                                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="18"/>
+                                                                                <rect key="frame" x="12" y="7.9999999999999982" width="136.33333333333334" height="19.333333333333329"/>
+                                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                                                                 <nil key="textColor"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
@@ -8198,8 +8203,8 @@ spend on?</string>
                                                                                         <nil key="highlightedColor"/>
                                                                                     </label>
                                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="days under budget" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9hN-WR-6vp">
-                                                                                        <rect key="frame" x="8" y="104" width="114" height="15.666666666666671"/>
-                                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                                                                        <rect key="frame" x="8" y="104" width="106.33333333333333" height="14.333333333333329"/>
+                                                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                                         <color key="textColor" red="0.3549804688" green="0.3793945312" blue="0.3728027344" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                                         <nil key="highlightedColor"/>
                                                                                     </label>
@@ -8243,16 +8248,16 @@ spend on?</string>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
                                                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="rD7-5b-ERg">
-                                                                                <rect key="frame" x="8" y="81" width="164.33333333333334" height="67"/>
+                                                                                <rect key="frame" x="8" y="81" width="159" height="67"/>
                                                                                 <subviews>
                                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Headphones" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Juz-iO-TiW">
-                                                                                        <rect key="frame" x="0.0" y="0.0" width="164.33333333333334" height="28.666666666666668"/>
+                                                                                        <rect key="frame" x="0.0" y="0.0" width="159" height="28.666666666666668"/>
                                                                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
                                                                                         <nil key="textColor"/>
                                                                                         <nil key="highlightedColor"/>
                                                                                     </label>
                                                                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="9Yf-gJ-TJJ">
-                                                                                        <rect key="frame" x="0.0" y="28.666666666666632" width="164.33333333333334" height="38.333333333333343"/>
+                                                                                        <rect key="frame" x="0.0" y="28.666666666666632" width="159" height="38.333333333333343"/>
                                                                                         <subviews>
                                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalCompressionResistancePriority="749" verticalCompressionResistancePriority="749" text="30%" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CTa-fd-unR">
                                                                                                 <rect key="frame" x="0.0" y="0.0" width="71" height="38.333333333333336"/>
@@ -8261,8 +8266,8 @@ spend on?</string>
                                                                                                 <nil key="highlightedColor"/>
                                                                                             </label>
                                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" text="Completed" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UgS-vt-CR9">
-                                                                                                <rect key="frame" x="75" y="0.0" width="89.333333333333314" height="38.333333333333336"/>
-                                                                                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="18"/>
+                                                                                                <rect key="frame" x="75" y="0.0" width="84" height="38.333333333333336"/>
+                                                                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                                 <nil key="textColor"/>
                                                                                                 <nil key="highlightedColor"/>
                                                                                             </label>
@@ -8692,9 +8697,9 @@ spend on?</string>
                                 <rect key="frame" x="0.0" y="118" width="393" height="50"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Budget" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FUz-GN-AeO">
-                                        <rect key="frame" x="20" y="10" width="82.666666666666671" height="30"/>
+                                        <rect key="frame" x="20.000000000000007" y="8.3333333333333286" width="92.666666666666686" height="33.666666666666664"/>
                                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="25"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     </label>

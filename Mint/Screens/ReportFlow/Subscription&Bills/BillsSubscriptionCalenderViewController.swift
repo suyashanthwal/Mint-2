@@ -18,8 +18,10 @@ class BillsSubscriptionCalenderViewController: UIViewController {
     @IBOutlet weak var CalenderCollectionView: UICollectionView!
 
     @IBOutlet weak var UpcomingBillsCollectionView: UICollectionView!
+    @IBOutlet weak var UpcomingBillsTitleLabel: UILabel!
     @IBOutlet weak var UpcomingBillsTotalAmountLabel: UILabel!
     @IBOutlet weak var ActiveSubscriptionCollectionView: UICollectionView!
+    @IBOutlet weak var ActiveSubscriptionTitleLabel: UILabel!
     @IBOutlet weak var ActiveSubscriptionTotalAmountLabel: UILabel!
 
     private let db = DatabaseManager.shared
@@ -97,7 +99,9 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         CalenderView.applyShadow()
 
         MonthLabel.textColor = AppColors.textPrimary
+        UpcomingBillsTitleLabel.textColor = AppColors.textPrimary
         UpcomingBillsTotalAmountLabel.textColor = AppColors.textPrimary
+        ActiveSubscriptionTitleLabel.textColor = AppColors.textPrimary
         ActiveSubscriptionTotalAmountLabel.textColor = AppColors.textPrimary
     }
 
@@ -126,7 +130,7 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         appearance.shadowColor = .clear
         appearance.titleTextAttributes = [
             .foregroundColor: AppColors.textPrimary,
-            .font: UIFont.systemFont(ofSize: 20, weight: .semibold)
+            .font: UIFont.systemFont(ofSize: 28, weight: .semibold)
         ]
         appearance.largeTitleTextAttributes = [
             .foregroundColor: AppColors.textPrimary

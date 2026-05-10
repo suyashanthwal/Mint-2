@@ -30,20 +30,20 @@
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="af6-ae-aSD">
-                                        <rect key="frame" x="51.666666666666657" y="72" width="56.666666666666657" height="28.666666666666671"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                        <rect key="frame" x="44.000000000000007" y="68" width="71.666666666666686" height="34.666666666666657"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="28"/>
                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7E3-uB-sXd">
-                                        <rect key="frame" x="60" y="104.66666666666667" width="40" height="20"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                        <rect key="frame" x="59.333333333333329" y="106.66666666666667" width="41.333333333333329" height="20"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="af6-ae-aSD" firstAttribute="top" secondItem="Jq3-BJ-YNd" secondAttribute="bottom" constant="8" id="ARa-nx-mkP"/>
+                                    <constraint firstItem="af6-ae-aSD" firstAttribute="top" secondItem="Jq3-BJ-YNd" secondAttribute="bottom" constant="4" id="ARa-nx-mkP"/>
                                     <constraint firstItem="Jq3-BJ-YNd" firstAttribute="top" secondItem="ZOy-ZV-j0u" secondAttribute="top" constant="32" id="N8n-Tj-UZC"/>
                                     <constraint firstItem="7E3-uB-sXd" firstAttribute="centerX" secondItem="Jq3-BJ-YNd" secondAttribute="centerX" id="XFK-Mm-Y1z"/>
                                     <constraint firstAttribute="height" constant="160" id="cOi-aV-vGK"/>

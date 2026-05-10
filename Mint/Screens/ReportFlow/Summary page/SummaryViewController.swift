@@ -12,6 +12,8 @@ class SummaryViewController: UIViewController {
     @IBOutlet weak var barChartView: BarChartView!
     @IBOutlet weak var monthlyDetailsCollectionView: UICollectionView!
     @IBOutlet weak var segmentedControl: UISegmentedControl!
+    @IBOutlet weak var detailsSectionHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var scrollView: UIScrollView!
 
     private struct SummaryBucket {
         let label: String
@@ -36,7 +38,6 @@ class SummaryViewController: UIViewController {
     private var currentAverageAmount: Double = 0
     private var currentComparisonPercent: Double?
     private var currentBudgetLimit: Double = 0
-    private var currentBudgetLimitLabel: String = ""
     private var currentRange: TimeRange = .daily
 
     private var expenseTransactions: [Transaction] {
@@ -77,6 +78,12 @@ class SummaryViewController: UIViewController {
         reloadFromDatabase(animateChart: false)
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateScrollInsets()
+        updateDetailsSectionHeight()
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -108,6 +115,7 @@ class SummaryViewController: UIViewController {
         UPorDOWNPercentLabel.textColor = AppColors.textSecondary
         detailsHeadingLabel.textColor = AppColors.textPrimary
         monthlyDetailsCollectionView.backgroundColor = .clear
+        scrollView.backgroundColor = AppColors.background
     }
 
     private func applyReportBackgroundTheme(to parent: UIView) {
@@ -135,7 +143,7 @@ class SummaryViewController: UIViewController {
         appearance.shadowColor = .clear
         appearance.titleTextAttributes = [
             .foregroundColor: AppColors.textPrimary,
-            .font: UIFont.systemFont(ofSize: 20, weight: .semibold)
+            .font: UIFont.systemFont(ofSize: 28, weight: .semibold)
         ]
         appearance.largeTitleTextAttributes = [
             .foregroundColor: AppColors.textPrimary
@@ -200,8 +208,6 @@ class SummaryViewController: UIViewController {
             currentDetails = makeYearlyDetails()
         }
         currentBudgetLimit = budgetLimit(for: timeRange)
-        currentBudgetLimitLabel = budgetLimitLabel(for: timeRange)
-
         currentAverageAmount = averageAmount(for: timeRange, buckets: currentBuckets)
         currentComparisonPercent = comparisonPercent(for: timeRange)
 
@@ -210,6 +216,7 @@ class SummaryViewController: UIViewController {
         setupChart(labels: currentBuckets.map(\.label), barWidth: timeRange == .monthly ? 0.55 : 0.5, animate: animateChart)
         barChartView.highlightValue(nil)
         monthlyDetailsCollectionView.reloadData()
+        DispatchQueue.main.async { self.updateDetailsSectionHeight() }
     }
 
     private func updateTopLabels(for timeRange: TimeRange) {
@@ -286,7 +293,7 @@ class SummaryViewController: UIViewController {
             if bucket.expense == 0 {
                 return AppColors.brandLight
             } else if bucket.budget > 0, bucket.expense > bucket.budget {
-                return AppColors.errorBackground
+                return AppColors.error
             } else {
                 return AppColors.brand
             }
@@ -313,10 +320,10 @@ class SummaryViewController: UIViewController {
         xAxis.axisMinimum = -0.5
         xAxis.axisMaximum = Double(max(currentBuckets.count, 1)) - 0.5
 
-        let maxExpense = max(currentBuckets.map(\.expense).max() ?? 0, currentBudgetLimit, 100)
+        let maxExpense = chartAxisMaximum(for: currentBuckets.map(\.expense))
         let leftAxis = barChartView.leftAxis
         leftAxis.axisMinimum = 0
-        leftAxis.axisMaximum = maxExpense * 1.2
+        leftAxis.axisMaximum = maxExpense
         leftAxis.drawGridLinesEnabled = true
         leftAxis.gridColor = AppColors.sectionBackground
         leftAxis.gridLineWidth = 0.5
@@ -326,17 +333,17 @@ class SummaryViewController: UIViewController {
         leftAxis.setLabelCount(4, force: true)
         leftAxis.removeAllLimitLines()
 
-        if currentBudgetLimit > 0 {
-            let limitLine = ChartLimitLine(limit: currentBudgetLimit, label: currentBudgetLimitLabel)
-            limitLine.lineColor = AppColors.brand
-            limitLine.lineWidth = 1.0
-            limitLine.lineDashLengths = [6, 4]
-            limitLine.labelPosition = .rightTop
-            limitLine.valueFont = .systemFont(ofSize: 9, weight: .medium)
-            limitLine.valueTextColor = AppColors.brand
-            leftAxis.addLimitLine(limitLine)
-            leftAxis.drawLimitLinesBehindDataEnabled = false
+        if currentAverageAmount > 0 {
+            let averageLine = ChartLimitLine(limit: currentAverageAmount, label: averageLimitLabel(for: currentRange))
+            averageLine.lineColor = AppColors.brand
+            averageLine.lineWidth = 1.0
+            averageLine.lineDashLengths = [4, 4]
+            averageLine.labelPosition = .rightTop
+            averageLine.valueFont = .systemFont(ofSize: 9, weight: .medium)
+            averageLine.valueTextColor = AppColors.brand
+            leftAxis.addLimitLine(averageLine)
         }
+        leftAxis.drawLimitLinesBehindDataEnabled = false
 
         if animate {
             barChartView.animate(yAxisDuration: 0.8, easingOption: .easeInOutQuart)
@@ -508,16 +515,16 @@ class SummaryViewController: UIViewController {
         }
     }
 
-    private func budgetLimitLabel(for timeRange: TimeRange) -> String {
+    private func averageLimitLabel(for timeRange: TimeRange) -> String {
         switch timeRange {
         case .daily:
-            return "Daily average limit"
+            return "Daily avg"
         case .weekly:
-            return "Weekly average limit"
+            return "Weekly avg"
         case .monthly:
-            return "Monthly average limit"
+            return "Monthly avg"
         case .yearly:
-            return "Yearly average limit"
+            return "Yearly avg"
         }
     }
 
@@ -529,22 +536,47 @@ class SummaryViewController: UIViewController {
         )
         updateDetailsHeading(for: currentRange, selectedBucket: bucket)
         monthlyDetailsCollectionView.reloadData()
+        DispatchQueue.main.async { self.updateDetailsSectionHeight() }
     }
 
     private func averageAmount(for timeRange: TimeRange, buckets: [SummaryBucket]) -> Double {
-        let nonZeroBuckets = buckets.filter { $0.expense > 0 }
-        guard !nonZeroBuckets.isEmpty else { return 0 }
+        guard !buckets.isEmpty else { return 0 }
+
+        let total = buckets.reduce(0) { $0 + $1.expense }
+        guard total > 0 else { return 0 }
+
+        return total / averageDivisor(for: timeRange)
+    }
+
+    private func averageDivisor(for timeRange: TimeRange) -> Double {
+        let calendar = Calendar.current
 
         switch timeRange {
         case .daily:
-            return nonZeroBuckets.reduce(0) { $0 + $1.expense } / Double(nonZeroBuckets.count)
+            return 1
+
         case .weekly:
-            return buckets.reduce(0) { $0 + $1.expense } / 7.0
+            guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: latestExpenseDate) else {
+                return 7
+            }
+
+            let weekStart = calendar.startOfDay(for: weekInterval.start)
+            let latestDay = calendar.startOfDay(for: latestExpenseDate)
+            let elapsedDays = calendar.dateComponents([.day], from: weekStart, to: latestDay).day ?? 0
+            return Double(min(max(elapsedDays + 1, 1), 7))
+
         case .monthly:
-            return buckets.reduce(0) { $0 + $1.expense } / Double(buckets.count)
+            return Double(max(calendar.component(.day, from: latestExpenseDate), 1))
+
         case .yearly:
-            return buckets.reduce(0) { $0 + $1.expense } / 12.0
+            return Double(max(calendar.component(.month, from: latestExpenseDate), 1))
         }
+    }
+
+    private func chartAxisMaximum(for values: [Double]) -> Double {
+        guard let largestValue = values.max(), largestValue > 0 else { return 1 }
+
+        return largestValue * 1.15
     }
 
     private func comparisonPercent(for timeRange: TimeRange) -> Double? {
@@ -591,15 +623,32 @@ class SummaryViewController: UIViewController {
     private func setupCollectionView() {
         monthlyDetailsCollectionView.delegate = self
         monthlyDetailsCollectionView.dataSource = self
+        monthlyDetailsCollectionView.isScrollEnabled = false
+        monthlyDetailsCollectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)
         monthlyDetailsCollectionView.register(
             UINib(nibName: "SummaryCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "SummaryCell"
         )
 
         let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 0
+        layout.minimumLineSpacing = 8
         layout.minimumInteritemSpacing = 0
         monthlyDetailsCollectionView.collectionViewLayout = layout
+    }
+
+    private func updateScrollInsets() {
+        let tabBarHeight = tabBarController?.tabBar.isHidden == false ? (tabBarController?.tabBar.bounds.height ?? 0) : 0
+        let bottomInset = max(24, tabBarHeight + 12)
+        scrollView.contentInset.bottom = bottomInset
+        scrollView.verticalScrollIndicatorInsets.bottom = bottomInset
+    }
+
+    private func updateDetailsSectionHeight() {
+        monthlyDetailsCollectionView.layoutIfNeeded()
+        let contentHeight = monthlyDetailsCollectionView.collectionViewLayout.collectionViewContentSize.height
+        let contentInsets = monthlyDetailsCollectionView.adjustedContentInset.top + monthlyDetailsCollectionView.adjustedContentInset.bottom
+        let resolvedHeight = max(contentHeight + contentInsets, 1)
+        detailsSectionHeightConstraint.constant = 40 + 8 + resolvedHeight
     }
 
     private func currencyString(_ value: Double) -> String {
@@ -641,6 +690,7 @@ extension SummaryViewController: ChartViewDelegate {
 
         updateDetailsHeading(for: currentRange)
         monthlyDetailsCollectionView.reloadData()
+        DispatchQueue.main.async { self.updateDetailsSectionHeight() }
     }
 }
 

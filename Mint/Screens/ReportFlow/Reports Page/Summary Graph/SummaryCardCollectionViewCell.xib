@@ -22,13 +22,13 @@
                     </view>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Average Daily Limit" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Lpl-e2-egE">
                         <rect key="frame" x="16" y="16" width="124" height="17"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MLo-qP-g6X">
                         <rect key="frame" x="16" y="41" width="72" height="34"/>
-                        <fontDescription key="fontDescription" type="boldSystem" pointSize="28"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="36"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>

@@ -5,9 +5,10 @@ import DGCharts
 class TPCViewController: UIViewController {
 
     @IBOutlet weak var pieChartView: PieChartView!
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var PerCategoryCollectionView: UICollectionView!
     @IBOutlet weak var SpendingBreakdownHeadingLabel: UILabel!
     @IBOutlet weak var MonthCollectionView: UICollectionView!
+    @IBOutlet weak var perCategorySectionHeightConstraint: NSLayoutConstraint!
 
     @IBOutlet var AllBackgroundVIews: [UIView]!
     @IBOutlet var AllCardVIews: [UIView]!
@@ -100,6 +101,11 @@ class TPCViewController: UIViewController {
         reloadFromDatabase(animateChart: false, preserveSelection: true)
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updatePerCategorySectionHeight()
+    }
+
     private func setupUI() {
         applyReportBackgroundTheme(to: view)
         for view in AllBackgroundVIews { view.backgroundColor = AppColors.background }
@@ -110,7 +116,7 @@ class TPCViewController: UIViewController {
 
         SpendingBreakdownHeadingLabel.textColor = AppColors.textPrimary
         MonthCollectionView.backgroundColor = .clear
-        collectionView.backgroundColor = .clear
+        PerCategoryCollectionView.backgroundColor = .clear
         view.backgroundColor = AppColors.background
     }
 
@@ -139,7 +145,7 @@ class TPCViewController: UIViewController {
         appearance.shadowColor = .clear
         appearance.titleTextAttributes = [
             .foregroundColor: AppColors.textPrimary,
-            .font: UIFont.systemFont(ofSize: 20, weight: .semibold)
+            .font: UIFont.systemFont(ofSize: 28, weight: .semibold)
         ]
         appearance.largeTitleTextAttributes = [
             .foregroundColor: AppColors.textPrimary
@@ -179,7 +185,7 @@ class TPCViewController: UIViewController {
         MonthCollectionView.reloadData()
         refreshDonutChart(animate: animateChart)
         updateHeading()
-        collectionView.reloadData()
+        PerCategoryCollectionView.reloadData()
 
         DispatchQueue.main.async {
             guard self.months.indices.contains(self.selectedMonthIndex) else { return }
@@ -188,6 +194,7 @@ class TPCViewController: UIViewController {
                 at: .centeredHorizontally,
                 animated: false
             )
+            self.updatePerCategorySectionHeight()
         }
     }
 
@@ -202,12 +209,19 @@ class TPCViewController: UIViewController {
     }
 
     private func setupCollectionView() {
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.register(
+        PerCategoryCollectionView.delegate = self
+        PerCategoryCollectionView.dataSource = self
+        PerCategoryCollectionView.isScrollEnabled = false
+        PerCategoryCollectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: 0)
+        PerCategoryCollectionView.register(
             UINib(nibName: "TPCCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: cellId
         )
+
+        if let layout = PerCategoryCollectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.minimumLineSpacing = 8
+            layout.minimumInteritemSpacing = 0
+        }
     }
 
     private func setupDonutChart() {
@@ -287,6 +301,15 @@ class TPCViewController: UIViewController {
             SpendingBreakdownHeadingLabel.text = "\(name) Transactions"
         }
     }
+
+    private func updatePerCategorySectionHeight() {
+        PerCategoryCollectionView.layoutIfNeeded()
+        let contentHeight = PerCategoryCollectionView.collectionViewLayout.collectionViewContentSize.height
+            + PerCategoryCollectionView.adjustedContentInset.top
+            + PerCategoryCollectionView.adjustedContentInset.bottom
+        let resolvedHeight = max(contentHeight, 1)
+        perCategorySectionHeightConstraint.constant = 16 + 19.333333333333329 + 16 + resolvedHeight + 16
+    }
 }
 
 extension TPCViewController: ChartViewDelegate {
@@ -304,7 +327,8 @@ extension TPCViewController: ChartViewDelegate {
         updatePieChartColors(selectedName: summary.category.name)
         updateCenterText(category: summary.category, amount: summary.total)
         updateHeading()
-        collectionView.reloadData()
+        PerCategoryCollectionView.reloadData()
+        DispatchQueue.main.async { self.updatePerCategorySectionHeight() }
     }
 
     func chartValueNothingSelected(_ chartView: ChartViewBase) {
@@ -314,7 +338,8 @@ extension TPCViewController: ChartViewDelegate {
         updatePieChartColors(selectedName: nil)
         updateCenterText(category: nil, amount: totalExpense)
         updateHeading()
-        collectionView.reloadData()
+        PerCategoryCollectionView.reloadData()
+        DispatchQueue.main.async { self.updatePerCategorySectionHeight() }
     }
 }
 
@@ -399,7 +424,8 @@ extension TPCViewController: UICollectionViewDelegate {
         refreshDonutChart()
         updatePieChartColors(selectedName: nil)
         updateHeading()
-        self.collectionView.reloadData()
+        self.PerCategoryCollectionView.reloadData()
+        DispatchQueue.main.async { self.updatePerCategorySectionHeight() }
     }
 }
 
@@ -412,6 +438,6 @@ extension TPCViewController: UICollectionViewDelegateFlowLayout {
             return CGSize(width: 140, height: 40)
         }
 
-        return CGSize(width: collectionView.bounds.width - 32, height: 70)
+        return CGSize(width: collectionView.bounds.width - 32, height: 80)
     }
 }
