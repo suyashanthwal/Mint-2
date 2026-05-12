@@ -49,6 +49,7 @@ import UIKit
         loadCategoriesFromDatabase()
         enableKeyboardDismissOnBackgroundTapAndSwipe()
         view.backgroundColor = AppColors.background
+        view.overrideUserInterfaceStyle = .dark
         styleComponents()
         configureAmountTextField()
         wireUpGestures()
@@ -74,6 +75,11 @@ import UIKit
         amountValueTextField.keyboardType = .decimalPad
         amountValueTextField.textColor = AppColors.textPrimary
         amountValueTextField.tintColor = AppColors.brand
+        amountValueTextField.backgroundColor = .clear
+        amountValueTextField.attributedPlaceholder = NSAttributedString(
+            string: amountValueTextField.placeholder ?? "",
+            attributes: [.foregroundColor: AppColors.textSecondary]
+        )
         amountValueTextField.addTarget(self, action: #selector(amountFieldChanged(_:)), for: .editingChanged)
     }
 
@@ -205,6 +211,7 @@ import UIKit
          let sheet = UIAlertController(title: title,
                                         message: nil,
                                         preferredStyle: .actionSheet)
+         sheet.overrideUserInterfaceStyle = .dark
          for option in options {
              let action = UIAlertAction(title: option, style: .default) { _ in
                  onPick(option)
@@ -220,9 +227,13 @@ import UIKit
          let alert = UIAlertController(title: "Add a note",
                                         message: nil,
                                         preferredStyle: .alert)
+         alert.overrideUserInterfaceStyle = .dark
          alert.addTextField {
              $0.placeholder = "What was this for?"
              $0.text        = self.noteText
+             $0.textColor = AppColors.textPrimary
+             $0.tintColor = AppColors.brand
+             $0.backgroundColor = AppColors.inputBackground
          }
          alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
          alert.addAction(UIAlertAction(title: "Done", style: .default) { [weak self] _ in
@@ -236,6 +247,7 @@ import UIKit
          let alert = UIAlertController(title: "Pick a date",
                                         message: "\n\n\n\n\n\n\n\n\n",
                                         preferredStyle: .actionSheet)
+         alert.overrideUserInterfaceStyle = .dark
          let picker = UIDatePicker()
          picker.datePickerMode           = .date
          picker.preferredDatePickerStyle = .wheels
@@ -268,32 +280,48 @@ import UIKit
          amountValueTextField.textAlignment = .left
          iconCircles?.prefix(2).forEach { circle in
                  circle.backgroundColor = AppColors.brandLight
+                 circle.layer.borderWidth = 1
+                 circle.layer.borderColor = AppColors.brand.withAlphaComponent(0.35).cgColor
                 
              }
          
          iconCircles?.suffix(from: 2).forEach { circle in
-                 circle.backgroundColor = AppColors.sectionBackground
+                 circle.backgroundColor = AppColors.inputBackground
+                 circle.layer.borderWidth = 1
+                 circle.layer.borderColor = AppColors.cardBorder.cgColor
                  
              }
 
          [categoryRowView, fromRowView, noteRowView, dateRowView].forEach {
-             $0?.backgroundColor = .clear
+             $0?.backgroundColor = AppColors.inputBackground
+             $0?.layer.cornerRadius = 14
+             $0?.layer.borderWidth = 1
+             $0?.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.7).cgColor
          }
 
+         [categoryValueLabel, fromTitleLabel, fromValueLabel, noteValueLabel, dateValueLabel].forEach {
+             $0?.textColor = AppColors.textPrimary
+         }
+         fromTitleLabel.textColor = AppColors.textSecondary
+         categoryIconImageView.tintColor = AppColors.brand
+
          expenseIncomeSegment.backgroundColor          = AppColors.sectionBackground
-         expenseIncomeSegment.selectedSegmentTintColor = AppColors.card
+         expenseIncomeSegment.selectedSegmentTintColor = AppColors.inputBackground
+         expenseIncomeSegment.layer.borderWidth = 1
+         expenseIncomeSegment.layer.borderColor = AppColors.cardBorder.cgColor
          expenseIncomeSegment.setTitleTextAttributes(
              [.foregroundColor: AppColors.textSecondary,
-              .font: UIFont.systemFont(ofSize: 14, weight: .medium)],
+              .font: MintFont.space(size: 14, weight: .medium)],
              for: .normal
          )
          expenseIncomeSegment.setTitleTextAttributes(
-             [.foregroundColor: AppColors.brand,
-              .font: UIFont.systemFont(ofSize: 14, weight: .semibold)],
+             [.foregroundColor: AppColors.textPrimary,
+              .font: MintFont.space(size: 14, weight: .semibold)],
              for: .selected
          )
 
          nextDateButton.tintColor = AppColors.brand
+         view.applyMintTypography()
      }
 
      private func formattedAmountText(_ amount: Double) -> String {

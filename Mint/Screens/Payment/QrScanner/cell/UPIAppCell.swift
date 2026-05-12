@@ -11,6 +11,11 @@ class UPIAppCell: UICollectionViewCell {
 
         override func awakeFromNib() {
             super.awakeFromNib()
+            backgroundColor = .clear
+            contentView.backgroundColor = .clear
+            nameLabel.textColor = AppColors.textPrimary
+            arrowImageView.tintColor = AppColors.textSecondary
+            nameLabel.font = MintFont.space(matching: nameLabel.font)
         }
 
     func configure(name: String, isFirst: Bool) {
@@ -46,7 +51,8 @@ class UPIAppCell: UICollectionViewCell {
         iconImageView.clipsToBounds = true
         
         contentView.backgroundColor = isFirst
-            ? UIColor.systemBlue.withAlphaComponent(0.1)
+            ? AppColors.brandLight
             : .clear
+        contentView.layer.cornerRadius = 12
     }
 }

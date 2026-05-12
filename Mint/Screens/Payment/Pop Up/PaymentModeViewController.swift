@@ -67,10 +67,13 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
         
         func setupUI() {
             view.backgroundColor = AppColors.background
+            view.overrideUserInterfaceStyle = .dark
             
             for (index, cview) in CardViews.enumerated() {
-                cview.backgroundColor = AppColors.sectionBackground
+                cview.backgroundColor = AppColors.card
                 cview.layer.cornerRadius = 12
+                cview.layer.borderWidth = 1
+                cview.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.7).cgColor
                 cview.tag = index
                 cview.isUserInteractionEnabled = true
                 let tap = UITapGestureRecognizer(target: self, action: #selector(cardTapped(_:)))
@@ -84,7 +87,7 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
             }
             
             for iconview in InsideIconView {
-                iconview.backgroundColor = AppColors.card
+                iconview.backgroundColor = AppColors.inputBackground
                 iconview.layer.cornerRadius = 20
                 iconview.clipsToBounds = true
             }
@@ -92,6 +95,9 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
             for imageview in InsideIconImageView {
                 imageview.tintColor = AppColors.brand
             }
+
+            AllPrimaryText.forEach { $0.textColor = AppColors.textPrimary }
+            AllSecondaryText.forEach { $0.textColor = AppColors.textSecondary }
         }
         
         @objc func cardTapped(_ sender: UITapGestureRecognizer) {
@@ -104,9 +110,10 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
 
         func selectCard(at index: Int) {
             for (i, cview) in CardViews.enumerated() {
-                cview.backgroundColor = AppColors.sectionBackground
+                cview.backgroundColor = AppColors.card
+                cview.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.7).cgColor
                 if i < InsideIconView.count {
-                    InsideIconView[i].backgroundColor = AppColors.card
+                    InsideIconView[i].backgroundColor = AppColors.inputBackground
                 }
                 if i < InsideIconImageView.count {
                     InsideIconImageView[i].tintColor = AppColors.brand
@@ -116,6 +123,7 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
             guard index < CardViews.count else { return }
             UIView.animate(withDuration: 0.2) {
                 self.CardViews[index].backgroundColor = AppColors.brandLight
+                self.CardViews[index].layer.borderColor = AppColors.brand.cgColor
                 if index < self.InsideIconView.count {
                     self.InsideIconView[index].backgroundColor = AppColors.brand
                 }

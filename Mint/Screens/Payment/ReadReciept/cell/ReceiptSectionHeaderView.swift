@@ -11,6 +11,11 @@ class ReceiptSectionHeaderView: UICollectionReusableView {
 
         override func awakeFromNib() {
             super.awakeFromNib()
+            backgroundColor = .clear
+            sectionTitleLabel.textColor = AppColors.textPrimary
+            itemCountPill.backgroundColor = AppColors.brandLight
+            itemCountLabel.textColor = AppColors.brandLightText
+            applyMintTypography()
         }
         override func layoutSubviews() {
             super.layoutSubviews()

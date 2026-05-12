@@ -77,6 +77,7 @@ class ReceiptReviewViewController: UIViewController {
         super.viewDidLoad()
         enableKeyboardDismissOnBackgroundTapAndSwipe()
         view.backgroundColor = AppColors.background
+        view.overrideUserInterfaceStyle = .dark
         configureNavigationBar()
         loadUserCategoriesIfNeeded()
         lineItems = scanData.lineItems
@@ -88,10 +89,18 @@ class ReceiptReviewViewController: UIViewController {
     private func setupSaveButton() {
         saveButton.backgroundColor    = AppColors.brand
         saveButton.setTitleColor(AppColors.brandText, for: .normal)
+        saveButton.tintColor = AppColors.brandText
+        saveButton.layer.cornerRadius = 14
+        saveButton.clipsToBounds = true
     }
 
     private func configureNavigationBar() {
         navigationItem.title = "Receipt Review"
+        navigationController?.navigationBar.tintColor = AppColors.brand
+        navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary,
+            .font: MintFont.space(size: 17, weight: .semibold)
+        ]
     }
 
     private func setupCollectionView() {

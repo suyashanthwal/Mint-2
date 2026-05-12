@@ -22,7 +22,13 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
     private var lastDrawnBounds: CGRect = .zero
     private var needsGraphRedraw = true
     private var plottedPoints: [CGPoint] = []
-    private var plottedPadding = UIEdgeInsets(top: 24, left: 44, bottom: 38, right: 16)
+    private let chartPadding = UIEdgeInsets(top: 24, left: 48, bottom: 58, right: 16)
+    private var plottedPadding = UIEdgeInsets(top: 24, left: 48, bottom: 58, right: 16)
+
+    private enum ComparisonBadgeRules {
+        static let minimumPercentChange = 5.0
+        static let minimumAverageChange = 50.0
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -30,6 +36,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         AverageDailyLimitAmountLabel.textColor = AppColors.brand
         VsLastMonthView.backgroundColor = AppColors.brandLight
         VsLastMonthLabel.textColor = AppColors.brandLightText
+        VsLastMonthView.isHidden = true
         LineGraphView.layer.addSublayer(graphLayer)
         setupTooltip()
         setupGestures()
@@ -89,7 +96,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         let bounds = LineGraphView.bounds
         let width = bounds.width
         let height = bounds.height
-        let padding = UIEdgeInsets(top: 24, left: 44, bottom: 38, right: 16)
+        let padding = chartPadding
         let graphWidth = width - padding.left - padding.right
         let graphHeight = height - padding.top - padding.bottom
 
@@ -159,7 +166,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
             label.textColor = AppColors.textSecondary
             label.text = formattedCurrency(value)
             label.sizeToFit()
-            label.frame.origin = CGPoint(x: 4, y: y - (label.bounds.height / 2))
+            label.frame.origin = CGPoint(x: 6, y: y - (label.bounds.height / 2))
             LineGraphView.addSubview(label)
         }
     }
@@ -261,7 +268,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
             label.sizeToFit()
             label.center = CGPoint(
                 x: padding.left + (graphWidth * xProgress),
-                y: height - (padding.bottom / 2)
+                y: padding.top + (height - padding.top - padding.bottom) + 18
             )
             LineGraphView.addSubview(label)
         }
@@ -314,15 +321,34 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         let resolvedAverage = average ?? currentAverage
         AverageDailyLimitAmountLabel.text = formattedAmount(resolvedAverage)
 
-        guard let previousMonthAverage, previousMonthAverage > 0, let resolvedAverage else {
-            VsLastMonthLabel.text = "No last month data"
+        guard let previousMonthAverage,
+              previousMonthAverage > 0,
+              let resolvedAverage,
+              resolvedAverage > 0
+        else {
+            hideComparisonBadge()
             return
         }
 
         let change = ((resolvedAverage - previousMonthAverage) / previousMonthAverage) * 100
+        let absoluteAverageChange = abs(resolvedAverage - previousMonthAverage)
+        let isMeaningfulChange = abs(change) >= ComparisonBadgeRules.minimumPercentChange ||
+            absoluteAverageChange >= ComparisonBadgeRules.minimumAverageChange
+
+        guard isMeaningfulChange else {
+            hideComparisonBadge()
+            return
+        }
+
         let roundedPercent = Int(change.rounded())
         let prefix = roundedPercent > 0 ? "+" : ""
         VsLastMonthLabel.text = "\(prefix)\(roundedPercent)% vs last month"
+        VsLastMonthView.isHidden = false
+    }
+
+    private func hideComparisonBadge() {
+        VsLastMonthLabel.text = nil
+        VsLastMonthView.isHidden = true
     }
 
     private var currentAverage: Double? {

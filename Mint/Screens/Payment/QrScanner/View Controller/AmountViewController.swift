@@ -93,6 +93,7 @@ class AmountViewController: UIViewController, UITextFieldDelegate {
             message: "Please install a UPI payment app like GPay, PhonePe, or Paytm to proceed.",
             preferredStyle: .alert
         )
+        alert.overrideUserInterfaceStyle = .dark
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
@@ -147,21 +148,49 @@ class AmountViewController: UIViewController, UITextFieldDelegate {
     }
     
     private func setupUI() {
-       
-        badgeImageView.tintColor = .systemGreen
-        
+        view.backgroundColor = AppColors.background
+        view.overrideUserInterfaceStyle = .dark
+        navigationController?.navigationBar.tintColor = AppColors.brand
+        navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary,
+            .font: MintFont.space(size: 17, weight: .semibold)
+        ]
+
+        payeeNameLabel.textColor = AppColors.textPrimary
+        upiIDLabel.textColor = AppColors.textSecondary
+        note.textColor = AppColors.textPrimary
+        note.tintColor = AppColors.brand
+        note.backgroundColor = AppColors.inputBackground
+        note.layer.cornerRadius = 12
+        note.layer.borderWidth = 1
+        note.layer.borderColor = AppColors.cardBorder.cgColor
+        note.applyMintPlaceholderFont()
+
+        badgeImageView.tintColor = AppColors.success
         
         profileImageView?.layer.cornerRadius = 50
         profileImageView?.clipsToBounds = true
-        profileImageView?.backgroundColor = .systemOrange
+        profileImageView?.backgroundColor = AppColors.brand
         
         sendButton?.layer.cornerRadius = 25
         sendButton?.clipsToBounds = true
+        sendButton?.backgroundColor = AppColors.brand
+        sendButton?.tintColor = AppColors.brandText
+        sendButton?.setTitleColor(AppColors.brandText, for: .normal)
+
+        categoryContainerView?.backgroundColor = AppColors.card
+        categoryContainerView?.layer.cornerRadius = 18
+        categoryContainerView?.layer.borderWidth = 1
+        categoryContainerView?.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.7).cgColor
 
         amountLabel.delegate = self
         amountLabel.keyboardType = .decimalPad
+        amountLabel.textColor = AppColors.textPrimary
         amountLabel.tintColor = AppColors.brand
+        amountLabel.backgroundColor = .clear
+        amountLabel.applyMintPlaceholderFont()
         amountLabel.addTarget(self, action: #selector(amountFieldChanged(_:)), for: .editingChanged)
+        view.applyMintTypography()
     }
     
 
@@ -183,12 +212,12 @@ class AmountViewController: UIViewController, UITextFieldDelegate {
     
     private func setProfileInitial(_ name: String) {
         let initial = String(name.prefix(1)).uppercased()
-        profileImageView?.backgroundColor = .systemOrange
+        profileImageView?.backgroundColor = AppColors.brand
         
         let label = UILabel()
         label.text = initial
-        label.font = .systemFont(ofSize: 40, weight: .semibold)
-        label.textColor = .white
+        label.font = MintFont.space(size: 40, weight: .semibold)
+        label.textColor = AppColors.brandText
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         
@@ -233,6 +262,7 @@ class AmountViewController: UIViewController, UITextFieldDelegate {
             message: "This screen lets you choose a category and send the payment.",
             preferredStyle: .alert
         )
+        alert.overrideUserInterfaceStyle = .dark
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }

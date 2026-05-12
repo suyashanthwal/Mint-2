@@ -13,6 +13,13 @@ class ReceiptAddItemCell: UICollectionViewCell {
 
         override func awakeFromNib() {
             super.awakeFromNib()
+            backgroundColor = .clear
+            contentView.backgroundColor = .clear
+            containerView.backgroundColor = AppColors.card
+            containerView.layer.cornerRadius = 12
+            plusIconImageView.tintColor = AppColors.brand
+            addItemLabel.textColor = AppColors.textPrimary
+            contentView.applyMintTypography()
 
             let tap = UITapGestureRecognizer(
                 target: self,
@@ -34,7 +41,7 @@ class ReceiptAddItemCell: UICollectionViewCell {
 
             let dash              = CAShapeLayer()
             dash.name             = "dashedBorder"
-            dash.strokeColor      = UIColor.systemGray3.cgColor
+            dash.strokeColor      = AppColors.cardBorder.cgColor
             dash.fillColor        = UIColor.clear.cgColor
             dash.lineWidth        = 1.5
             dash.lineDashPattern  = [6, 4]
@@ -59,4 +66,3 @@ class ReceiptAddItemCell: UICollectionViewCell {
         }
     }
    
-

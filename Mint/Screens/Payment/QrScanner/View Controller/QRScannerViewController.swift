@@ -32,6 +32,7 @@ class QRScannerViewController: UIViewController {
         override func viewDidLoad() {
             super.viewDidLoad()
 
+            setupUI()
             setupBindings()
             feedbackGenerator.prepare()
 
@@ -63,6 +64,22 @@ class QRScannerViewController: UIViewController {
     @IBAction func cancelTapped(_ sender: Any) {
         presentingViewController?.presentingViewController?.dismiss(animated: true)
     }
+
+        private func setupUI() {
+            view.backgroundColor = AppColors.background
+            view.overrideUserInterfaceStyle = .dark
+            qrContainerView?.backgroundColor = AppColors.background
+            cameraPreviewView?.backgroundColor = AppColors.sectionBackground
+            overlayView?.backgroundColor = UIColor.black.withAlphaComponent(0.62)
+            uploadButton?.backgroundColor = AppColors.card
+            uploadButton?.tintColor = AppColors.brand
+            uploadButton?.layer.cornerRadius = 14
+            uploadButton?.layer.borderWidth = 1
+            uploadButton?.layer.borderColor = AppColors.cardBorder.cgColor
+            scannerBoxView?.backgroundColor = .clear
+            buttonStackView?.tintColor = AppColors.brand
+            view.applyMintTypography()
+        }
     
 
     
@@ -268,6 +285,7 @@ class QRScannerViewController: UIViewController {
             let alert = UIAlertController(title: "Error",
                                           message: message,
                                           preferredStyle: .alert)
+            alert.overrideUserInterfaceStyle = .dark
 
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             present(alert, animated: true)
@@ -279,6 +297,7 @@ class QRScannerViewController: UIViewController {
                 message: "Enable camera access in Settings.",
                 preferredStyle: .alert
             )
+            alert.overrideUserInterfaceStyle = .dark
 
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 

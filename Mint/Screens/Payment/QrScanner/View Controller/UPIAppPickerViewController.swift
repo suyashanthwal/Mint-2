@@ -27,7 +27,14 @@ class UPIAppPickerViewController: UIViewController {
 
         override func viewDidLoad() {
             super.viewDidLoad()
+            setupUI()
             setupCollectionView()
+        }
+
+        private func setupUI() {
+            view.backgroundColor = AppColors.background
+            view.overrideUserInterfaceStyle = .dark
+            view.applyMintTypography()
         }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -57,6 +64,7 @@ class UPIAppPickerViewController: UIViewController {
                 message: "No UPI payment app was detected. Please install Google Pay, PhonePe, or Paytm.",
                 preferredStyle: .alert
             )
+            alert.overrideUserInterfaceStyle = .dark
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             present(alert, animated: true)
         }

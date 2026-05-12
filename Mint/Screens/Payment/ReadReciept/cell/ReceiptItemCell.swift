@@ -18,6 +18,20 @@ class ReceiptItemCell: UICollectionViewCell {
 
         override func awakeFromNib() {
             super.awakeFromNib()
+            backgroundColor = .clear
+            contentView.backgroundColor = .clear
+            cardView.backgroundColor = AppColors.card
+            cardView.layer.borderWidth = 1
+            cardView.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.7).cgColor
+            titleLabel.textColor = AppColors.textPrimary
+            priceLabel.textColor = AppColors.textPrimary
+            unitPriceLabel.textColor = AppColors.textSecondary
+            categoryPill.backgroundColor = AppColors.inputBackground
+            categoryPill.layer.borderWidth = 1
+            categoryPill.layer.borderColor = AppColors.cardBorder.cgColor
+            categoryIconImageView.tintColor = AppColors.brand
+            categoryLabel.textColor = AppColors.textSecondary
+            contentView.applyMintTypography()
 
             let tap = UITapGestureRecognizer(target: self, action: #selector(pillTapped))
             categoryPill.addGestureRecognizer(tap)
@@ -49,4 +63,3 @@ class ReceiptItemCell: UICollectionViewCell {
 
       
     }
-

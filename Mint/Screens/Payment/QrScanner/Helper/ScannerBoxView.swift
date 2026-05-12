@@ -32,7 +32,7 @@ final class ScannerBoxView: UIView {
         clipsToBounds = false
 
         for cornerLayer in [topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner] {
-            cornerLayer.strokeColor = UIColor.black.cgColor
+            cornerLayer.strokeColor = AppColors.brand.cgColor
             cornerLayer.fillColor = UIColor.clear.cgColor
             cornerLayer.lineWidth = cornerLineWidth
             cornerLayer.lineCap = .round
