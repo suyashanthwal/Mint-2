@@ -383,10 +383,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
     private func updateGoalCard() {
         let mostCompletedActiveGoal = goals
-            .filter { !$0.isCompleted && $0.progress < 1 }
+            .filter { $0.isActiveGoal }
             .max { $0.progress < $1.progress }
         let latestCompletedGoal = goals
-            .filter { $0.isCompleted || $0.progress >= 1 }
+            .filter(\.isCompleted)
             .sorted { ($0.completedOn ?? .distantPast) > ($1.completedOn ?? .distantPast) }
             .first
         let displayedGoal = mostCompletedActiveGoal ?? latestCompletedGoal
@@ -468,7 +468,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
     private func estimatedGoalAccelerationDays() -> Int? {
         guard let goal = goals
-            .filter({ !$0.isCompleted && $0.progress < 1 })
+            .filter({ $0.isActiveGoal && $0.progress < 1 })
             .max(by: { $0.progress < $1.progress })
         else { return nil }
 

@@ -8,11 +8,20 @@ extension DatabaseManager {
         guard let userId = currentUserIdString else { return result }
 
         let query = """
-        SELECT id, name, target_amount, currently_saved, target_date,
-               monthly_goal, icon_name, image_name, is_completed, completed_on
+        SELECT id,
+               name,
+               target_amount,
+               currently_saved,
+               target_date,
+               monthly_goal,
+               icon_name,
+               image_name,
+               is_completed,
+               is_on_hold,
+               completed_on
         FROM goals
         WHERE user_id = ?
-        ORDER BY is_completed ASC, target_date ASC;
+        ORDER BY is_completed ASC, is_on_hold ASC, target_date ASC;
         """
 
         var stmt: OpaquePointer?
@@ -21,29 +30,33 @@ extension DatabaseManager {
 
         let iso = ISO8601DateFormatter()
 
-        func optText(_ col: Int32) -> String? {
+        func optionalText(_ col: Int32) -> String? {
             guard let ptr = sqlite3_column_text(stmt, col) else { return nil }
-            let s = String(cString: ptr)
-            return s.isEmpty ? nil : s
+            let value = String(cString: ptr)
+            return value.isEmpty ? nil : value
         }
 
         while sqlite3_step(stmt) == SQLITE_ROW {
             guard
                 let idPtr = sqlite3_column_text(stmt, 0),
-                let uuid  = UUID(uuidString: String(cString: idPtr))
+                let uuid = UUID(uuidString: String(cString: idPtr))
             else { continue }
 
+            let targetDate = iso.date(from: String(cString: sqlite3_column_text(stmt, 4))) ?? Date()
+            let completedOn = optionalText(10).flatMap { iso.date(from: $0) }
+
             result.append(Goal(
-                id:             uuid,
-                name:           String(cString: sqlite3_column_text(stmt, 1)),
-                targetAmount:   sqlite3_column_double(stmt, 2),
+                id: uuid,
+                name: String(cString: sqlite3_column_text(stmt, 1)),
+                targetAmount: sqlite3_column_double(stmt, 2),
                 currentlySaved: sqlite3_column_double(stmt, 3),
-                targetDate:     iso.date(from: String(cString: sqlite3_column_text(stmt, 4))) ?? Date(),
-                monthlyGoal:    sqlite3_column_double(stmt, 5),
-                iconName:       String(cString: sqlite3_column_text(stmt, 6)),
-                imageName:      optText(7),
-                isCompleted:    sqlite3_column_int(stmt, 8) == 1,
-                completedOn:    optText(9).flatMap { iso.date(from: $0) }
+                targetDate: targetDate,
+                monthlyGoal: sqlite3_column_double(stmt, 5),
+                iconName: String(cString: sqlite3_column_text(stmt, 6)),
+                imageName: optionalText(7),
+                isCompleted: sqlite3_column_int(stmt, 8) == 1,
+                isOnHold: sqlite3_column_int(stmt, 9) == 1,
+                completedOn: completedOn
             ))
         }
 
@@ -64,12 +77,22 @@ extension DatabaseManager {
         iconName: String,
         imageName: String? = nil
     ) -> UUID? {
-
         let sql = """
         INSERT INTO goals
-            (id, user_id, name, target_amount, currently_saved, target_date,
-             monthly_goal, icon_name, image_name, is_completed, completed_on, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            (id,
+             user_id,
+             name,
+             target_amount,
+             currently_saved,
+             target_date,
+             monthly_goal,
+             icon_name,
+             image_name,
+             is_completed,
+             is_on_hold,
+             completed_on,
+             created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         var stmt: OpaquePointer?
@@ -79,13 +102,14 @@ extension DatabaseManager {
         }
 
         let newId = UUID()
-        let iso   = ISO8601DateFormatter()
+        let iso = ISO8601DateFormatter()
 
         guard let userId = currentUserIdString else {
             sqlite3_finalize(stmt)
             print("insertGoal: no signed-in user")
             return nil
         }
+
         let createdAt = iso.string(from: Date())
 
         sqlite3_bind_text(stmt, 1, (newId.uuidString as NSString).utf8String, -1, nil)
@@ -97,15 +121,16 @@ extension DatabaseManager {
         sqlite3_bind_double(stmt, 7, monthlyGoal)
         sqlite3_bind_text(stmt, 8, (iconName as NSString).utf8String, -1, nil)
 
-        if let img = imageName {
-            sqlite3_bind_text(stmt, 9, (img as NSString).utf8String, -1, nil)
+        if let imageName {
+            sqlite3_bind_text(stmt, 9, (imageName as NSString).utf8String, -1, nil)
         } else {
             sqlite3_bind_null(stmt, 9)
         }
 
         sqlite3_bind_int(stmt, 10, 0)
-        sqlite3_bind_null(stmt, 11)
-        sqlite3_bind_text(stmt, 12, (createdAt as NSString).utf8String, -1, nil)
+        sqlite3_bind_int(stmt, 11, 0)
+        sqlite3_bind_null(stmt, 12)
+        sqlite3_bind_text(stmt, 13, (createdAt as NSString).utf8String, -1, nil)
 
         let success = sqlite3_step(stmt) == SQLITE_DONE
         sqlite3_finalize(stmt)
@@ -114,8 +139,7 @@ extension DatabaseManager {
             print("Goal inserted: \(name)")
             return newId
         } else {
-            let error = String(cString: sqlite3_errmsg(db))
-            print("insertGoal failed: \(error)")
+            print("insertGoal failed: \(String(cString: sqlite3_errmsg(db)))")
             return nil
         }
     }
@@ -139,6 +163,7 @@ extension DatabaseManager {
         iconName: String,
         imageName: String? = nil,
         isCompleted: Bool = false,
+        isOnHold: Bool = false,
         completedOn: Date? = nil
     ) {
         let sql = """
@@ -151,6 +176,7 @@ extension DatabaseManager {
             icon_name       = ?,
             image_name      = ?,
             is_completed    = ?,
+            is_on_hold      = ?,
             completed_on    = ?
         WHERE id = ?;
         """
@@ -163,34 +189,36 @@ extension DatabaseManager {
 
         let iso = ISO8601DateFormatter()
 
-        sqlite3_bind_text(stmt,   1, (name                          as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(stmt, 1, (name as NSString).utf8String, -1, nil)
         sqlite3_bind_double(stmt, 2, targetAmount)
         sqlite3_bind_double(stmt, 3, currentlySaved)
-        sqlite3_bind_text(stmt,   4, (iso.string(from: targetDate)   as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(stmt, 4, (iso.string(from: targetDate) as NSString).utf8String, -1, nil)
         sqlite3_bind_double(stmt, 5, monthlyGoal)
-        sqlite3_bind_text(stmt,   6, (iconName                       as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(stmt, 6, (iconName as NSString).utf8String, -1, nil)
 
-        if let img = imageName {
-            sqlite3_bind_text(stmt, 7, (img as NSString).utf8String, -1, nil)
+        if let imageName {
+            sqlite3_bind_text(stmt, 7, (imageName as NSString).utf8String, -1, nil)
         } else {
             sqlite3_bind_null(stmt, 7)
         }
 
-        sqlite3_bind_int(stmt,  8, isCompleted ? 1 : 0)
+        sqlite3_bind_int(stmt, 8, isCompleted ? 1 : 0)
+        sqlite3_bind_int(stmt, 9, isOnHold ? 1 : 0)
 
-        if let completed = completedOn {
-            sqlite3_bind_text(stmt, 9, (iso.string(from: completed) as NSString).utf8String, -1, nil)
+        if let completedOn {
+            sqlite3_bind_text(stmt, 10, (iso.string(from: completedOn) as NSString).utf8String, -1, nil)
         } else {
-            sqlite3_bind_null(stmt, 9)
+            sqlite3_bind_null(stmt, 10)
         }
 
-        sqlite3_bind_text(stmt, 10, (id.uuidString as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(stmt, 11, (id.uuidString as NSString).utf8String, -1, nil)
 
         if sqlite3_step(stmt) == SQLITE_DONE {
             print("Goal updated: \(name)")
         } else {
             print("updateGoal failed: \(String(cString: sqlite3_errmsg(db)))")
         }
+
         sqlite3_finalize(stmt)
     }
 
@@ -198,13 +226,7 @@ extension DatabaseManager {
     func addMoneyToGoal(goalId: UUID, amount: Double) -> Bool {
         guard amount > 0, var goal = fetchGoal(id: goalId) else { return false }
 
-        goal.currentlySaved += amount
-
-        if goal.currentlySaved >= goal.targetAmount {
-            goal.currentlySaved = goal.targetAmount
-            goal.isCompleted = true
-            goal.completedOn = goal.completedOn ?? Date()
-        }
+        goal.currentlySaved = min(goal.currentlySaved + amount, goal.targetAmount)
 
         updateGoal(
             id: goal.id,
@@ -216,6 +238,58 @@ extension DatabaseManager {
             iconName: goal.iconName,
             imageName: goal.imageName,
             isCompleted: goal.isCompleted,
+            isOnHold: goal.isOnHold,
+            completedOn: goal.completedOn
+        )
+
+        return true
+    }
+
+    @discardableResult
+    func setGoalHoldState(id: UUID, isOnHold: Bool) -> Bool {
+        guard var goal = fetchGoal(id: id) else { return false }
+        guard !goal.isCompleted else { return false }
+
+        goal.isOnHold = isOnHold
+
+        updateGoal(
+            id: goal.id,
+            name: goal.name,
+            targetAmount: goal.targetAmount,
+            currentlySaved: goal.currentlySaved,
+            targetDate: goal.targetDate,
+            monthlyGoal: goal.monthlyGoal,
+            iconName: goal.iconName,
+            imageName: goal.imageName,
+            isCompleted: goal.isCompleted,
+            isOnHold: goal.isOnHold,
+            completedOn: goal.completedOn
+        )
+
+        return true
+    }
+
+    @discardableResult
+    func markGoalPurchased(id: UUID) -> Bool {
+        guard var goal = fetchGoal(id: id) else { return false }
+        guard goal.currentlySaved >= goal.targetAmount else { return false }
+
+        goal.currentlySaved = min(goal.currentlySaved, goal.targetAmount)
+        goal.isCompleted = true
+        goal.isOnHold = false
+        goal.completedOn = goal.completedOn ?? Date()
+
+        updateGoal(
+            id: goal.id,
+            name: goal.name,
+            targetAmount: goal.targetAmount,
+            currentlySaved: goal.currentlySaved,
+            targetDate: goal.targetDate,
+            monthlyGoal: goal.monthlyGoal,
+            iconName: goal.iconName,
+            imageName: goal.imageName,
+            isCompleted: goal.isCompleted,
+            isOnHold: goal.isOnHold,
             completedOn: goal.completedOn
         )
 

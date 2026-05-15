@@ -11,14 +11,23 @@ struct Goal: Identifiable, Codable {
     let iconName: String
     let imageName: String?
     var isCompleted: Bool
+    var isOnHold: Bool
     var completedOn: Date?
     var pickedImageURL: URL? = nil
     
     enum CodingKeys: String, CodingKey {
-           case id, name, targetAmount, currentlySaved,
-                targetDate, monthlyGoal, iconName,
-                imageName, isCompleted, completedOn
-       }
+        case id
+        case name
+        case targetAmount
+        case currentlySaved
+        case targetDate
+        case monthlyGoal
+        case iconName
+        case imageName
+        case isCompleted
+        case isOnHold
+        case completedOn
+    }
 
     
     init(
@@ -31,6 +40,7 @@ struct Goal: Identifiable, Codable {
         iconName: String,
         imageName: String? = nil,
         isCompleted: Bool = false,
+        isOnHold: Bool = false,
         completedOn: Date? = nil
     ) {
         self.id             = id
@@ -42,6 +52,7 @@ struct Goal: Identifiable, Codable {
         self.iconName       = iconName
         self.imageName      = imageName
         self.isCompleted    = isCompleted
+        self.isOnHold       = isOnHold
         self.completedOn    = completedOn
     }
     
@@ -52,5 +63,13 @@ struct Goal: Identifiable, Codable {
     
     var amountToGo: Double {
         max(targetAmount - currentlySaved, 0)
+    }
+
+    var isReadyToPurchase: Bool {
+        !isCompleted && !isOnHold && currentlySaved >= targetAmount
+    }
+    
+    var isActiveGoal: Bool {
+        !isCompleted && !isOnHold
     }
 }

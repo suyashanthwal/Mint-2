@@ -1,88 +1,99 @@
-
 import UIKit
 
-class ReachedGoalsCollectionViewCell: UICollectionViewCell {
+final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
 
-    @IBOutlet weak var IconBackgroundView: UIView!
-    @IBOutlet weak var ReachedGoalName: UILabel!
-    @IBOutlet weak var ReachedGoalCompletedOn: UILabel!
-    @IBOutlet weak var ReachedGoalAmount: UILabel!
+    @IBOutlet private weak var cardView: UIView!
+    @IBOutlet private weak var thumbnailContainerView: UIView!
+    @IBOutlet private weak var thumbnailImageView: UIImageView!
+    @IBOutlet private weak var titleLabel: UILabel!
+    @IBOutlet private weak var subtitleLabel: UILabel!
+    @IBOutlet private weak var amountLabel: UILabel!
+    @IBOutlet private weak var accentDotView: UIView!
 
     override func awakeFromNib() {
         super.awakeFromNib()
         applyStyle()
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        cardView.layer.cornerRadius = 20
+        thumbnailContainerView.layer.cornerRadius = 14
+        accentDotView.layer.cornerRadius = accentDotView.bounds.width / 2
+        layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.frame,
+            cornerRadius: cardView.layer.cornerRadius
+        ).cgPath
+    }
+
     private func applyStyle() {
-        contentView.backgroundColor = AppColors.card
+        contentView.backgroundColor = .clear
+        backgroundColor = .clear
+        contentView.clipsToBounds = false
+        clipsToBounds = false
+        layer.masksToBounds = false
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.14
+        layer.shadowRadius = 14
+        layer.shadowOffset = CGSize(width: 0, height: 8)
 
-        IconBackgroundView.backgroundColor    = AppColors.brandLight
-        IconBackgroundView.layer.cornerRadius = IconBackgroundView.frame.width / 2
-        IconBackgroundView.clipsToBounds      = true
+        cardView.backgroundColor = UIColor(hex: "#172349")
+        cardView.layer.cornerCurve = .continuous
+        cardView.layer.borderWidth = 1
+        cardView.layer.borderColor = UIColor.white.withAlphaComponent(0.06).cgColor
 
-        ReachedGoalName.font      = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        ReachedGoalName.textColor = AppColors.textPrimary
+        thumbnailContainerView.backgroundColor = UIColor(hex: "#0F1633")
+        thumbnailImageView.contentMode = .scaleAspectFit
+        thumbnailImageView.clipsToBounds = true
 
-        ReachedGoalCompletedOn.font      = UIFont.systemFont(ofSize: 12, weight: .regular)
-        ReachedGoalCompletedOn.textColor = AppColors.textSecondary
+        titleLabel.textColor = .white
+        titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
+        titleLabel.numberOfLines = 1
 
-        ReachedGoalAmount.font      = UIFont.systemFont(ofSize: 15, weight: .bold)
-        ReachedGoalAmount.textColor = AppColors.brand
-        ReachedGoalAmount.textAlignment = .right
+        subtitleLabel.textColor = UIColor.white.withAlphaComponent(0.48)
+        subtitleLabel.font = .systemFont(ofSize: 11, weight: .medium)
+        subtitleLabel.numberOfLines = 1
+
+        amountLabel.textColor = UIColor(hex: "#1EE579")
+        amountLabel.font = .systemFont(ofSize: 17, weight: .bold)
+        amountLabel.textAlignment = .right
+        amountLabel.adjustsFontSizeToFitWidth = true
+        amountLabel.minimumScaleFactor = 0.78
+
+        accentDotView.backgroundColor = UIColor(hex: "#FFC529")
+        accentDotView.layer.borderWidth = 2
+        accentDotView.layer.borderColor = UIColor(hex: "#162246").cgColor
     }
 
     func configure(with goal: Goal) {
-        ReachedGoalName.text = goal.name
+        titleLabel.text = goal.name
+        amountLabel.text = "₹\(Int(goal.targetAmount))"
 
         if let completedOn = goal.completedOn {
-            ReachedGoalCompletedOn.text = "Completed on \(formattedDate(completedOn))"
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd MMM yyyy"
+            subtitleLabel.text = "Purchased on \(formatter.string(from: completedOn))"
         } else {
-            ReachedGoalCompletedOn.text = "Goal reached"
+            subtitleLabel.text = "Purchased"
         }
 
-        ReachedGoalAmount.text = formatCurrency(goal.targetAmount)
+        if let pickedImageURL = goal.pickedImageURL,
+           let data = try? Data(contentsOf: pickedImageURL),
+           let image = UIImage(data: data) {
+            thumbnailImageView.image = image
+            thumbnailImageView.tintColor = nil
+            return
+        }
 
-        addIconIfNeeded(sfSymbol: goal.iconName)
+        if let imageName = goal.imageName,
+           let image = UIImage(named: imageName) {
+            thumbnailImageView.image = image
+            thumbnailImageView.tintColor = nil
+            return
+        }
 
-        layoutIfNeeded()
-        IconBackgroundView.layer.cornerRadius = IconBackgroundView.bounds.width / 2
-    }
-
-    private func addIconIfNeeded(sfSymbol: String) {
-        IconBackgroundView.subviews
-            .filter { $0.tag == 99 }
-            .forEach { $0.removeFromSuperview() }
-
-        let config    = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
-        let image     = UIImage(systemName: "checkmark.circle.fill", withConfiguration: config)?
-            .withTintColor(AppColors.brand, renderingMode: .alwaysOriginal)
-
-        let imageView        = UIImageView(image: image)
-        imageView.tag        = 99
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-
-        IconBackgroundView.addSubview(imageView)
-        NSLayoutConstraint.activate([
-            imageView.centerXAnchor.constraint(equalTo: IconBackgroundView.centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: IconBackgroundView.centerYAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 24),
-            imageView.heightAnchor.constraint(equalToConstant: 24),
-        ])
-    }
-
-    private func formatCurrency(_ amount: Double) -> String {
-        let f             = NumberFormatter()
-        f.numberStyle     = .currency
-        f.currencyCode    = "INR"
-        f.currencySymbol  = "₹"
-        f.maximumFractionDigits = 0
-        return f.string(from: NSNumber(value: amount)) ?? "₹0"
-    }
-
-    private func formattedDate(_ date: Date) -> String {
-        let f        = DateFormatter()
-        f.dateFormat = "MMM dd, yyyy"
-        return f.string(from: date)
+        let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .medium)
+        thumbnailImageView.image = UIImage(systemName: goal.iconName, withConfiguration: config)?
+            .withTintColor(.white.withAlphaComponent(0.9), renderingMode: .alwaysOriginal)
     }
 }

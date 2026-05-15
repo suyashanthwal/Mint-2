@@ -71,6 +71,7 @@ final class DatabaseManager {
                 forKey: Self.defaultAdminSeedVersionKey
             )
         }
+        ensureGoalsOnHoldColumnExists()
         ensureDefaultAdminAccountState()
         ensureDefaultAdminSeedDataIsCurrent()
         checkAndResetMonthlyExpenseIfNeeded()
@@ -216,6 +217,34 @@ final class DatabaseManager {
             return parsed
         }
         return Self.databaseDateFormatter.date(from: value)
+    }
+
+    private func ensureGoalsOnHoldColumnExists() {
+        guard let db else { return }
+
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, "PRAGMA table_info(goals);", -1, &stmt, nil) == SQLITE_OK else {
+            return
+        }
+
+        var hasOnHoldColumn = false
+
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            guard let columnName = sqlite3_column_text(stmt, 1) else { continue }
+            if String(cString: columnName) == "is_on_hold" {
+                hasOnHoldColumn = true
+                break
+            }
+        }
+
+        sqlite3_finalize(stmt)
+
+        guard !hasOnHoldColumn else { return }
+
+        let alterTable = "ALTER TABLE goals ADD COLUMN is_on_hold INTEGER NOT NULL DEFAULT 0;"
+        if sqlite3_exec(db, alterTable, nil, nil, nil) != SQLITE_OK {
+            print("Failed to add goals.is_on_hold column: \(String(cString: sqlite3_errmsg(db)))")
+        }
     }
 
 }

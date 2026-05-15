@@ -1167,6 +1167,7 @@ extension BudgetViewController {
                                       attributes: .destructive) { [weak self] _ in
                     self?.confirmDelete(title: goal.name) {
                         DatabaseManager.shared.deleteGoal(id: goal.id)
+                        GoalImageStore.removeImage(for: goal.id)
                         NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
                         NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
                         self?.reloadAll()

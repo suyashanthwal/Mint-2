@@ -453,7 +453,7 @@ final class NewBudgetViewController: UIViewController {
         let categoryBudget = categories.reduce(0) { $0 + $1.budget }
         let recurringTotal = recurringMonthlyTotal()
         let goalsMonthlyTotal = goals
-            .filter { !$0.isCompleted }
+            .filter(\.isActiveGoal)
             .reduce(0) { $0 + $1.monthlyGoal }
         let remaining = max(allocated - spent, 0)
 
@@ -982,14 +982,15 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
             let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
                 self?.openEditGoal(goal: goal)
             }
-            let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
-                self?.confirmDelete(title: goal.name) {
-                    DatabaseManager.shared.deleteGoal(id: goal.id)
-                    NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
-                    NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
-                    self?.reloadAll()
+                let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+                    self?.confirmDelete(title: goal.name) {
+                        DatabaseManager.shared.deleteGoal(id: goal.id)
+                        GoalImageStore.removeImage(for: goal.id)
+                        NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
+                        NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+                        self?.reloadAll()
+                    }
                 }
-            }
             return UIMenu(title: goal.name, children: [edit, delete])
         }
     }

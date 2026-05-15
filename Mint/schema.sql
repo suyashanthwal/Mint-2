@@ -213,6 +213,7 @@ CREATE TABLE IF NOT EXISTS goals (
     icon_name       TEXT    NOT NULL,
     image_name      TEXT,
     is_completed    INTEGER NOT NULL DEFAULT 0,
+    is_on_hold      INTEGER NOT NULL DEFAULT 0,
     completed_on    TEXT,
     created_at      TEXT    NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
