@@ -12,11 +12,24 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
     private let trackLayer = CAShapeLayer()
     private let highlightLayer = CAShapeLayer()
 
+    var contextMenuPreviewView: UIView {
+        cardView
+    }
+
+    override var isHighlighted: Bool {
+        didSet { updateInteractionAppearance() }
+    }
+
+    override var isSelected: Bool {
+        didSet { updateInteractionAppearance() }
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         applyStyle()
         ringContainerView.layer.addSublayer(trackLayer)
         ringContainerView.layer.addSublayer(highlightLayer)
+        updateInteractionAppearance()
     }
 
     override func layoutSubviews() {
@@ -30,6 +43,8 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
     private func applyStyle() {
         contentView.backgroundColor = .clear
         backgroundColor = .clear
+        selectedBackgroundView = UIView()
+        selectedBackgroundView?.backgroundColor = .clear
 
         cardView.backgroundColor = .clear
         imageContainerView.backgroundColor = UIColor(hex: "#11162F")
@@ -46,6 +61,13 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
         completedDotView.backgroundColor = UIColor(hex: "#33D95E")
         completedDotView.layer.borderWidth = 2
         completedDotView.layer.borderColor = UIColor(hex: "#070819").cgColor
+    }
+
+    private func updateInteractionAppearance() {
+        let pressed = isHighlighted || isSelected
+        let scale: CGFloat = pressed ? 0.98 : 1
+        cardView.transform = CGAffineTransform(scaleX: scale, y: scale)
+        titleLabel.alpha = pressed ? 0.92 : 1
     }
 
     func configure(with goal: Goal) {

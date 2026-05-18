@@ -32,10 +32,23 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
     private let baseGradientLayer = CAGradientLayer()
     private let fillGradientLayer = CAGradientLayer()
 
+    var contextMenuPreviewView: UIView {
+        cardView
+    }
+
+    override var isHighlighted: Bool {
+        didSet { updateInteractionAppearance() }
+    }
+
+    override var isSelected: Bool {
+        didSet { updateInteractionAppearance() }
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         applyBaseStyle()
         configureGradientLayers()
+        updateInteractionAppearance()
     }
 
     override func prepareForReuse() {
@@ -71,12 +84,22 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
     }
 
     private func applyBaseStyle() {
+        contentView.backgroundColor = .clear
+        backgroundColor = .clear
+        selectedBackgroundView = UIView()
+        selectedBackgroundView?.backgroundColor = .clear
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = 0.16
         layer.shadowRadius = 20
         layer.shadowOffset = CGSize(width: 0, height: 10)
 
         cardView.layer.cornerCurve = .continuous
+    }
+
+    private func updateInteractionAppearance() {
+        let pressed = isHighlighted || isSelected
+        cardView.transform = pressed ? CGAffineTransform(scaleX: 0.99, y: 0.99) : .identity
+        layer.shadowOpacity = pressed ? 0.12 : 0.16
     }
 
     private func configureGradientLayers() {

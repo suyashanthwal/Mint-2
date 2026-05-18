@@ -11,8 +11,10 @@ final class GoalsSectionHeaderReusableView: UICollectionReusableView {
         super.awakeFromNib()
         backgroundColor = .clear
         titleLabel.numberOfLines = 1
+        titleLabel.textColor = AppColors.textPrimary
         countLabel.textAlignment = .right
         countLabel.numberOfLines = 1
+        countLabel.textColor = AppColors.textSecondary
     }
 
     func configure(title: String, countText: String) {
