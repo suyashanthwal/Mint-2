@@ -5998,8 +5998,56 @@ spend on?</string>
                                                     <action selector="segmentedControlValueChanged:" destination="AZp-Kr-Mo7" eventType="valueChanged" id="xFm-f7-rYy"/>
                                                 </connections>
                                             </segmentedControl>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v8N-qL-cfT" userLabel="Period Navigation">
+                                                <rect key="frame" x="0.0" y="65" width="393" height="36"/>
+                                                <subviews>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="W3a-Ld-Hg3">
+                                                        <rect key="frame" x="117.5" y="0.0" width="158" height="36"/>
+                                                        <subviews>
+                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" translatesAutoresizingMaskIntoConstraints="NO" id="kY8-Bj-0D2">
+                                                                <rect key="frame" x="0.0" y="0.0" width="36" height="36"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="width" constant="36" id="tq4-0u-E0y"/>
+                                                                    <constraint firstAttribute="height" constant="36" id="x8u-dE-YMj"/>
+                                                                </constraints>
+                                                                <state key="normal">
+                                                                    <imageReference key="image" image="chevron.left" catalog="system" symbolScale="medium"/>
+                                                                </state>
+                                                                <connections>
+                                                                    <action selector="previousPeriodButtonTapped:" destination="AZp-Kr-Mo7" eventType="touchUpInside" id="n2u-7M-f5p"/>
+                                                                </connections>
+                                                            </button>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalCompressionResistancePriority="749" text="May 2026" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="i0L-zT-CH8">
+                                                                <rect key="frame" x="52" y="7" width="54.5" height="22"/>
+                                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" translatesAutoresizingMaskIntoConstraints="NO" id="wwq-9G-Rqs">
+                                                                <rect key="frame" x="122.5" y="0.0" width="36" height="36"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="width" constant="36" id="NkE-Bg-9pX"/>
+                                                                    <constraint firstAttribute="height" constant="36" id="r0M-JG-Qg5"/>
+                                                                </constraints>
+                                                                <state key="normal">
+                                                                    <imageReference key="image" image="chevron.right" catalog="system" symbolScale="medium"/>
+                                                                </state>
+                                                                <connections>
+                                                                    <action selector="nextPeriodButtonTapped:" destination="AZp-Kr-Mo7" eventType="touchUpInside" id="0Rj-JP-Nx2"/>
+                                                                </connections>
+                                                            </button>
+                                                        </subviews>
+                                                    </stackView>
+                                                </subviews>
+                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                <constraints>
+                                                    <constraint firstItem="W3a-Ld-Hg3" firstAttribute="centerX" secondItem="v8N-qL-cfT" secondAttribute="centerX" id="5IQ-Rl-nx8"/>
+                                                    <constraint firstItem="W3a-Ld-Hg3" firstAttribute="centerY" secondItem="v8N-qL-cfT" secondAttribute="centerY" id="adg-QG-7VU"/>
+                                                    <constraint firstAttribute="height" constant="36" id="oKE-I9-JyF"/>
+                                                </constraints>
+                                            </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="q5q-bh-Z3g">
-                                                <rect key="frame" x="0.0" y="64" width="393" height="130"/>
+                                                <rect key="frame" x="0.0" y="125" width="393" height="130"/>
                                                 <subviews>
                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="BCa-96-gac">
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="130"/>
@@ -6040,7 +6088,7 @@ spend on?</string>
                                                 </constraints>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zHg-tq-YfD" customClass="BarChartView" customModule="DGCharts">
-                                                <rect key="frame" x="0.0" y="218" width="393" height="300"/>
+                                                <rect key="frame" x="0.0" y="279" width="393" height="300"/>
                                                 <color key="backgroundColor" systemColor="systemGray6Color"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="300" id="MdL-mt-dJX"/>
@@ -6053,7 +6101,7 @@ spend on?</string>
                                                 </userDefinedRuntimeAttributes>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MY0-EK-q2h">
-                                                <rect key="frame" x="0.0" y="542" width="393" height="300"/>
+                                                <rect key="frame" x="0.0" y="603" width="393" height="300"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Zzt-Gb-z7B">
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="40"/>
@@ -6141,9 +6189,12 @@ spend on?</string>
                         <outlet property="AverageHeadingLabel" destination="6bY-et-2kF" id="3WQ-1o-FRM"/>
                         <outlet property="UPorDOWNPercentLabel" destination="Cdt-BO-qKS" id="4J4-0p-DF1"/>
                         <outlet property="barChartView" destination="zHg-tq-YfD" id="CBM-pa-fz1"/>
+                        <outlet property="currentPeriodLabel" destination="i0L-zT-CH8" id="7p0-oV-MYY"/>
                         <outlet property="detailsHeadingLabel" destination="4hu-33-tb4" id="W3q-Tj-pQ0"/>
                         <outlet property="detailsSectionHeightConstraint" destination="22j-BD-vVF" id="JOU-Uh-VmX"/>
                         <outlet property="monthlyDetailsCollectionView" destination="Vlb-9k-CtP" id="E2h-GM-5QX"/>
+                        <outlet property="nextPeriodButton" destination="wwq-9G-Rqs" id="gVg-PG-pgT"/>
+                        <outlet property="previousPeriodButton" destination="kY8-Bj-0D2" id="M88-X9-84H"/>
                         <outlet property="scrollView" destination="khM-Gi-KbU" id="Q3A-Ih-wH3"/>
                         <outlet property="segmentedControl" destination="F28-oT-piR" id="R9e-zg-7m3"/>
                     </connections>

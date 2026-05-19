@@ -12,9 +12,22 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
     private var currentGoalID: UUID?
     private var imageProcessingTask: Task<Void, Never>?
 
+    var contextMenuPreviewView: UIView {
+        cardView
+    }
+
+    override var isHighlighted: Bool {
+        didSet { updateInteractionAppearance() }
+    }
+
+    override var isSelected: Bool {
+        didSet { updateInteractionAppearance() }
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         applyStyle()
+        updateInteractionAppearance()
     }
 
     override func prepareForReuse() {
@@ -39,6 +52,8 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
     private func applyStyle() {
         contentView.backgroundColor = .clear
         backgroundColor = .clear
+        selectedBackgroundView = UIView()
+        selectedBackgroundView?.backgroundColor = .clear
         contentView.clipsToBounds = false
         clipsToBounds = false
         layer.masksToBounds = false
@@ -73,6 +88,12 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
         accentDotView.backgroundColor = UIColor(hex: "#FFC529")
         accentDotView.layer.borderWidth = 2
         accentDotView.layer.borderColor = UIColor(hex: "#162246").cgColor
+    }
+
+    private func updateInteractionAppearance() {
+        let pressed = isHighlighted || isSelected
+        cardView.transform = pressed ? CGAffineTransform(scaleX: 0.99, y: 0.99) : .identity
+        layer.shadowOpacity = pressed ? 0.1 : 0.14
     }
 
     func configure(with goal: Goal) {

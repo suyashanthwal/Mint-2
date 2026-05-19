@@ -119,10 +119,6 @@ final class GoalsViewController: UIViewController {
         goalsCollectionView.showsVerticalScrollIndicator = false
         goalsCollectionView.alwaysBounceVertical = true
         goalsCollectionView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 40, right: 0)
-
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleCollectionLongPress(_:)))
-        longPress.minimumPressDuration = 0.45
-        goalsCollectionView.addGestureRecognizer(longPress)
     }
 
     private func configureOnboarding() {
@@ -395,27 +391,11 @@ final class GoalsViewController: UIViewController {
     private func presentGoalActions(for goal: Goal) {
         let alert = UIAlertController(title: goal.name, message: nil, preferredStyle: .actionSheet)
 
-        if goal.isActiveGoal {
-            alert.addAction(UIAlertAction(title: "Add Funds", style: .default) { [weak self] _ in
-                self?.presentAddMoney(for: goal)
-            })
-
-            if goal.isReadyToPurchase {
-                alert.addAction(UIAlertAction(title: "Mark Purchased", style: .default) { [weak self] _ in
-                    self?.markGoalPurchased(goal)
-                })
-            } else {
-                alert.addAction(UIAlertAction(title: "Hold Goal", style: .default) { [weak self] _ in
-                    self?.holdGoal(goal)
-                })
-            }
+        let holdAction = UIAlertAction(title: "Hold Goal", style: .default) { [weak self] _ in
+            self?.holdGoal(goal)
         }
-
-        if goal.isOnHold {
-            alert.addAction(UIAlertAction(title: "Resume Goal", style: .default) { [weak self] _ in
-                self?.resumeGoal(goal)
-            })
-        }
+        holdAction.isEnabled = goal.isActiveGoal && !goal.isCompleted && !goal.isOnHold
+        alert.addAction(holdAction)
 
         alert.addAction(UIAlertAction(title: "Edit Goal", style: .default) { [weak self] _ in
             self?.presentEditGoal(for: goal)
@@ -430,6 +410,7 @@ final class GoalsViewController: UIViewController {
     }
 
     private func holdGoal(_ goal: Goal) {
+        guard goal.isActiveGoal, !goal.isCompleted, !goal.isOnHold else { return }
         guard DatabaseManager.shared.setGoalHoldState(id: goal.id, isOnHold: true) else { return }
         postGoalDataChange()
     }
@@ -467,20 +448,6 @@ final class GoalsViewController: UIViewController {
 
     @objc private func handleGoalDataChange() {
         reloadGoals()
-    }
-
-    @objc private func handleCollectionLongPress(_ recognizer: UILongPressGestureRecognizer) {
-        guard recognizer.state == .began else { return }
-
-        let location = recognizer.location(in: goalsCollectionView)
-        guard let indexPath = goalsCollectionView.indexPathForItem(at: location),
-              let section = GoalsSection(rawValue: indexPath.section),
-              section != .addGoal
-        else { return }
-
-        let goals = sectionGoals(for: section)
-        guard goals.indices.contains(indexPath.item) else { return }
-        presentGoalActions(for: goals[indexPath.item])
     }
 
     private func showGoalsOnboarding() {
@@ -662,6 +629,7 @@ extension GoalsViewController: UICollectionViewDataSource {
         cell.configure(message: placeholderMessage(for: section), sizeStyle: placeholderStyle(for: section))
         return cell
     }
+
 }
 
 extension GoalsViewController: UICollectionViewDelegate {
@@ -675,6 +643,111 @@ extension GoalsViewController: UICollectionViewDelegate {
         case .badges, .active, .completed, .inactive:
             return
         }
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard let section = GoalsSection(rawValue: indexPath.section),
+              section != .addGoal
+        else { return nil }
+
+        let goals = sectionGoals(for: section)
+        guard goals.indices.contains(indexPath.item) else { return nil }
+
+        let goal = goals[indexPath.item]
+        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+            guard let self else { return nil }
+
+            let hold = UIAction(title: "Hold Goal", image: UIImage(systemName: "pause.circle")) { _ in
+                self.holdGoal(goal)
+            }
+            hold.attributes = goal.isActiveGoal && !goal.isCompleted && !goal.isOnHold ? [] : [.disabled]
+
+            let edit = UIAction(title: "Edit Goal", image: UIImage(systemName: "pencil")) { _ in
+                self.presentEditGoal(for: goal)
+            }
+
+            let delete = UIAction(title: "Delete Goal", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
+                self.confirmDelete(goal)
+            }
+
+            return UIMenu(title: goal.name, children: [hold, edit, delete])
+        }
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        contextMenuPreview(for: collectionView, configuration: configuration)
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        contextMenuPreview(for: collectionView, configuration: configuration)
+    }
+
+    private func contextMenuPreview(
+        for collectionView: UICollectionView,
+        configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        guard let indexPath = configuration.identifier as? NSIndexPath,
+              let cell = collectionView.cellForItem(at: indexPath as IndexPath)
+        else { return nil }
+
+        let previewSourceView: UIView
+        switch cell {
+        case let goalCell as OngoingGoalCollectionViewCell:
+            previewSourceView = goalCell.contextMenuPreviewView
+        case let goalCell as ReachedGoalsCollectionViewCell:
+            previewSourceView = goalCell.contextMenuPreviewView
+        case let goalCell as GoalBadgeCollectionViewCell:
+            previewSourceView = goalCell.contextMenuPreviewView
+        default:
+            previewSourceView = cell.contentView
+        }
+
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        parameters.visiblePath = UIBezierPath(
+            roundedRect: previewSourceView.bounds,
+            cornerRadius: previewSourceView.layer.cornerRadius
+        )
+
+        let targetCenter = previewSourceView.superview?.convert(
+            CGPoint(x: previewSourceView.frame.midX, y: previewSourceView.frame.midY),
+            to: collectionView
+        ) ?? previewSourceView.center
+        let target = UIPreviewTarget(container: collectionView, center: targetCenter)
+
+        if let snapshotView = makeContextMenuSnapshot(from: previewSourceView) {
+            return UITargetedPreview(view: snapshotView, parameters: parameters, target: target)
+        }
+
+        return UITargetedPreview(view: previewSourceView, parameters: parameters, target: target)
+    }
+
+    private func makeContextMenuSnapshot(from sourceView: UIView) -> UIView? {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = UIScreen.main.scale
+
+        let renderer = UIGraphicsImageRenderer(size: sourceView.bounds.size, format: format)
+        let image = renderer.image { _ in
+            sourceView.drawHierarchy(in: sourceView.bounds, afterScreenUpdates: false)
+        }
+
+        let imageView = UIImageView(image: image)
+        imageView.frame = sourceView.bounds
+        imageView.contentMode = .scaleToFill
+        imageView.layer.cornerRadius = sourceView.layer.cornerRadius
+        imageView.layer.masksToBounds = true
+        imageView.backgroundColor = .clear
+        return imageView
     }
 }
 
