@@ -145,10 +145,11 @@ class TPCViewController: UIViewController {
         appearance.shadowColor = .clear
         appearance.titleTextAttributes = [
             .foregroundColor: AppColors.textPrimary,
-            .font: UIFont.systemFont(ofSize: 28, weight: .semibold)
+            .font: MintFont.space(size: 28, weight: .semibold)
         ]
         appearance.largeTitleTextAttributes = [
-            .foregroundColor: AppColors.textPrimary
+            .foregroundColor: AppColors.textPrimary,
+            .font: MintFont.space(size: 34, weight: .bold)
         ]
 
         navigationController?.navigationBar.standardAppearance = appearance
@@ -276,7 +277,7 @@ class TPCViewController: UIViewController {
         text.append(NSAttributedString(
             string: "\(category?.name ?? "Total")\n",
             attributes: [
-                .font: UIFont.systemFont(ofSize: 16, weight: .medium),
+                .font: MintFont.space(size: 16, weight: .medium),
                 .foregroundColor: AppColors.textSecondary,
                 .paragraphStyle: centered
             ]
@@ -284,7 +285,7 @@ class TPCViewController: UIViewController {
         text.append(NSAttributedString(
             string: amount.formatted(.currency(code: "INR")),
             attributes: [
-                .font: UIFont.systemFont(ofSize: 26, weight: .bold),
+                .font: MintFont.space(size: 26, weight: .bold),
                 .foregroundColor: AppColors.textPrimary,
                 .paragraphStyle: centered
             ]

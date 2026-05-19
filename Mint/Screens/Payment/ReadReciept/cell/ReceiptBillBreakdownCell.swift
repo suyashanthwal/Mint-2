@@ -25,7 +25,7 @@ struct ReceiptBreakdownRow {
         backgroundColor = .clear
         contentView.backgroundColor = .clear
 
-        titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        titleLabel.font = MintFont.space(size: 17, weight: .semibold)
         titleLabel.textColor = AppColors.textPrimary
 
         rowsStackView.axis = .vertical
@@ -71,8 +71,8 @@ struct ReceiptBreakdownRow {
         container.spacing = 12
 
         let titleLabel = UILabel()
-        titleLabel.font = .systemFont(ofSize: row.isEmphasized ? 16 : 14,
-                                      weight: row.isEmphasized ? .semibold : .medium)
+        titleLabel.font = MintFont.space(size: row.isEmphasized ? 16 : 14,
+                                         weight: row.isEmphasized ? .semibold : .medium)
         titleLabel.textColor = row.isEmphasized ? AppColors.textPrimary : AppColors.textSecondary
         titleLabel.text = row.title
 
@@ -80,8 +80,8 @@ struct ReceiptBreakdownRow {
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
         let valueLabel = UILabel()
-        valueLabel.font = .systemFont(ofSize: row.isEmphasized ? 16 : 14,
-                                      weight: row.isEmphasized ? .bold : .semibold)
+        valueLabel.font = MintFont.space(size: row.isEmphasized ? 16 : 14,
+                                         weight: row.isEmphasized ? .bold : .semibold)
         valueLabel.textColor = row.isEmphasized ? AppColors.brand : AppColors.textPrimary
         valueLabel.textAlignment = .right
         valueLabel.text = row.value

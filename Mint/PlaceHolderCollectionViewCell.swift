@@ -40,7 +40,7 @@ final class PlaceHolderCollectionViewCell: UICollectionViewCell {
         infoLabel.textColor = AppColors.textSecondary
         infoLabel.textAlignment = .center
         infoLabel.numberOfLines = 0
-        infoLabel.font = UIFont.preferredFont(forTextStyle: .footnote)
+        infoLabel.font = MintFont.space(size: UIFont.preferredFont(forTextStyle: .footnote).pointSize)
 
         apply(sizeStyle: .fill)
     }

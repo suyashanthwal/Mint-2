@@ -224,16 +224,17 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
     }
 
     private func applyImage(for goal: Goal) {
-        if let pickedImageURL = goal.pickedImageURL,
-           let data = try? Data(contentsOf: pickedImageURL),
-           let image = UIImage(data: data) {
-            goalImageView.image = image
+        if let loadedImage = GoalImageStore.loadSavedImage(for: goal) {
+            goalImageView.image = loadedImage.image
             goalImageView.tintColor = nil
-            migrateLegacyPickedImageIfNeeded(
-                image,
-                goalId: goal.id,
-                sourceURL: pickedImageURL
-            )
+            imageProcessingTask = GoalImageStore.migrateLegacyImageToSubjectOnlyIfNeeded(
+                loadedImage,
+                for: goal.id
+            ) { [weak self] processedImage in
+                guard let self, self.currentGoalID == goal.id else { return }
+                self.goalImageView.image = processedImage
+                self.goalImageView.tintColor = nil
+            }
             return
         }
 
@@ -248,25 +249,6 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
         goalImageView.image = UIImage(systemName: goal.iconName, withConfiguration: config)?
             .withTintColor(.white.withAlphaComponent(currentMode == .inactive ? 0.7 : 0.9), renderingMode: .alwaysOriginal)
     }
-
-    private func migrateLegacyPickedImageIfNeeded(_ image: UIImage, goalId: UUID, sourceURL: URL) {
-        guard sourceURL.pathExtension.lowercased() != "png" else { return }
-
-        imageProcessingTask?.cancel()
-        imageProcessingTask = Task { [weak self] in
-            let processedImage = await GoalImageCutoutProcessor.process(image)
-            guard !Task.isCancelled else { return }
-
-            _ = GoalImageStore.save(processedImage, for: goalId)
-
-            await MainActor.run {
-                guard let self, self.currentGoalID == goalId, !Task.isCancelled else { return }
-                self.goalImageView.image = processedImage
-                self.goalImageView.tintColor = nil
-            }
-        }
-    }
-
     @IBAction private func actionButtonTapped(_ sender: UIButton) {
         onPrimaryAction?()
     }

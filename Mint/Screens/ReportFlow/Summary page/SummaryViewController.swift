@@ -98,14 +98,14 @@ class SummaryViewController: UIViewController {
         segmentedControl.setTitleTextAttributes(
             [
                 .foregroundColor: AppColors.textSecondary,
-                .font: UIFont.systemFont(ofSize: 13, weight: .medium)
+                .font: MintFont.space(size: 13, weight: .medium)
             ],
             for: .normal
         )
         segmentedControl.setTitleTextAttributes(
             [
                 .foregroundColor: AppColors.brandText,
-                .font: UIFont.systemFont(ofSize: 13, weight: .semibold)
+                .font: MintFont.space(size: 13, weight: .semibold)
             ],
             for: .selected
         )
@@ -143,10 +143,11 @@ class SummaryViewController: UIViewController {
         appearance.shadowColor = .clear
         appearance.titleTextAttributes = [
             .foregroundColor: AppColors.textPrimary,
-            .font: UIFont.systemFont(ofSize: 28, weight: .semibold)
+            .font: MintFont.space(size: 28, weight: .semibold)
         ]
         appearance.largeTitleTextAttributes = [
-            .foregroundColor: AppColors.textPrimary
+            .foregroundColor: AppColors.textPrimary,
+            .font: MintFont.space(size: 34, weight: .bold)
         ]
 
         navigationController?.navigationBar.standardAppearance = appearance
@@ -245,14 +246,14 @@ class SummaryViewController: UIViewController {
             string: "\(directionArrow) \(Int(absPercent))%",
             attributes: [
                 .foregroundColor: color,
-                .font: UIFont.systemFont(ofSize: 16, weight: .semibold)
+                .font: MintFont.space(size: 16, weight: .semibold)
             ]
         )
         text.append(NSAttributedString(
             string: " vs last period",
             attributes: [
                 .foregroundColor: AppColors.textSecondary,
-                .font: UIFont.systemFont(ofSize: 16, weight: .regular)
+                .font: MintFont.space(size: 16, weight: .regular)
             ]
         ))
         UPorDOWNPercentLabel.attributedText = text
@@ -313,7 +314,7 @@ class SummaryViewController: UIViewController {
         xAxis.centerAxisLabelsEnabled = false
         xAxis.labelPosition = .bottom
         xAxis.drawGridLinesEnabled = false
-        xAxis.labelFont = .systemFont(ofSize: currentRange == .monthly ? 8 : 9, weight: .medium)
+        xAxis.labelFont = MintFont.space(size: currentRange == .monthly ? 8 : 9, weight: .medium)
         xAxis.labelTextColor = AppColors.textSecondary
         xAxis.drawAxisLineEnabled = true
         xAxis.axisLineColor = AppColors.sectionBackground
@@ -327,7 +328,7 @@ class SummaryViewController: UIViewController {
         leftAxis.drawGridLinesEnabled = true
         leftAxis.gridColor = AppColors.sectionBackground
         leftAxis.gridLineWidth = 0.5
-        leftAxis.labelFont = .systemFont(ofSize: 9)
+        leftAxis.labelFont = MintFont.space(size: 9)
         leftAxis.labelTextColor = AppColors.textSecondary
         leftAxis.drawAxisLineEnabled = false
         leftAxis.setLabelCount(4, force: true)

@@ -15,7 +15,7 @@ class MonthStripCollectionViewCell: UICollectionViewCell {
 
     func configure(month: String, year: Int, isSelected: Bool) {
         MonthLabel.text = "\(month) \(year)"
-        MonthLabel.font = .systemFont(ofSize: 13, weight: isSelected ? .semibold : .regular)
+        MonthLabel.font = MintFont.space(size: 13, weight: isSelected ? .semibold : .regular)
         MonthLabel.textColor = isSelected ? AppColors.brandText : AppColors.textSecondary
         MonthBackgroundView.backgroundColor = isSelected
             ? AppColors.brand

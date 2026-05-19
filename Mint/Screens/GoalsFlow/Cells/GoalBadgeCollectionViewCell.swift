@@ -11,12 +11,22 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
 
     private let trackLayer = CAShapeLayer()
     private let highlightLayer = CAShapeLayer()
+    private var currentGoalID: UUID?
+    private var imageProcessingTask: Task<Void, Never>?
 
     override func awakeFromNib() {
         super.awakeFromNib()
         applyStyle()
         ringContainerView.layer.addSublayer(trackLayer)
         ringContainerView.layer.addSublayer(highlightLayer)
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        currentGoalID = nil
+        imageProcessingTask?.cancel()
+        imageProcessingTask = nil
+        imageView.image = nil
     }
 
     override func layoutSubviews() {
@@ -39,7 +49,7 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
         imageView.clipsToBounds = true
 
         titleLabel.textColor = .white
-        titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        titleLabel.font = MintFont.space(size: 13, weight: .medium)
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 2
 
@@ -49,13 +59,20 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with goal: Goal) {
+        currentGoalID = goal.id
         titleLabel.text = goal.name
 
-        if let pickedImageURL = goal.pickedImageURL,
-           let data = try? Data(contentsOf: pickedImageURL),
-           let image = UIImage(data: data) {
-            imageView.image = image
+        if let loadedImage = GoalImageStore.loadSavedImage(for: goal) {
+            imageView.image = loadedImage.image
             imageView.tintColor = nil
+            imageProcessingTask = GoalImageStore.migrateLegacyImageToSubjectOnlyIfNeeded(
+                loadedImage,
+                for: goal.id
+            ) { [weak self] processedImage in
+                guard let self, self.currentGoalID == goal.id else { return }
+                self.imageView.image = processedImage
+                self.imageView.tintColor = nil
+            }
             return
         }
 

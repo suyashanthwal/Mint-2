@@ -3,9 +3,87 @@ import UIKit
 import CoreText
 import SDWebImage
 
+private struct HomeInsightsPayload: Codable {
+
+    struct SummarySection: Codable {
+        let monthName: String
+        let year: Int
+        let daysElapsed: Int
+        let daysInMonth: Int
+        let totalExpense: Double
+        let totalIncome: Double
+        let dailyAverage: Double
+        let previousMonthAverage: Double?
+        let transactionCount: Int
+        let highestSpendDay: Int?
+        let highestSpendDayAmount: Double?
+        let budget: Double?
+        let remainingBudget: Double?
+    }
+
+    struct CategoryItem: Codable {
+        let name: String
+        let amount: Double
+        let sharePercent: Int
+        let budget: Double?
+    }
+
+    struct CategorySection: Codable {
+        let totalExpense: Double
+        let categoryCount: Int
+        let topCategories: [CategoryItem]
+    }
+
+    struct SubsAndBillsSection: Codable {
+        let monthName: String
+        let unpaidBillsCount: Int
+        let upcomingBillsTotal: Double
+        let nextBillName: String?
+        let nextBillAmount: Double?
+        let nextBillDueDate: String?
+        let daysUntilNextBill: Int?
+        let activeSubscriptionCount: Int
+        let monthlySubscriptionTotal: Double
+    }
+
+    struct GoalItem: Codable {
+        let name: String
+        let target: Double
+        let saved: Double
+        let monthlyContribution: Double
+    }
+
+    let summary: SummarySection
+    let category: CategorySection
+    let subsAndBills: SubsAndBillsSection
+    let goals: [GoalItem]
+}
+
+private struct HomeInsightsEnvelope: Codable {
+    let payload: HomeInsightsPayload
+    let fields: [String]
+    let forceRefresh: Bool
+}
+
+private struct HomeInsightsResponse: Codable {
+    let homeDigest: String?
+}
+
 class HomeViewController: UIViewController, UICollectionViewDelegate {
+    private enum SegueIdentifier {
+        static let summary = "HomeToSummary"
+    }
+
     private let goalFallbackBackground = AppColors.sectionBackground
     private let goalFallbackSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 36, weight: .semibold)
+    private let goalBaseGradientLayer = CAGradientLayer()
+    private let goalFillGradientLayer = CAGradientLayer()
+
+    private enum DashboardGoalBackgroundMode {
+        case active
+        case completed
+        case empty
+    }
 
     private enum HomeUpcomingItem {
         case bill(Bill)
@@ -57,6 +135,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet private weak var confirmTransactionsTitleLabel: UILabel?
     @IBOutlet private weak var recentTransactionsTitleLabel: UILabel?
     
+    @IBOutlet weak var monthlyFlipButton: UIButton!
+    @IBOutlet weak var goalsButton: UIButton!
+    @IBOutlet weak var insightsLabel: UILabel!
+    @IBOutlet weak var insightViewCard: UIView!
     private var hasCheckedOnboarding = false
     private var transactions: [Transaction] = []
     private var allTransactions: [Transaction] = []
@@ -67,7 +149,24 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private var recurringPayments: [RecurringPayment] = []
     private var currentBudget: Budget?
     private var selectedGoalProgress: CGFloat = 0
+    private var selectedGoalBackgroundMode: DashboardGoalBackgroundMode = .empty
     private var categories: [Category] = []
+    private var goalImageProcessingTask: Task<Void, Never>?
+    private let db = DatabaseManager.shared
+    private static let insightsBaseURLDefaultsKey = "mint_insights_base_url"
+    private var insightsBaseURL: URL? {
+        if let override = UserDefaults.standard.string(forKey: Self.insightsBaseURLDefaultsKey),
+           let url = sanitizedInsightsBaseURL(from: override) {
+            return url
+        }
+
+        let configuredBaseURL = Bundle.main.object(forInfoDictionaryKey: "MintInsightsBaseURL") as? String
+        return configuredBaseURL.flatMap(sanitizedInsightsBaseURL(from:))
+    }
+    private var insightsURL: URL? {
+        insightsBaseURL?.appendingPathComponent("insights")
+    }
+    private var insightTask: URLSessionDataTask?
     private let contextMenuFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let actionFeedbackGenerator = UINotificationFeedbackGenerator()
 
@@ -160,6 +259,14 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         ]
     }
 
+    @IBAction func goalSummaryToGoalPage(_ sender: Any) {
+        switchToGoalsTab()
+    }
+    @IBAction func monthlyFlipButton(_ sender: Any) {
+    }
+    @IBAction func monthlyToSummaryButton(_ sender: Any) {
+        performSegue(withIdentifier: SegueIdentifier.summary, sender: sender)
+    }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
@@ -172,14 +279,33 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         }
     }
 
+    private func switchToGoalsTab() {
+        guard let tabBarController,
+              let viewControllers = tabBarController.viewControllers else { return }
+
+        for (index, controller) in viewControllers.enumerated() {
+            if let navigationController = controller as? UINavigationController,
+               navigationController.viewControllers.first is GoalsViewController {
+                navigationController.popToRootViewController(animated: false)
+                tabBarController.selectedIndex = index
+                return
+            }
+
+            if controller is GoalsViewController {
+                tabBarController.selectedIndex = index
+                return
+            }
+        }
+    }
+
     deinit {
+        goalImageProcessingTask?.cancel()
+        insightTask?.cancel()
         NotificationCenter.default.removeObserver(self)
     }
     
     
     private func loadDataFromDatabase() {
-        let db = DatabaseManager.shared
-
         categories        = db.fetchCategories()
         allTransactions   = db.fetchTransactions()
         transactions      = db.fetchRecentTransactions(limit: 5)
@@ -188,6 +314,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         recurringPayments = db.fetchRecurringPayments()
         upcomingItems     = buildUpcomingItemsForHome()
         goals             = db.fetchGoals()
+        GoalImageStore.attachSavedImages(to: &goals)
         currentBudget     = db.fetchCurrentBudget()
 
         if isViewLoaded {
@@ -198,6 +325,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         updateDailyAverageCard()
         updateStreakCard()
         updateGoalCard()
+        loadInsights()
         applyDashboardTypography()
 
         updateConfirmSectionVisibility()
@@ -275,6 +403,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         transactionsCollectionView.collectionViewLayout.invalidateLayout()
         billsCollectionView.collectionViewLayout.invalidateLayout()
         applyDashboardGradients()
+        updateDashboardGoalBackground()
         updateGoalImageMask()
         renderGoalProgress()
     }
@@ -394,19 +523,23 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         if let goal = displayedGoal {
             let progressPercent = Int(round(Double(goal.progress) * 100))
             selectedGoalProgress = CGFloat(goal.progress)
+            selectedGoalBackgroundMode = goal.isCompleted ? .completed : .active
             GoalNameLabel.text = goal.name
             SavedSoFarLabel.attributedText = nil
             SavedSoFarLabel.text = "\(progressPercent)%"
             applyGoalImage(for: goal)
+            updateDashboardGoalBackground()
             renderGoalProgress()
             return
         }
 
         selectedGoalProgress = 0
+        selectedGoalBackgroundMode = .empty
         GoalNameLabel.text = "No goal yet"
         SavedSoFarLabel.attributedText = nil
         SavedSoFarLabel.text = "0%"
         applyGoalPlaceholderIcon(systemName: "target")
+        updateDashboardGoalBackground()
         renderGoalProgress()
     }
 
@@ -485,10 +618,475 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         return min(max(days, 1), 99)
     }
 
+    private var expenseTransactions: [Transaction] {
+        allTransactions.filter { $0.type == .expense }
+    }
+
+    private var activeRecurringExpenses: [RecurringPayment] {
+        recurringPayments.filter { $0.isActive && !$0.isIncome }
+    }
+
+    private func recurringEventDates(for subscription: RecurringPayment, year: Int, month: Int) -> [Date] {
+        let calendar = Calendar.current
+        guard let monthStart = calendar.date(from: DateComponents(year: year, month: month, day: 1)),
+              let dayRange = calendar.range(of: .day, in: .month, for: monthStart)
+        else { return [] }
+
+        let monthEnd = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart) ?? monthStart
+        let anchorDate = calendar.startOfDay(for: subscription.nextDate)
+        guard monthEnd >= anchorDate else { return [] }
+
+        switch subscription.duration {
+        case .daily:
+            let startDay = calendar.isDate(anchorDate, equalTo: monthStart, toGranularity: .month)
+                ? calendar.component(.day, from: anchorDate)
+                : dayRange.lowerBound
+            return (startDay..<dayRange.upperBound).compactMap {
+                calendar.date(from: DateComponents(year: year, month: month, day: $0))
+            }
+
+        case .weekly:
+            let weekday = calendar.component(.weekday, from: anchorDate)
+            return dayRange.compactMap { day -> Date? in
+                guard let candidate = calendar.date(from: DateComponents(year: year, month: month, day: day)),
+                      candidate >= anchorDate,
+                      calendar.component(.weekday, from: candidate) == weekday
+                else { return nil }
+                return candidate
+            }
+
+        case .monthly, .quarterly, .halfYearly, .yearly:
+            let anchorMonthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: anchorDate)) ?? anchorDate
+            let anchorComponents = calendar.dateComponents([.year, .month, .day], from: anchorDate)
+            guard let anchorYear = anchorComponents.year,
+                  let anchorMonth = anchorComponents.month,
+                  let anchorDay = anchorComponents.day,
+                  monthStart >= anchorMonthStart
+            else { return [] }
+
+            let monthDelta = (year - anchorYear) * 12 + (month - anchorMonth)
+            let stride: Int
+
+            switch subscription.duration {
+            case .monthly:
+                stride = 1
+            case .quarterly:
+                stride = 3
+            case .halfYearly:
+                stride = 6
+            case .yearly:
+                stride = 12
+            case .daily, .weekly:
+                stride = 1
+            }
+
+            guard monthDelta >= 0, monthDelta % stride == 0 else { return [] }
+            let day = min(anchorDay, dayRange.upperBound - 1)
+            return calendar.date(from: DateComponents(year: year, month: month, day: day)).map { [$0] } ?? []
+        }
+    }
+
+    private func nextRecurringEventDate(for subscription: RecurringPayment, onOrAfter date: Date) -> Date? {
+        let calendar = Calendar.current
+        let searchStart = calendar.startOfDay(for: date)
+        let startComponents = calendar.dateComponents([.year, .month], from: min(subscription.nextDate, searchStart))
+
+        guard let startYear = startComponents.year,
+              let startMonth = startComponents.month
+        else { return subscription.nextDate }
+
+        let monthStart = calendar.date(from: DateComponents(year: startYear, month: startMonth, day: 1)) ?? searchStart
+        for offset in 0..<24 {
+            guard let monthDate = calendar.date(byAdding: .month, value: offset, to: monthStart) else {
+                continue
+            }
+            let year = calendar.component(.year, from: monthDate)
+            let month = calendar.component(.month, from: monthDate)
+            if let occurrence = recurringEventDates(for: subscription, year: year, month: month)
+                .first(where: { calendar.startOfDay(for: $0) >= searchStart }) {
+                return occurrence
+            }
+        }
+
+        return nil
+    }
+
+    private func loadInsights() {
+        let requestPayload = makeInsightsPayload()
+        let requestEnvelope = makeInsightsEnvelope(from: requestPayload)
+
+        guard shouldRequestInsights(for: requestPayload), let insightsURL else {
+            applyInsights(nil)
+            return
+        }
+
+        let cachedResponse = cachedInsightsResponse(for: requestEnvelope)
+        if let cachedResponse {
+            applyInsights(cachedResponse)
+        }
+
+        insightTask?.cancel()
+
+        var request = URLRequest(url: insightsURL)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 25
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+
+        guard let body = try? encoder.encode(requestEnvelope) else {
+            applyInsights(nil)
+            return
+        }
+
+        request.httpBody = body
+
+        insightTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self else { return }
+
+            if let nsError = error as NSError?, nsError.code == NSURLErrorCancelled {
+                return
+            }
+
+            guard error == nil,
+                  let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode),
+                  let data
+            else {
+                DispatchQueue.main.async {
+                    if cachedResponse == nil {
+                        self.applyInsights(nil)
+                    }
+                }
+                return
+            }
+
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            let decodedResponse = try? decoder.decode(HomeInsightsResponse.self, from: data)
+
+            DispatchQueue.main.async {
+                if let decodedResponse, self.hasUsableInsights(decodedResponse) {
+                    self.storeInsightsResponse(decodedResponse, for: requestEnvelope)
+                } else {
+                    self.clearCachedInsightsResponse()
+                }
+
+                if decodedResponse != nil || cachedResponse == nil {
+                    self.applyInsights(decodedResponse)
+                }
+            }
+        }
+
+        insightTask?.resume()
+    }
+
+    private func shouldRequestInsights(for requestPayload: HomeInsightsPayload) -> Bool {
+        requestPayload.summary.totalExpense > 0 ||
+        requestPayload.summary.totalIncome > 0 ||
+        requestPayload.category.totalExpense > 0 ||
+        requestPayload.subsAndBills.unpaidBillsCount > 0 ||
+        requestPayload.subsAndBills.activeSubscriptionCount > 0 ||
+        !requestPayload.goals.isEmpty
+    }
+
+    private func makeInsightsPayload() -> HomeInsightsPayload {
+        let calendar = Calendar.current
+        let today = Date()
+        let monthFormatter = DateFormatter()
+        monthFormatter.calendar = calendar
+        monthFormatter.locale = Locale(identifier: "en_US_POSIX")
+        monthFormatter.dateFormat = "LLLL"
+
+        let currentMonthTransactions = allTransactions.filter {
+            calendar.isDate($0.timestamp, equalTo: today, toGranularity: .month)
+        }
+        let currentMonthExpenses = currentMonthTransactions.filter { $0.type == .expense }
+        let currentMonthIncome = currentMonthTransactions.filter { $0.type == .income }
+        let totalExpense = currentMonthExpenses.reduce(0) { $0 + $1.amount }
+        let totalIncome = currentMonthIncome.reduce(0) { $0 + $1.amount }
+        let daysElapsed = max(calendar.component(.day, from: today), 1)
+        let daysInMonth = calendar.range(of: .day, in: .month, for: today)?.count ?? 30
+
+        let dayTotals = currentMonthExpenses.reduce(into: [Int: Double]()) { partialResult, transaction in
+            let day = calendar.component(.day, from: transaction.timestamp)
+            partialResult[day, default: 0] += transaction.amount
+        }
+        let highestSpendDay = dayTotals.max { $0.value < $1.value }
+
+        let previousMonthAverage: Double? = {
+            guard let previousMonthDate = calendar.date(byAdding: .month, value: -1, to: today) else {
+                return nil
+            }
+
+            let previousMonth = calendar.component(.month, from: previousMonthDate)
+            let previousYear = calendar.component(.year, from: previousMonthDate)
+            let previousDayTotals = expenseTransactions.reduce(into: [Int: Double]()) { partialResult, transaction in
+                let components = calendar.dateComponents([.year, .month, .day], from: transaction.timestamp)
+                guard components.month == previousMonth,
+                      components.year == previousYear,
+                      let day = components.day
+                else { return }
+                partialResult[day, default: 0] += transaction.amount
+            }
+
+            let previousTotal = previousDayTotals.values.reduce(0, +)
+            let previousDaysInMonth = calendar.range(of: .day, in: .month, for: previousMonthDate)?.count ?? 30
+            guard previousTotal > 0 else { return nil }
+            return previousTotal / Double(previousDaysInMonth)
+        }()
+
+        let categoryTotals = currentMonthExpenses.reduce(into: [UUID: Double]()) { partialResult, transaction in
+            guard let categoryId = transaction.categoryId else { return }
+            partialResult[categoryId, default: 0] += transaction.amount
+        }
+        let topCategories = categoryTotals
+            .compactMap { categoryId, amount -> HomeInsightsPayload.CategoryItem? in
+                guard let category = categories.first(where: { $0.id == categoryId }) else { return nil }
+                let sharePercent = totalExpense > 0
+                    ? Int((amount / totalExpense * 100).rounded())
+                    : 0
+                return HomeInsightsPayload.CategoryItem(
+                    name: category.name,
+                    amount: amount,
+                    sharePercent: sharePercent,
+                    budget: category.budget > 0 ? category.budget : nil
+                )
+            }
+            .sorted { $0.amount > $1.amount }
+
+        let startOfToday = calendar.startOfDay(for: today)
+        let unpaidBills = allBills
+            .filter { !$0.isPaid }
+            .sorted { $0.billDate < $1.billDate }
+        let upcomingBills = unpaidBills.filter {
+            calendar.startOfDay(for: $0.billDate) >= startOfToday
+        }
+        let nextBill = upcomingBills.first ?? unpaidBills.first
+        let daysUntilNextBill = nextBill.flatMap {
+            calendar.dateComponents(
+                [.day],
+                from: startOfToday,
+                to: calendar.startOfDay(for: $0.billDate)
+            ).day
+        }
+
+        let reportYear = calendar.component(.year, from: today)
+        let reportMonth = calendar.component(.month, from: today)
+        let subscriptionsOccurringThisMonth = activeRecurringExpenses.filter {
+            !recurringEventDates(for: $0, year: reportYear, month: reportMonth).isEmpty
+        }
+
+        let insightGoals = goals
+            .filter(\.isActiveGoal)
+            .sorted { $0.progress > $1.progress }
+            .map {
+                HomeInsightsPayload.GoalItem(
+                    name: $0.name,
+                    target: $0.targetAmount,
+                    saved: $0.currentlySaved,
+                    monthlyContribution: $0.monthlyGoal
+                )
+            }
+
+        return HomeInsightsPayload(
+            summary: .init(
+                monthName: monthFormatter.string(from: today),
+                year: calendar.component(.year, from: today),
+                daysElapsed: daysElapsed,
+                daysInMonth: daysInMonth,
+                totalExpense: totalExpense,
+                totalIncome: totalIncome,
+                dailyAverage: totalExpense / Double(daysElapsed),
+                previousMonthAverage: previousMonthAverage,
+                transactionCount: currentMonthExpenses.count,
+                highestSpendDay: highestSpendDay?.key,
+                highestSpendDayAmount: highestSpendDay?.value,
+                budget: currentBudget?.allocatedBudget,
+                remainingBudget: currentBudget.map { $0.allocatedBudget - totalExpense }
+            ),
+            category: .init(
+                totalExpense: totalExpense,
+                categoryCount: topCategories.count,
+                topCategories: Array(topCategories.prefix(3))
+            ),
+            subsAndBills: .init(
+                monthName: monthFormatter.string(from: today),
+                unpaidBillsCount: unpaidBills.count,
+                upcomingBillsTotal: upcomingBills.reduce(0) { $0 + $1.amount },
+                nextBillName: nextBill?.name,
+                nextBillAmount: nextBill?.amount,
+                nextBillDueDate: nextBill.map { db.databaseDateOnlyString(from: $0.billDate) },
+                daysUntilNextBill: daysUntilNextBill,
+                activeSubscriptionCount: subscriptionsOccurringThisMonth.count,
+                monthlySubscriptionTotal: subscriptionsOccurringThisMonth.reduce(0) { total, subscription in
+                    total + (Double(recurringEventDates(for: subscription, year: reportYear, month: reportMonth).count) * subscription.amount)
+                }
+            ),
+            goals: insightGoals
+        )
+    }
+
+    private func makeInsightsEnvelope(from payload: HomeInsightsPayload) -> HomeInsightsEnvelope {
+        HomeInsightsEnvelope(
+            payload: payload,
+            fields: ["home_digest"],
+            forceRefresh: false
+        )
+    }
+
+    private func applyInsights(_ response: HomeInsightsResponse?) {
+        let cleanedText = sanitizeInsight(response?.homeDigest)
+        insightsLabel?.text = cleanedText
+        insightViewCard?.isHidden = cleanedText.isEmpty
+    }
+
+    private func sanitizeInsight(_ text: String?) -> String {
+        let cleanedText = text?
+            .replacingOccurrences(of: "\n", with: " ")
+            .split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ") ?? ""
+
+        let lowercaseText = cleanedText.lowercased()
+        let blockedPrefixes = [
+            "could not",
+            "no insight",
+            "n/a",
+            "none",
+            "null"
+        ]
+
+        if cleanedText.isEmpty ||
+            blockedPrefixes.contains(where: { lowercaseText.hasPrefix($0) }) ||
+            isLowValueInsight(lowercaseText)
+        {
+            return ""
+        }
+
+        return cleanedText
+    }
+
+    private func isLowValueInsight(_ lowercaseText: String) -> Bool {
+        let obviousMarkers = [
+            "spend is ",
+            "spending is ",
+            "spending stands at ",
+            "peaked on day ",
+            "leads spending at ",
+            "upcoming unpaid bills currently add up to ",
+            "active subscriptions total ",
+            "your total expense",
+            "you have spent",
+            "you spent a total",
+            "total spending for",
+            "goal is % complete",
+            "you have saved",
+            "subscriptions cost",
+            "bills total"
+        ]
+
+        if obviousMarkers.contains(where: { lowercaseText.contains($0) }) {
+            return true
+        }
+
+        let dueDateOnlyMarkers = [
+            " is due today.",
+            " is due tomorrow.",
+            " is due in "
+        ]
+
+        if dueDateOnlyMarkers.contains(where: { lowercaseText.contains($0) }) &&
+            !lowercaseText.contains("set aside") &&
+            !lowercaseText.contains("plan") &&
+            !lowercaseText.contains("buffer") &&
+            !lowercaseText.contains("transfer")
+        {
+            return true
+        }
+
+        return false
+    }
+
+    private func cachedInsightsResponse(for envelope: HomeInsightsEnvelope) -> HomeInsightsResponse? {
+        guard let defaultsKey = insightsCacheKey,
+              let signatureKey = insightsCacheSignatureKey,
+              let storedSignature = UserDefaults.standard.string(forKey: signatureKey),
+              let currentSignature = encodedInsightsSignature(for: envelope),
+              storedSignature == currentSignature,
+              let data = UserDefaults.standard.data(forKey: defaultsKey)
+        else {
+            return nil
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        guard let response = try? decoder.decode(HomeInsightsResponse.self, from: data),
+              hasUsableInsights(response)
+        else {
+            clearCachedInsightsResponse()
+            return nil
+        }
+
+        return response
+    }
+
+    private func storeInsightsResponse(_ response: HomeInsightsResponse, for envelope: HomeInsightsEnvelope) {
+        guard let defaultsKey = insightsCacheKey,
+              let signatureKey = insightsCacheSignatureKey,
+              let signature = encodedInsightsSignature(for: envelope)
+        else {
+            return
+        }
+
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        guard let data = try? encoder.encode(response) else { return }
+
+        UserDefaults.standard.set(data, forKey: defaultsKey)
+        UserDefaults.standard.set(signature, forKey: signatureKey)
+    }
+
+    private var insightsCacheKey: String? {
+        guard let userId = db.currentUserIdString else { return nil }
+        return "home_insights_response_\(userId)"
+    }
+
+    private var insightsCacheSignatureKey: String? {
+        guard let userId = db.currentUserIdString else { return nil }
+        return "home_insights_signature_\(userId)"
+    }
+
+    private func encodedInsightsSignature(for envelope: HomeInsightsEnvelope) -> String? {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        guard let data = try? encoder.encode(envelope) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func hasUsableInsights(_ response: HomeInsightsResponse) -> Bool {
+        !sanitizeInsight(response.homeDigest).isEmpty
+    }
+
+    private func clearCachedInsightsResponse() {
+        if let defaultsKey = insightsCacheKey {
+            UserDefaults.standard.removeObject(forKey: defaultsKey)
+        }
+        if let signatureKey = insightsCacheSignatureKey {
+            UserDefaults.standard.removeObject(forKey: signatureKey)
+        }
+    }
+
+    private func sanitizedInsightsBaseURL(from rawValue: String) -> URL? {
+        let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedValue.isEmpty else { return nil }
+        return URL(string: trimmedValue)?.standardized
+    }
+
     private func toggleBillPaymentState(for billId: UUID) {
         guard let bill = allBills.first(where: { $0.id == billId }) else { return }
 
-        let db = DatabaseManager.shared
         let nextPaidState = !bill.isPaid
         db.updateBillPaymentStatus(id: billId, isPaid: nextPaidState)
         db.removeBillPaymentTransaction(billId: billId)
@@ -520,7 +1118,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func confirmBufferedTransaction(id: UUID) {
-        let db = DatabaseManager.shared
         guard db.confirmBufferedTransaction(id: id) else { return }
 
         db.resetMonthlyExpense()
@@ -553,7 +1150,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func deleteTransaction(_ transaction: Transaction) {
-        let db = DatabaseManager.shared
         guard db.deleteTransaction(id: transaction.id) else { return }
 
         actionFeedbackGenerator.notificationOccurred(.success)
@@ -886,6 +1482,10 @@ private extension HomeViewController {
         styleCard(averageCardsView, cornerRadius: 14, borderColor: AppColors.cardBorder)
         styleCard(goalcardview, cornerRadius: 14, fillColor: AppColors.orange)
         styleCard(goalsCardView, cornerRadius: 14)
+        styleCard(insightViewCard, cornerRadius: 14)
+        insightViewCard.applyShadow()
+        insightViewCard.isHidden = true
+        insightsLabel.text = nil
 
         MonthlyView.clipsToBounds = true
         goalsCardView.clipsToBounds = true
@@ -897,17 +1497,15 @@ private extension HomeViewController {
         confirmSectionContainerView.layer.masksToBounds = false
         averageCardsView.backgroundColor = AppColors.card
         goalcardview.backgroundColor = AppColors.orange
+        configureDashboardGoalBackground()
         applyDashboardTypography()
-        installCornerRefreshIcon(on: MonthlyView, tintColor: AppColors.textPrimary)
-        installCornerRefreshIcon(on: goalsCardView, tintColor: AppColors.textPrimary)
-        hideButtons(in: goalsCardView)
-        hideButtons(in: upcomingcardview)
 
         goalImageView?.contentMode = .scaleAspectFit
         goalImageView?.clipsToBounds = true
         goalProgressContainerView?.backgroundColor = .clear
         goalProgressContainerView?.layer.cornerRadius = (goalProgressContainerView?.bounds.width ?? 100) / 2
         goalProgressContainerView?.clipsToBounds = false
+        goalProgressContainerView?.isHidden = false
         loadFireAnimation()
         profileButton?.backgroundColor = AppColors.textPrimary
         profileButton?.tintColor = AppColors.background
@@ -925,13 +1523,6 @@ private extension HomeViewController {
             ],
             name: "monthlyGradient"
         )
-        goalsCardView.applyGradient(
-            colors: [
-                UIColor(hex: "#3F823D").cgColor,
-                UIColor(hex: "#89DF74").cgColor
-            ],
-            name: "goalGradient"
-        )
     }
 
     func loadFireAnimation() {
@@ -939,8 +1530,82 @@ private extension HomeViewController {
         streakFireImageView?.tintColor = AppColors.error
     }
 
+    func configureDashboardGoalBackground() {
+        goalBaseGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        goalBaseGradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+        goalBaseGradientLayer.locations = [0.0, 0.58, 1.0]
+
+        goalFillGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        goalFillGradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+        goalFillGradientLayer.locations = [0.0, 1.0]
+
+        if goalBaseGradientLayer.superlayer == nil {
+            goalsCardView.layer.insertSublayer(goalBaseGradientLayer, at: 0)
+        }
+        if goalFillGradientLayer.superlayer == nil {
+            goalsCardView.layer.insertSublayer(goalFillGradientLayer, above: goalBaseGradientLayer)
+        }
+    }
+
+    func updateDashboardGoalBackground() {
+        let bounds = goalsCardView.bounds
+        guard bounds.width > 0, bounds.height > 0 else { return }
+
+        let clampedProgress = max(0, min(selectedGoalProgress, 1))
+        let softenedProgress = max(0, clampedProgress - 0.03)
+
+        goalBaseGradientLayer.frame = bounds
+        goalFillGradientLayer.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: bounds.width * clampedProgress,
+            height: bounds.height
+        )
+
+        switch selectedGoalBackgroundMode {
+        case .active:
+            goalBaseGradientLayer.colors = [
+                UIColor(hex: "#1F4F23").withAlphaComponent(0.40).cgColor,
+                UIColor(hex: "#2A602B").withAlphaComponent(0.18).cgColor,
+                UIColor(hex: "#265928").withAlphaComponent(0.0).cgColor
+            ]
+            goalFillGradientLayer.colors = [
+                UIColor(hex: "#2E732C").cgColor,
+                UIColor(hex: "#4A9437").cgColor
+            ]
+            goalBaseGradientLayer.opacity = Float(min(0.45, softenedProgress * 0.55))
+            goalFillGradientLayer.opacity = clampedProgress > 0.001 ? 1 : 0
+
+        case .completed:
+            goalBaseGradientLayer.colors = [
+                UIColor(hex: "#245723").withAlphaComponent(0.48).cgColor,
+                UIColor(hex: "#326B2D").withAlphaComponent(0.22).cgColor,
+                UIColor(hex: "#2E642A").withAlphaComponent(0.02).cgColor
+            ]
+            goalFillGradientLayer.colors = [
+                UIColor(hex: "#357E2F").cgColor,
+                UIColor(hex: "#53A13D").cgColor
+            ]
+            goalBaseGradientLayer.opacity = Float(max(0.16, min(0.55, clampedProgress * 0.6)))
+            goalFillGradientLayer.opacity = clampedProgress > 0.001 ? 1 : 0
+
+        case .empty:
+            goalBaseGradientLayer.colors = [
+                UIColor(hex: "#1F4F23").withAlphaComponent(0.40).cgColor,
+                UIColor(hex: "#2A602B").withAlphaComponent(0.18).cgColor,
+                UIColor(hex: "#265928").withAlphaComponent(0.0).cgColor
+            ]
+            goalFillGradientLayer.colors = [
+                UIColor(hex: "#2E732C").cgColor,
+                UIColor(hex: "#4A9437").cgColor
+            ]
+            goalBaseGradientLayer.opacity = 0
+            goalFillGradientLayer.opacity = 0
+        }
+    }
+
     func renderGoalProgress() {
-        guard let container = goalProgressContainerView, container.bounds.width > 0 else { return }
+        guard let container = goalProgressContainerView, !container.isHidden, container.bounds.width > 0 else { return }
         container.layer.cornerRadius = min(container.bounds.width, container.bounds.height) / 2
 
         container.layer.sublayers?
@@ -982,11 +1647,21 @@ private extension HomeViewController {
     }
 
     func applyGoalImage(for goal: Goal) {
-        if let image = savedGoalImage(for: goal) {
-            goalImageView?.image = image
+        goalImageProcessingTask?.cancel()
+
+        if let loadedImage = GoalImageStore.loadSavedImage(for: goal) {
+            goalImageView?.image = loadedImage.image
             goalImageView?.contentMode = .scaleAspectFill
             goalImageView?.tintColor = nil
             goalImageView?.backgroundColor = .clear
+            goalImageProcessingTask = GoalImageStore.migrateLegacyImageToSubjectOnlyIfNeeded(
+                loadedImage,
+                for: goal.id
+            ) { [weak self] processedImage in
+                self?.goalImageView?.image = processedImage
+                self?.goalImageView?.tintColor = nil
+                self?.goalImageView?.backgroundColor = .clear
+            }
         } else if let imageName = goal.imageName, let image = UIImage(named: imageName) {
             goalImageView?.image = image
             goalImageView?.contentMode = .scaleAspectFill
@@ -1003,15 +1678,7 @@ private extension HomeViewController {
             .applyingSymbolConfiguration(goalFallbackSymbolConfiguration)
         goalImageView?.contentMode = .center
         goalImageView?.tintColor = AppColors.textPrimary
-        goalImageView?.backgroundColor = goalFallbackBackground
-    }
-
-    func savedGoalImage(for goal: Goal) -> UIImage? {
-        let url = FileManager.default
-            .urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("goal_\(goal.id.uuidString)_photo.jpg")
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return UIImage(data: data)
+        goalImageView?.backgroundColor = .clear
     }
 
     func styleLabels(in rootView: UIView?, color: UIColor) {
@@ -1136,6 +1803,11 @@ private extension HomeViewController {
         recentTransactionsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
         recentTransactionsTitleLabel?.textColor = AppColors.textPrimary
         recentTransactionsTitleLabel?.removeCharacterSpacing()
+
+        insightsLabel?.font = MintFont.space(size: 14, weight: .medium)
+        insightsLabel?.textColor = AppColors.textPrimary
+        insightsLabel?.numberOfLines = 0
+        insightsLabel?.removeCharacterSpacing()
 
         for label in labels(in: view) {
             switch label.text {

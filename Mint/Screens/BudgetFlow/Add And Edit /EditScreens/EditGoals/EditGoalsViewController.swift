@@ -146,21 +146,23 @@ extension EditGoalsViewController {
 
     func loadGoal() {
         guard let goal = goal else { return }
+        var goalWithImage = goal
+        var goalsToAttach = [goalWithImage]
+        GoalImageStore.attachSavedImages(to: &goalsToAttach)
+        goalWithImage = goalsToAttach[0]
 
-        title = goal.name
-        nameTextField.text          = goal.name
-        amountTextField.text        = String(Int(goal.targetAmount))
-        monthlyTargetTextField.text = String(Int(goal.monthlyGoal))
-        totalSavedLabel.text        = "Saved: ₹\(Int(goal.currentlySaved))"
+        title = goalWithImage.name
+        nameTextField.text          = goalWithImage.name
+        amountTextField.text        = String(Int(goalWithImage.targetAmount))
+        monthlyTargetTextField.text = String(Int(goalWithImage.monthlyGoal))
+        totalSavedLabel.text        = "Saved: ₹\(Int(goalWithImage.currentlySaved))"
         notesTextView.text          = nil
 
-        datePicker.date = goal.targetDate
-        updateDateLabel(goal.targetDate)
+        datePicker.date = goalWithImage.targetDate
+        updateDateLabel(goalWithImage.targetDate)
 
-        if let fileURL = goal.pickedImageURL,
-           let data = try? Data(contentsOf: fileURL),
-           let image = UIImage(data: data) {
-            goalPhotoImageView.image = image
+        if let loadedImage = GoalImageStore.loadSavedImage(for: goalWithImage) {
+            goalPhotoImageView.image = loadedImage.image
             goalPhotoImageView.contentMode = .scaleAspectFit
             goalPhotoButton.setTitle("Change Photo", for: .normal)
         }

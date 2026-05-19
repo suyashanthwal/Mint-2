@@ -946,7 +946,7 @@ class BudgetViewController: UIViewController, UICollectionViewDelegate {
         BudgetEditButton.tintColor       = AppColors.brand
         BudgetEditButton.setTitleColor(AppColors.brandText, for: .normal)
 
-        let footnoteFont = UIFont.preferredFont(forTextStyle: .footnote)
+        let footnoteFont = MintFont.space(size: UIFont.preferredFont(forTextStyle: .footnote).pointSize)
         if var config = BudgetEditButton.configuration {
             config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
                 var attrs = incoming

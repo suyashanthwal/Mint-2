@@ -49,7 +49,7 @@ final class OnboardingSpotlightView: UIView {
 
     private let stepBadge: UILabel = {
         let l = UILabel()
-        l.font      = UIFont.systemFont(ofSize: 11, weight: .semibold)
+        l.font      = MintFont.space(size: 11, weight: .semibold)
         l.textColor = Style.accentGreen
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
@@ -57,7 +57,7 @@ final class OnboardingSpotlightView: UIView {
 
     private let tooltipTitle: UILabel = {
         let l = UILabel()
-        l.font      = UIFont.systemFont(ofSize: 17, weight: .bold)
+        l.font      = MintFont.space(size: 17, weight: .bold)
         l.textColor = UIColor.black
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
@@ -65,7 +65,7 @@ final class OnboardingSpotlightView: UIView {
 
     private let tooltipMessage: UILabel = {
         let l = UILabel()
-        l.font          = UIFont.systemFont(ofSize: 14, weight: .regular)
+        l.font          = MintFont.space(size: 14, weight: .regular)
         l.textColor     = UIColor.gray
         l.numberOfLines = 0
         l.translatesAutoresizingMaskIntoConstraints = false
@@ -91,7 +91,7 @@ final class OnboardingSpotlightView: UIView {
     private let tapHint: UILabel = {
         let l = UILabel()
         l.text          = "Tap anywhere to continue"
-        l.font          = UIFont.systemFont(ofSize: 12, weight: .medium)
+        l.font          = MintFont.space(size: 12, weight: .medium)
         l.textColor     = UIColor.lightGray
         l.textAlignment = .center
         l.translatesAutoresizingMaskIntoConstraints = false

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="dark"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -24,7 +24,7 @@
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="progress-fill">
                                         <rect key="frame" x="0.0" y="0.0" width="108" height="188"/>
-                                        <color key="backgroundColor" red="0.18039215690000001" green="0.45098039219999998" blue="0.17254901960000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="backgroundColor" red="0.18039215690000002" green="0.45098039219999997" blue="0.17254901960000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="108" id="fill-width"/>
                                         </constraints>
@@ -36,12 +36,12 @@
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                 </subviews>
+                                <color key="backgroundColor" red="0.070588235294117646" green="0.10196078431372549" blue="0.20392156862745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="progress-fill" secondAttribute="bottom" id="fill-bottom"/>
                                     <constraint firstItem="progress-fill" firstAttribute="leading" secondItem="base-fill" secondAttribute="leading" id="fill-leading"/>
                                     <constraint firstItem="progress-fill" firstAttribute="top" secondItem="base-fill" secondAttribute="top" id="fill-top"/>
                                 </constraints>
-                                <color key="backgroundColor" red="0.098039215690000001" green="0.1058823529" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
                                         <integer key="value" value="26"/>
@@ -136,20 +136,20 @@
                                                         </constraints>
                                                     </stackView>
                                                     <view contentMode="scaleToFill" horizontalHuggingPriority="249" verticalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="middle-spacer">
-                                                        <rect key="frame" x="162" y="48" width="48" height="50"/>
+                                                        <rect key="frame" x="162" y="48" width="36" height="50"/>
                                                     </view>
-                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="trailing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="right-column-stack">
+                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="bottom" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="right-column-stack">
                                                         <rect key="frame" x="210" y="0.0" width="184" height="98"/>
                                                         <subviews>
                                                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="252" verticalHuggingPriority="252" translatesAutoresizingMaskIntoConstraints="NO" id="goal-image">
-                                                                <rect key="frame" x="0.0" y="0.0" width="184" height="84"/>
+                                                                <rect key="frame" x="0.0" y="0.0" width="184" height="52"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="height" constant="84" id="image-height"/>
                                                                     <constraint firstAttribute="width" constant="184" id="image-width"/>
                                                                 </constraints>
                                                             </imageView>
                                                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="action-button">
-                                                                <rect key="frame" x="72" y="58" width="112" height="36"/>
+                                                                <rect key="frame" x="72" y="62" width="112" height="36"/>
                                                                 <color key="backgroundColor" white="1" alpha="0.12" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="height" constant="36" id="button-height"/>

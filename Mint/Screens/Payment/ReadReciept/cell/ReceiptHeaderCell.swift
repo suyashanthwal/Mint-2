@@ -15,16 +15,16 @@ final class ReceiptHeaderCell: UICollectionViewCell {
         super.awakeFromNib()
         backgroundColor = .clear
         contentView.backgroundColor = .clear
-        merchantLabel.font = .systemFont(ofSize: 22, weight: .bold)
+        merchantLabel.font = MintFont.space(size: 22, weight: .bold)
         merchantLabel.textColor = AppColors.textPrimary
         merchantLabel.textAlignment = .center
         merchantLabel.numberOfLines = 1
 
-        dateLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        dateLabel.font = MintFont.space(size: 13, weight: .medium)
         dateLabel.textColor = AppColors.textSecondary
         dateLabel.textAlignment = .center
 
-        amountLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        amountLabel.font = MintFont.space(size: 18, weight: .bold)
         amountLabel.textAlignment = .center
 
         iconImageView.contentMode = .scaleAspectFit

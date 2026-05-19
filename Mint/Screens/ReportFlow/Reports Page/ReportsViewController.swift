@@ -1,7 +1,7 @@
 
 import UIKit
 
-private struct ReportsInsightsRequest: Codable {
+private struct ReportsInsightsPayload: Codable {
 
     struct SummarySection: Codable {
         let monthName: String
@@ -23,6 +23,7 @@ private struct ReportsInsightsRequest: Codable {
         let name: String
         let amount: Double
         let sharePercent: Int
+        let budget: Double?
     }
 
     struct CategorySection: Codable {
@@ -49,9 +50,7 @@ private struct ReportsInsightsRequest: Codable {
 }
 
 private struct ReportsInsightsEnvelope: Codable {
-    let summary: ReportsInsightsRequest.SummarySection
-    let category: ReportsInsightsRequest.CategorySection
-    let subsAndBills: ReportsInsightsRequest.SubsAndBillsSection
+    let payload: ReportsInsightsPayload
     let fields: [String]
     let forceRefresh: Bool
 }
@@ -738,7 +737,7 @@ class ReportsViewController: UIViewController {
         insightTask?.resume()
     }
 
-    private func shouldRequestInsights(for requestPayload: ReportsInsightsRequest) -> Bool {
+    private func shouldRequestInsights(for requestPayload: ReportsInsightsPayload) -> Bool {
         requestPayload.summary.totalExpense > 0 ||
         requestPayload.summary.totalIncome > 0 ||
         requestPayload.category.totalExpense > 0 ||
@@ -746,7 +745,7 @@ class ReportsViewController: UIViewController {
         requestPayload.subsAndBills.activeSubscriptionCount > 0
     }
 
-    private func makeInsightsRequest() -> ReportsInsightsRequest {
+    private func makeInsightsRequest() -> ReportsInsightsPayload {
         let calendar = Calendar.current
         let today = Date()
         let monthFormatter = DateFormatter()
@@ -771,15 +770,16 @@ class ReportsViewController: UIViewController {
             partialResult[categoryId, default: 0] += transaction.amount
         }
         let topCategories = categoryTotals
-            .compactMap { categoryId, amount -> ReportsInsightsRequest.CategoryItem? in
+            .compactMap { categoryId, amount -> ReportsInsightsPayload.CategoryItem? in
                 guard let category = categories.first(where: { $0.id == categoryId }) else { return nil }
                 let sharePercent = totalExpense > 0
                     ? Int((amount / totalExpense * 100).rounded())
                     : 0
-                return ReportsInsightsRequest.CategoryItem(
+                return ReportsInsightsPayload.CategoryItem(
                     name: category.name,
                     amount: amount,
-                    sharePercent: sharePercent
+                    sharePercent: sharePercent,
+                    budget: category.budget > 0 ? category.budget : nil
                 )
             }
             .sorted { $0.amount > $1.amount }
@@ -807,7 +807,7 @@ class ReportsViewController: UIViewController {
             !recurringEventDates(for: $0, year: reportYear, month: reportMonth).isEmpty
         }
 
-        return ReportsInsightsRequest(
+        return ReportsInsightsPayload(
             summary: .init(
                 monthName: monthFormatter.string(from: today),
                 year: calendar.component(.year, from: today),
@@ -844,11 +844,9 @@ class ReportsViewController: UIViewController {
         )
     }
 
-    private func makeInsightsEnvelope(from request: ReportsInsightsRequest) -> ReportsInsightsEnvelope {
+    private func makeInsightsEnvelope(from request: ReportsInsightsPayload) -> ReportsInsightsEnvelope {
         ReportsInsightsEnvelope(
-            summary: request.summary,
-            category: request.category,
-            subsAndBills: request.subsAndBills,
+            payload: request,
             fields: ["summary", "category_highlight", "subs_and_bills"],
             forceRefresh: false
         )

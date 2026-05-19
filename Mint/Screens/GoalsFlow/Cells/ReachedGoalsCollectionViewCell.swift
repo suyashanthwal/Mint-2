@@ -9,10 +9,20 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
     @IBOutlet private weak var subtitleLabel: UILabel!
     @IBOutlet private weak var amountLabel: UILabel!
     @IBOutlet private weak var accentDotView: UIView!
+    private var currentGoalID: UUID?
+    private var imageProcessingTask: Task<Void, Never>?
 
     override func awakeFromNib() {
         super.awakeFromNib()
         applyStyle()
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        currentGoalID = nil
+        imageProcessingTask?.cancel()
+        imageProcessingTask = nil
+        thumbnailImageView.image = nil
     }
 
     override func layoutSubviews() {
@@ -47,15 +57,15 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
         thumbnailImageView.clipsToBounds = true
 
         titleLabel.textColor = .white
-        titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
+        titleLabel.font = MintFont.space(size: 17, weight: .bold)
         titleLabel.numberOfLines = 1
 
         subtitleLabel.textColor = UIColor.white.withAlphaComponent(0.48)
-        subtitleLabel.font = .systemFont(ofSize: 11, weight: .medium)
+        subtitleLabel.font = MintFont.space(size: 11, weight: .medium)
         subtitleLabel.numberOfLines = 1
 
         amountLabel.textColor = UIColor(hex: "#1EE579")
-        amountLabel.font = .systemFont(ofSize: 17, weight: .bold)
+        amountLabel.font = MintFont.space(size: 17, weight: .bold)
         amountLabel.textAlignment = .right
         amountLabel.adjustsFontSizeToFitWidth = true
         amountLabel.minimumScaleFactor = 0.78
@@ -66,6 +76,7 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with goal: Goal) {
+        currentGoalID = goal.id
         titleLabel.text = goal.name
         amountLabel.text = "₹\(Int(goal.targetAmount))"
 
@@ -77,11 +88,17 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
             subtitleLabel.text = "Purchased"
         }
 
-        if let pickedImageURL = goal.pickedImageURL,
-           let data = try? Data(contentsOf: pickedImageURL),
-           let image = UIImage(data: data) {
-            thumbnailImageView.image = image
+        if let loadedImage = GoalImageStore.loadSavedImage(for: goal) {
+            thumbnailImageView.image = loadedImage.image
             thumbnailImageView.tintColor = nil
+            imageProcessingTask = GoalImageStore.migrateLegacyImageToSubjectOnlyIfNeeded(
+                loadedImage,
+                for: goal.id
+            ) { [weak self] processedImage in
+                guard let self, self.currentGoalID == goal.id else { return }
+                self.thumbnailImageView.image = processedImage
+                self.thumbnailImageView.tintColor = nil
+            }
             return
         }
 

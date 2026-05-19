@@ -1,6 +1,7 @@
 
 import UIKit
 import CoreText
+import ObjectiveC.runtime
 
 extension UIView {
     func applyShadow() {
@@ -185,9 +186,29 @@ enum MintFont {
 
     static func weight(for font: UIFont?) -> UIFont.Weight {
         guard let font else { return .regular }
+        if let traits = font.fontDescriptor.object(forKey: .traits) as? [UIFontDescriptor.TraitKey: Any],
+           let traitWeight = traits[.weight] as? CGFloat {
+            switch traitWeight {
+            case ..<(-0.45):
+                return .light
+            case -0.45..<0.15:
+                return .regular
+            case 0.15..<0.3:
+                return .medium
+            case 0.3..<0.5:
+                return .semibold
+            case 0.5..<0.7:
+                return .bold
+            default:
+                return .heavy
+            }
+        }
+
         let traits = font.fontDescriptor.symbolicTraits
-        guard traits.contains(.traitBold) else { return .regular }
-        return .bold
+        if traits.contains(.traitBold) {
+            return .bold
+        }
+        return .regular
     }
 
     private static func weightedNames(
@@ -279,6 +300,31 @@ extension UIView {
         layer.borderColor = AppColors.cardBorder.cgColor
         layer.borderWidth = 1
         applyShadow()
+    }
+}
+
+extension UIViewController {
+    static func enableMintTypographySwizzle() {
+        struct SwizzleToken {
+            static let once: Void = {
+                let originalSelector = #selector(UIViewController.viewDidLoad)
+                let swizzledSelector = #selector(UIViewController.mint_viewDidLoad)
+
+                guard let originalMethod = class_getInstanceMethod(UIViewController.self, originalSelector),
+                      let swizzledMethod = class_getInstanceMethod(UIViewController.self, swizzledSelector) else {
+                    return
+                }
+
+                method_exchangeImplementations(originalMethod, swizzledMethod)
+            }()
+        }
+
+        _ = SwizzleToken.once
+    }
+
+    @objc private func mint_viewDidLoad() {
+        mint_viewDidLoad()
+        view.applyMintTypography()
     }
 }
 

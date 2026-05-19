@@ -47,25 +47,25 @@ class SubsCalenderCollectionViewCell: UICollectionViewCell {
         if isSelected {
             backgroundPill.backgroundColor = highlightColor
             dateLabel.textColor            = highlightTextColor
-            dateLabel.font                 = UIFont.systemFont(ofSize: 16, weight: .bold)
+            dateLabel.font                 = MintFont.space(size: 16, weight: .bold)
             dotView.backgroundColor        = highlightTextColor
 
         } else if isToday {
             backgroundPill.backgroundColor = todayColor
             dateLabel.textColor            = AppColors.brandLightText
-            dateLabel.font                 = UIFont.systemFont(ofSize: 16, weight: .semibold)
+            dateLabel.font                 = MintFont.space(size: 16, weight: .semibold)
             dotView.backgroundColor        = AppColors.brand
 
         } else if isPadding {
             backgroundPill.backgroundColor = .clear
             dateLabel.textColor = AppColors.textSecondary.withAlphaComponent(0.35)
-            dateLabel.font      = UIFont.systemFont(ofSize: 16, weight: .regular)
+            dateLabel.font      = MintFont.space(size: 16, weight: .regular)
             dotView.backgroundColor = AppColors.brand
 
         } else {
             backgroundPill.backgroundColor = .clear
             dateLabel.textColor = AppColors.textPrimary
-            dateLabel.font      = UIFont.systemFont(ofSize: 16, weight: .medium)
+            dateLabel.font      = MintFont.space(size: 16, weight: .medium)
             dotView.backgroundColor = AppColors.brand
         }
     }
@@ -76,6 +76,6 @@ class SubsCalenderCollectionViewCell: UICollectionViewCell {
         dotView.isHidden               = true
         backgroundPill.backgroundColor = .clear
         dateLabel.textColor            = AppColors.textPrimary
-        dateLabel.font                 = UIFont.systemFont(ofSize: 16, weight: .medium)
+        dateLabel.font                 = MintFont.space(size: 16, weight: .medium)
     }
 }

@@ -130,10 +130,11 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         appearance.shadowColor = .clear
         appearance.titleTextAttributes = [
             .foregroundColor: AppColors.textPrimary,
-            .font: UIFont.systemFont(ofSize: 28, weight: .semibold)
+            .font: MintFont.space(size: 28, weight: .semibold)
         ]
         appearance.largeTitleTextAttributes = [
-            .foregroundColor: AppColors.textPrimary
+            .foregroundColor: AppColors.textPrimary,
+            .font: MintFont.space(size: 34, weight: .bold)
         ]
 
         navigationController?.navigationBar.standardAppearance = appearance

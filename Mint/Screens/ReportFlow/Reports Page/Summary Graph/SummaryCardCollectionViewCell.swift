@@ -162,7 +162,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
 
             let value = (maxAmount / Double(steps)) * Double(step)
             let label = UILabel()
-            label.font = .systemFont(ofSize: 9, weight: .medium)
+            label.font = MintFont.space(size: 9, weight: .medium)
             label.textColor = AppColors.textSecondary
             label.text = formattedCurrency(value)
             label.sizeToFit()
@@ -262,7 +262,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
                 ? 0.5
                 : CGFloat(index) / CGFloat(labels.count - 1)
             let label = UILabel()
-            label.font = .systemFont(ofSize: 9, weight: .medium)
+            label.font = MintFont.space(size: 9, weight: .medium)
             label.textColor = AppColors.textSecondary
             label.text = labelText
             label.sizeToFit()
@@ -291,7 +291,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         let averageY = yPosition(for: average, graphHeight: graphHeight, padding: padding, maxAmount: maxAmount)
 
         let label = UILabel()
-        label.font = .systemFont(ofSize: 10, weight: .semibold)
+        label.font = MintFont.space(size: 10, weight: .semibold)
         label.textColor = AppColors.textSecondary
         label.text = "Daily avg \(formattedCurrency(average))"
         label.sizeToFit()
@@ -384,7 +384,7 @@ final class SummaryCardCollectionViewCell: UICollectionViewCell {
         tooltipView.clipsToBounds = true
         tooltipView.isHidden = true
 
-        tooltipLabel.font = .systemFont(ofSize: 11, weight: .semibold)
+        tooltipLabel.font = MintFont.space(size: 11, weight: .semibold)
         tooltipLabel.textColor = AppColors.brandText
         tooltipView.addSubview(tooltipLabel)
         LineGraphView.addSubview(tooltipView)

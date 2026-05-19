@@ -2,6 +2,12 @@ import UIKit
 
 enum GoalImageStore {
 
+    struct LoadedImage {
+        let image: UIImage
+        let sourceURL: URL?
+        let needsSubjectIsolationMigration: Bool
+    }
+
     static func url(for goalId: UUID) -> URL {
         FileManager.default
             .urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -51,6 +57,55 @@ enum GoalImageStore {
             } else {
                 goals[index].pickedImageURL = nil
             }
+        }
+    }
+
+    static func loadSavedImage(for goal: Goal) -> LoadedImage? {
+        guard let pickedImageURL = goal.pickedImageURL,
+              let data = try? Data(contentsOf: pickedImageURL),
+              let image = UIImage(data: data) else {
+            return nil
+        }
+
+        return LoadedImage(
+            image: image,
+            sourceURL: pickedImageURL,
+            needsSubjectIsolationMigration: pickedImageURL.pathExtension.lowercased() != "png"
+                || !imageHasTransparency(image)
+                || GoalImageCutoutProcessor.hasLikelyRemovableBackground(image)
+        )
+    }
+
+    @discardableResult
+    static func migrateLegacyImageToSubjectOnlyIfNeeded(
+        _ loadedImage: LoadedImage,
+        for goalId: UUID,
+        onUpdate: @escaping @MainActor (UIImage) -> Void
+    ) -> Task<Void, Never>? {
+        guard loadedImage.needsSubjectIsolationMigration else { return nil }
+
+        return Task {
+            let processedImage = await GoalImageCutoutProcessor.process(loadedImage.image)
+            guard !Task.isCancelled else { return }
+
+            _ = save(processedImage, for: goalId)
+
+            await MainActor.run {
+                onUpdate(processedImage)
+            }
+        }
+    }
+
+    private static func imageHasTransparency(_ image: UIImage) -> Bool {
+        guard let alphaInfo = image.cgImage?.alphaInfo else { return false }
+
+        switch alphaInfo {
+        case .premultipliedLast, .premultipliedFirst, .last, .first, .alphaOnly:
+            return true
+        case .none, .noneSkipLast, .noneSkipFirst:
+            return false
+        @unknown default:
+            return false
         }
     }
 }
