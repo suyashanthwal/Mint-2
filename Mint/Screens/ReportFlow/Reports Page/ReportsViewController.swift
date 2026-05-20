@@ -554,24 +554,6 @@ class ReportsViewController: UIViewController {
         let calendarYear = calendar.component(.year, from: preferredReportDate)
         let monthDataSource = CalendarDataSource(year: calendarYear, month: calendarMonth)
 
-        let billDays = Set(
-            bills.compactMap { bill -> Int? in
-                guard !bill.isPaid else { return nil }
-                let components = calendar.dateComponents([.year, .month, .day], from: bill.billDate)
-                guard components.year == calendarYear,
-                      components.month == calendarMonth
-                else { return nil }
-                return components.day
-            }
-        )
-
-        let subscriptionDays = Set(
-            activeRecurringExpenses.flatMap { subscription in
-                recurringEventDates(for: subscription, year: calendarYear, month: calendarMonth)
-                    .compactMap { calendar.component(.day, from: $0) }
-            }
-        )
-
         let unpaidBills = bills
             .filter { !$0.isPaid }
             .sorted { $0.billDate < $1.billDate }
@@ -591,9 +573,51 @@ class ReportsViewController: UIViewController {
             year: calendarYear,
             month: calendarMonth,
             title: monthDataSource.displayTitle,
-            eventDays: billDays.union(subscriptionDays),
+            eventIcons: calendarEventIcons(
+                unpaidBills: unpaidBills,
+                subscriptions: activeRecurringExpenses,
+                year: calendarYear,
+                month: calendarMonth
+            ),
             nextBillText: nextBillText
         )
+    }
+
+    private func calendarEventIcons(unpaidBills: [Bill],
+                                    subscriptions: [RecurringPayment],
+                                    year: Int,
+                                    month: Int) -> [Int: String] {
+        let calendar = Calendar.current
+        var iconsByDay: [Int: String] = [:]
+
+        for subscription in subscriptions {
+            let iconName = normalizedCalendarIconName(subscription.icon, fallback: "creditcard.fill")
+            let days = recurringEventDates(for: subscription, year: year, month: month)
+                .map { calendar.component(.day, from: $0) }
+
+            for day in days where iconsByDay[day] == nil {
+                iconsByDay[day] = iconName
+            }
+        }
+
+        for bill in unpaidBills {
+            let components = calendar.dateComponents([.year, .month, .day], from: bill.billDate)
+            guard components.year == year,
+                  components.month == month,
+                  let day = components.day
+            else { continue }
+
+            iconsByDay[day] = normalizedCalendarIconName(bill.icon, fallback: "doc.text.fill")
+        }
+
+        return iconsByDay
+    }
+
+    private func normalizedCalendarIconName(_ iconName: String?, fallback: String) -> String {
+        guard let iconName, !iconName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return fallback
+        }
+        return iconName
     }
 
     private func setupCollectionViews() {

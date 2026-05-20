@@ -248,14 +248,9 @@ class BillsSubscriptionCalenderViewController: UIViewController {
     private func reloadCalendar() {
         let dataSource = CalendarDataSource(year: currentYear, month: currentMonth)
         let unpaidBills = allBills.filter { !$0.isPaid }
-        let billDays = dataSource.billDaySet(from: unpaidBills)
-        let subscriptionDays = displayedSubscriptions.reduce(into: Set<Int>()) { partialResult, subscription in
-            partialResult.formUnion(
-                subscriptionEventDays(for: subscription, year: currentYear, month: currentMonth)
-            )
-        }
+        let eventIcons = calendarEventIcons(unpaidBills: unpaidBills, subscriptions: displayedSubscriptions)
 
-        calendarCells = dataSource.days(billDates: billDays.union(subscriptionDays))
+        calendarCells = dataSource.days(eventIcons: eventIcons)
         MonthLabel.text = dataSource.displayTitle
         updateNavButtons()
         CalenderCollectionView.reloadData()
@@ -271,6 +266,37 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         nextMonthButton.alpha = 1.0
         previousMonthButton.isEnabled = true
         previousMonthButton.alpha = 1.0
+    }
+
+    private func calendarEventIcons(unpaidBills: [Bill], subscriptions: [RecurringPayment]) -> [Int: String] {
+        var iconsByDay: [Int: String] = [:]
+
+        for subscription in subscriptions {
+            let eventDays = subscriptionEventDays(for: subscription, year: currentYear, month: currentMonth)
+            let iconName = normalizedCalendarIconName(subscription.icon, fallback: "creditcard.fill")
+            for day in eventDays where iconsByDay[day] == nil {
+                iconsByDay[day] = iconName
+            }
+        }
+
+        for bill in unpaidBills {
+            let components = Calendar.current.dateComponents([.year, .month, .day], from: bill.billDate)
+            guard components.year == currentYear,
+                  components.month == currentMonth,
+                  let day = components.day
+            else { continue }
+
+            iconsByDay[day] = normalizedCalendarIconName(bill.icon, fallback: "doc.text.fill")
+        }
+
+        return iconsByDay
+    }
+
+    private func normalizedCalendarIconName(_ iconName: String?, fallback: String) -> String {
+        guard let iconName, !iconName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return fallback
+        }
+        return iconName
     }
 
     @IBAction
@@ -438,7 +464,7 @@ extension BillsSubscriptionCalenderViewController: UICollectionViewDataSource {
                 isToday: isToday,
                 isSelected: isSelected,
                 isPadding: item.isPadding,
-                hasBill: item.hasBill
+                eventIconName: item.eventIconName
             )
             return cell
 

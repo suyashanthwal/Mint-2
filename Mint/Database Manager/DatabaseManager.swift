@@ -3,11 +3,18 @@ import SQLite3
 
 final class DatabaseManager {
 
+    enum AuthenticationProvider: String {
+        case emailPassword
+        case apple
+    }
+
     static let shared = DatabaseManager()
     static let defaultAdminUserId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
     static let currentDefaultAdminSeedVersion = 5
 
     private static let currentUserIdKey = "current_user_id"
+    private static let currentAuthProviderKey = "current_auth_provider"
+    private static let currentAppleUserIdentifierKey = "current_apple_user_identifier"
     private static let setupCompletedUserIdsKey = "setup_completed_user_ids"
     private static let defaultAdminSeedVersionKey = "default_admin_seed_version"
     private static let databaseDateTimeFormatter: DateFormatter = {
@@ -144,6 +151,17 @@ final class DatabaseManager {
         currentUserId?.uuidString
     }
 
+    var currentAuthenticationProvider: AuthenticationProvider? {
+        guard let rawValue = UserDefaults.standard.string(forKey: Self.currentAuthProviderKey) else {
+            return nil
+        }
+        return AuthenticationProvider(rawValue: rawValue)
+    }
+
+    var currentAppleUserIdentifier: String? {
+        UserDefaults.standard.string(forKey: Self.currentAppleUserIdentifierKey)
+    }
+
     var hasActiveSession: Bool {
         guard let currentUserId else { return false }
         return fetchUser(id: currentUserId) != nil
@@ -155,6 +173,22 @@ final class DatabaseManager {
             checkAndResetMonthlyExpenseIfNeeded()
         } else {
             UserDefaults.standard.removeObject(forKey: Self.currentUserIdKey)
+            UserDefaults.standard.removeObject(forKey: Self.currentAuthProviderKey)
+            UserDefaults.standard.removeObject(forKey: Self.currentAppleUserIdentifierKey)
+        }
+    }
+
+    func setCurrentAuthentication(provider: AuthenticationProvider?, appleUserIdentifier: String? = nil) {
+        if let provider {
+            UserDefaults.standard.set(provider.rawValue, forKey: Self.currentAuthProviderKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.currentAuthProviderKey)
+        }
+
+        if let appleUserIdentifier, provider == .apple {
+            UserDefaults.standard.set(appleUserIdentifier, forKey: Self.currentAppleUserIdentifierKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.currentAppleUserIdentifierKey)
         }
     }
 

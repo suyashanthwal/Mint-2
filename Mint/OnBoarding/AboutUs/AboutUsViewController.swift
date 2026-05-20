@@ -21,6 +21,7 @@ class AboutUsViewController: UIViewController{
             greenPos:  CGPoint(x: 1.0, y: 0.35),
             yellowPos: CGPoint(x: 0.0, y: 0.18)
         ),
+        
         (
             title: "Manage Your Spending",
             info: "Stay on top of your financial goals with real time insights.",
@@ -29,6 +30,7 @@ class AboutUsViewController: UIViewController{
             greenPos: CGPoint(x: 1.0, y: 0.3),
             yellowPos: CGPoint(x: 0.18, y: 0.23)
         ),
+        
         (
             title: "Reach Your Goals",
             info: "From Daily expense to next big goal, we've got you covered.",
@@ -37,6 +39,7 @@ class AboutUsViewController: UIViewController{
             greenPos: CGPoint(x: 1.0, y: 0.25),
             yellowPos: CGPoint(x: 0.0, y: 0.28)
         ),
+        
         (
             title: "Your Financial Assistant",
             info: "Understand your spending and grow better habits every day.",
@@ -49,6 +52,7 @@ class AboutUsViewController: UIViewController{
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureAppearance()
 
         yellowCircle.layer.cornerRadius = 120
         yellowCircle.clipsToBounds      = true
@@ -159,5 +163,35 @@ class AboutUsViewController: UIViewController{
             centerImage.image      = UIImage(named: page.image)
             continueButton.setTitle(page.buttonTitle, for: .normal)
         }
+    }
+
+    private func configureAppearance() {
+        view.backgroundColor = AppColors.background
+        navigationController?.navigationBar.tintColor = AppColors.textPrimary
+
+        yellowCircle.backgroundColor = AppColors.brand.withAlphaComponent(0.28)
+        greenCircle.backgroundColor = UIColor(hex: "#1D9B63").withAlphaComponent(0.24)
+        yellowCircle.effect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        greenCircle.effect = UIBlurEffect(style: .systemThinMaterialDark)
+
+        centerImage.superview?.applyOnboardingCardStyle()
+        infoLabel.superview?.applyOnboardingCardStyle()
+
+        titleLabel.font = MintFont.syne(size: 26, weight: .bold)
+        titleLabel.textColor = AppColors.textPrimary
+        titleLabel.numberOfLines = 2
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = 0.8
+        titleLabel.lineBreakMode = .byWordWrapping
+        titleLabel.removeCharacterSpacing()
+
+        infoLabel.font = MintFont.space(size: 16, weight: .medium)
+        infoLabel.textColor = AppColors.textSecondary
+        infoLabel.removeCharacterSpacing()
+
+        continueButton.applyPrimaryOnboardingStyle()
+
+        navigatior.currentPageIndicatorTintColor = AppColors.brand
+        navigatior.pageIndicatorTintColor = AppColors.textSecondary.withAlphaComponent(0.35)
     }
 }

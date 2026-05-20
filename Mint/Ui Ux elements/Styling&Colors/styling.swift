@@ -4,6 +4,10 @@ import CoreText
 import ObjectiveC.runtime
 
 extension UIView {
+    var allSubviews: [UIView] {
+        subviews + subviews.flatMap { $0.allSubviews }
+    }
+
     func applyShadow() {
         self.layer.cornerRadius  = 12.0
         self.layer.shadowColor   = UIColor.black.cgColor
@@ -177,6 +181,18 @@ enum MintFont {
         )
     }
 
+    static func syne(size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
+        customFont(
+            names: weightedNames(
+                family: "Syne",
+                spacedFamily: "Syne",
+                weight: weight
+            ),
+            size: size,
+            fallbackWeight: weight
+        )
+    }
+
     static func space(matching font: UIFont?, fallbackSize: CGFloat = 17) -> UIFont {
         space(
             size: font?.pointSize ?? fallbackSize,
@@ -301,6 +317,18 @@ extension UIView {
         layer.borderWidth = 1
         applyShadow()
     }
+
+    func applyOnboardingCardStyle(cornerRadius: CGFloat = 22) {
+        backgroundColor = AppColors.card
+        layer.cornerRadius = cornerRadius
+        layer.borderWidth = 1
+        layer.borderColor = AppColors.cardBorder.cgColor
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.18
+        layer.shadowOffset = CGSize(width: 0, height: 10)
+        layer.shadowRadius = 24
+        layer.masksToBounds = false
+    }
 }
 
 extension UIViewController {
@@ -400,6 +428,33 @@ extension UITextField {
                 .font: font as Any
             ]
         )
+    }
+}
+
+extension UIButton {
+    func applyPrimaryOnboardingStyle() {
+        var config = configuration ?? .filled()
+        config.baseBackgroundColor = AppColors.accent
+        config.baseForegroundColor = AppColors.brandText
+        config.cornerStyle = .large
+        config.background.backgroundColor = AppColors.accent
+        config.background.strokeColor = AppColors.brand
+        config.background.strokeWidth = 0
+        configuration = config
+        tintColor = AppColors.brandText
+        backgroundColor = .clear
+        layer.borderWidth = 0
+        layer.borderColor = UIColor.clear.cgColor
+        titleLabel?.font = MintFont.space(size: 17, weight: .bold)
+    }
+
+    func applySecondaryOnboardingStyle() {
+        var config = configuration ?? .plain()
+        config.baseBackgroundColor = .clear
+        config.baseForegroundColor = AppColors.textSecondary
+        configuration = config
+        tintColor = AppColors.textSecondary
+        titleLabel?.font = MintFont.space(size: 15, weight: .semibold)
     }
 }
 

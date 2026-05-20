@@ -5,7 +5,7 @@ struct SubsBillsCalendarData {
     let year: Int
     let month: Int
     let title: String
-    let eventDays: Set<Int>
+    let eventIcons: [Int: String]
     let nextBillText: String
 }
 
@@ -42,7 +42,7 @@ final class Subs_BillsCardCollectionViewCell: UICollectionViewCell {
         monthLabel.text = model.title
         NextBillLabel.text = model.nextBillText
         let dataSource = CalendarDataSource(year: model.year, month: model.month)
-        calendarCells = dataSource.days(billDates: model.eventDays)
+        calendarCells = dataSource.days(eventIcons: model.eventIcons)
         calendarView.reloadData()
     }
 
@@ -96,8 +96,9 @@ extension Subs_BillsCardCollectionViewCell: UICollectionViewDataSource {
             isToday: item.isToday,
             isSelected: false,
             isPadding: item.isPadding,
-            hasBill: item.hasBill,
-            highlightColor: AppColors.brandLight,
+            eventIconName: item.eventIconName,
+            todayColor: AppColors.brand,
+            highlightColor: AppColors.brand,
             highlightTextColor: AppColors.brandLightText
         )
         return cell

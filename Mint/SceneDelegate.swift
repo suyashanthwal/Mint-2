@@ -1,4 +1,5 @@
 
+import AuthenticationServices
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -22,6 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
+        validateAppleCredentialIfNeeded()
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -31,6 +33,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
+    }
+
+    private func validateAppleCredentialIfNeeded() {
+        guard DatabaseManager.shared.currentAuthenticationProvider == .apple,
+              let appleUserIdentifier = DatabaseManager.shared.currentAppleUserIdentifier
+        else { return }
+
+        ASAuthorizationAppleIDProvider().getCredentialState(forUserID: appleUserIdentifier) { [weak self] state, error in
+            guard error == nil else { return }
+            guard state != .authorized else { return }
+
+            DispatchQueue.main.async {
+                DatabaseManager.shared.signOut()
+                self?.window?.rootViewController = AppFlowManager.initialViewController()
+                self?.window?.makeKeyAndVisible()
+            }
+        }
     }
 
 }

@@ -5,7 +5,7 @@ struct CalendarDay {
     let day:       Int?
     let isToday:   Bool
     let isPadding: Bool
-    let hasBill:   Bool
+    let eventIconName: String?
 }
 
 struct CalendarDataSource {
@@ -15,7 +15,7 @@ struct CalendarDataSource {
 
     private let calendar = Calendar.current
 
-    func days(billDates: Set<Int> = []) -> [CalendarDay] {
+    func days(eventIcons: [Int: String] = [:]) -> [CalendarDay] {
         guard let firstOfMonth = firstDayOfMonth() else { return [] }
 
         let startOffset = calendar.component(.weekday, from: firstOfMonth) - 1
@@ -24,7 +24,7 @@ struct CalendarDataSource {
         var cells: [CalendarDay] = []
 
         for _ in 0 ..< startOffset {
-            cells.append(CalendarDay(day: nil, isToday: false, isPadding: true, hasBill: false))
+            cells.append(CalendarDay(day: nil, isToday: false, isPadding: true, eventIconName: nil))
         }
 
         let todayComponents = calendar.dateComponents([.year, .month, .day], from: Date())
@@ -36,14 +36,14 @@ struct CalendarDataSource {
                 day:       d,
                 isToday:   isToday,
                 isPadding: false,
-                hasBill:   billDates.contains(d)
+                eventIconName: eventIcons[d]
             ))
         }
 
         let remainder = cells.count % 7
         if remainder != 0 {
             for _ in 0 ..< (7 - remainder) {
-                cells.append(CalendarDay(day: nil, isToday: false, isPadding: true, hasBill: false))
+                cells.append(CalendarDay(day: nil, isToday: false, isPadding: true, eventIconName: nil))
             }
         }
 

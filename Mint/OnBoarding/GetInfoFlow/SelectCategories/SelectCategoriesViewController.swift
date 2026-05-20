@@ -27,6 +27,7 @@ class SelectCategoriesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureAppearance()
         setupViews()
     }
 
@@ -43,10 +44,14 @@ class SelectCategoriesViewController: UIViewController {
     private func setupViews() {
         for (index, view) in categoryViews.enumerated() {
             view.tag = index
-            view.layer.cornerRadius = 12
+            view.layer.cornerRadius = 18
+            view.layer.borderWidth = 1
+            view.layer.borderColor = AppColors.cardBorder.cgColor
             view.clipsToBounds = true
             view.backgroundColor = AppColors.sectionBackground
             categoryLabels[index].textColor = AppColors.textSecondary
+            categoryLabels[index].font = MintFont.space(size: 15, weight: .semibold)
+            categoryLabels[index].removeCharacterSpacing()
             categoryIcons[index].tintColor = AppColors.textSecondary
             let tap = UITapGestureRecognizer(target: self, action: #selector(categoryTapped(_:)))
             view.addGestureRecognizer(tap)
@@ -68,6 +73,9 @@ class SelectCategoriesViewController: UIViewController {
             view.backgroundColor = self.selectedViews.contains(tag)
                 ? AppColors.brand
                 : AppColors.sectionBackground
+            view.layer.borderColor = self.selectedViews.contains(tag)
+                ? AppColors.brand.cgColor
+                : AppColors.cardBorder.cgColor
             self.categoryLabels[tag].textColor = self.selectedViews.contains(tag)
                 ? AppColors.brandText
                 : AppColors.textSecondary
@@ -92,5 +100,37 @@ class SelectCategoriesViewController: UIViewController {
                 db.linkCategoryToCurrentBudget(categoryId: categoryId)
             }
         }
+    }
+
+    private func configureAppearance() {
+        view.backgroundColor = AppColors.background
+        navigationController?.navigationBar.tintColor = AppColors.textPrimary
+        navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: AppColors.textPrimary,
+            .font: MintFont.space(size: 17, weight: .semibold)
+        ]
+
+        if let titleLabel = labels(matching: "What do you usually\nspend on?").first {
+            titleLabel.font = MintFont.syne(size: 30, weight: .bold)
+            titleLabel.textColor = AppColors.textPrimary
+            titleLabel.removeCharacterSpacing()
+        }
+
+        if let subtitleLabel = labels(matching: "Select catgories you usually spend on.").first {
+            subtitleLabel.font = MintFont.space(size: 16, weight: .medium)
+            subtitleLabel.textColor = AppColors.textSecondary
+            subtitleLabel.removeCharacterSpacing()
+        }
+
+        buttons(titled: "Continue").first?.applyPrimaryOnboardingStyle()
+        skip.applySecondaryOnboardingStyle()
+    }
+
+    private func labels(matching text: String) -> [UILabel] {
+        view.allSubviews.compactMap { $0 as? UILabel }.filter { $0.text == text }
+    }
+
+    private func buttons(titled title: String) -> [UIButton] {
+        view.allSubviews.compactMap { $0 as? UIButton }.filter { $0.currentTitle == title }
     }
 }

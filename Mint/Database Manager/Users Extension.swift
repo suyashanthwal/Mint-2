@@ -10,6 +10,7 @@ extension DatabaseManager {
     }
 
     private static let passwordStoreKey = "stored_account_passwords"
+    private static let appleUserLinksKey = "apple_account_links"
     private static let defaultAdminPassword = "admin123"
     private static let defaultAdminOnboardingKeys = [
         OnboardingKeys.home,
@@ -219,70 +220,25 @@ extension DatabaseManager {
         guard fetchUser(email: normalizedEmail) == nil else { return nil }
 
         let userId = UUID()
-        let budgetId = UUID()
         let iso = ISO8601DateFormatter()
         let createdAt = iso.string(from: Date())
 
         let resetFormatter = DateFormatter()
         resetFormatter.dateFormat = "yyyy-MM-dd"
         let lastResetDate = resetFormatter.string(from: Date())
-
-        let userSQL = """
-        INSERT INTO users
-            (id, name, phone_number, email, currency,
-             is_email_auto_forward, is_pin_enabled, is_biometric_enabled,
-             is_dark_mode_enabled, is_notification_enabled, profile_image_name, created_on)
-        VALUES (?, ?, ?, ?, 'INR', 0, 0, 0, 0, 1, NULL, ?);
-        """
-
-        var userStmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, userSQL, -1, &userStmt, nil) == SQLITE_OK else {
-            print("createUserAccount: user prepare failed")
-            return nil
-        }
-
         let displayName = makeDisplayName(from: normalizedEmail)
-        sqlite3_bind_text(userStmt, 1, (userId.uuidString as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(userStmt, 2, (displayName as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(userStmt, 3, ("0000000000" as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(userStmt, 4, (normalizedEmail as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(userStmt, 5, (createdAt as NSString).utf8String, -1, nil)
 
-        guard sqlite3_step(userStmt) == SQLITE_DONE else {
-            print("createUserAccount: user insert failed: \(String(cString: sqlite3_errmsg(db)))")
-            sqlite3_finalize(userStmt)
-            return nil
-        }
-        sqlite3_finalize(userStmt)
-
-        let budgetSQL = """
-        INSERT INTO budgets
-            (id, user_id, allocated_budget, total_expense, daily_limit, last_reset_date, created_at)
-        VALUES (?, ?, 0, 0, 0, ?, ?);
-        """
-
-        var budgetStmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, budgetSQL, -1, &budgetStmt, nil) == SQLITE_OK else {
-            print("createUserAccount: budget prepare failed")
-            execute("DELETE FROM users WHERE id = ?;", args: [userId.uuidString])
-            return nil
-        }
-
-        sqlite3_bind_text(budgetStmt, 1, (budgetId.uuidString as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(budgetStmt, 2, (userId.uuidString as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(budgetStmt, 3, (lastResetDate as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(budgetStmt, 4, (createdAt as NSString).utf8String, -1, nil)
-
-        guard sqlite3_step(budgetStmt) == SQLITE_DONE else {
-            print("createUserAccount: budget insert failed: \(String(cString: sqlite3_errmsg(db)))")
-            sqlite3_finalize(budgetStmt)
-            execute("DELETE FROM users WHERE id = ?;", args: [userId.uuidString])
-            return nil
-        }
-        sqlite3_finalize(budgetStmt)
+        guard insertUserAndInitialBudget(
+            userId: userId,
+            email: normalizedEmail,
+            displayName: displayName,
+            createdAt: createdAt,
+            lastResetDate: lastResetDate
+        ) else { return nil }
 
         storePassword(password, for: normalizedEmail)
         setCurrentUser(id: userId)
+        setCurrentAuthentication(provider: .emailPassword)
         markSetupComplete(for: userId, isComplete: false)
         return userId
     }
@@ -295,7 +251,55 @@ extension DatabaseManager {
         else { return false }
 
         setCurrentUser(id: user.id)
+        setCurrentAuthentication(provider: .emailPassword)
         return true
+    }
+
+    @discardableResult
+    func signInWithApple(userIdentifier: String,
+                         email: String?,
+                         fullName: PersonNameComponents?) -> UUID? {
+        if let linkedUserId = linkedUserId(forAppleUserIdentifier: userIdentifier),
+           fetchUser(id: linkedUserId) != nil {
+            setCurrentUser(id: linkedUserId)
+            setCurrentAuthentication(provider: .apple, appleUserIdentifier: userIdentifier)
+            updateDisplayNameIfNeeded(for: linkedUserId, fullName: fullName)
+            return linkedUserId
+        }
+
+        if let email,
+           let existingUser = fetchUser(email: email) {
+            linkAppleUserIdentifier(userIdentifier, to: existingUser.id)
+            setCurrentUser(id: existingUser.id)
+            setCurrentAuthentication(provider: .apple, appleUserIdentifier: userIdentifier)
+            updateDisplayNameIfNeeded(for: existingUser.id, fullName: fullName)
+            return existingUser.id
+        }
+
+        let userId = UUID()
+        let iso = ISO8601DateFormatter()
+        let createdAt = iso.string(from: Date())
+
+        let resetFormatter = DateFormatter()
+        resetFormatter.dateFormat = "yyyy-MM-dd"
+        let lastResetDate = resetFormatter.string(from: Date())
+
+        let resolvedEmail = resolvedAppleEmail(email, userIdentifier: userIdentifier)
+        let displayName = makeAppleDisplayName(fullName: fullName, email: resolvedEmail)
+
+        guard insertUserAndInitialBudget(
+            userId: userId,
+            email: resolvedEmail,
+            displayName: displayName,
+            createdAt: createdAt,
+            lastResetDate: lastResetDate
+        ) else { return nil }
+
+        linkAppleUserIdentifier(userIdentifier, to: userId)
+        setCurrentUser(id: userId)
+        setCurrentAuthentication(provider: .apple, appleUserIdentifier: userIdentifier)
+        markSetupComplete(for: userId, isComplete: false)
+        return userId
     }
 
     func signOut() {
@@ -310,6 +314,132 @@ extension DatabaseManager {
         let localPart = email.split(separator: "@").first.map(String.init) ?? "User"
         let cleaned = localPart.replacingOccurrences(of: ".", with: " ")
         return cleaned.isEmpty ? "User" : cleaned.capitalized
+    }
+
+    private func makeAppleDisplayName(fullName: PersonNameComponents?, email: String) -> String {
+        let formattedName = PersonNameComponentsFormatter().string(from: fullName ?? PersonNameComponents())
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if !formattedName.isEmpty {
+            return formattedName
+        }
+
+        if email.contains("@mint.apple.local") {
+            return "Apple User"
+        }
+
+        return makeDisplayName(from: email)
+    }
+
+    private func resolvedAppleEmail(_ email: String?, userIdentifier: String) -> String {
+        if let email {
+            let normalizedEmail = normalizeEmail(email)
+            if fetchUser(email: normalizedEmail) == nil {
+                return normalizedEmail
+            }
+            return normalizedEmail
+        }
+
+        let sanitizedIdentifier = userIdentifier.replacingOccurrences(of: "[^A-Za-z0-9]", with: "", options: .regularExpression)
+        return "apple.\(sanitizedIdentifier.lowercased())@mint.apple.local"
+    }
+
+    private func insertUserAndInitialBudget(userId: UUID,
+                                            email: String,
+                                            displayName: String,
+                                            createdAt: String,
+                                            lastResetDate: String) -> Bool {
+        let budgetId = UUID()
+        let userSQL = """
+        INSERT INTO users
+            (id, name, phone_number, email, currency,
+             is_email_auto_forward, is_pin_enabled, is_biometric_enabled,
+             is_dark_mode_enabled, is_notification_enabled, profile_image_name, created_on)
+        VALUES (?, ?, ?, ?, 'INR', 0, 0, 0, 0, 1, NULL, ?);
+        """
+
+        var userStmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, userSQL, -1, &userStmt, nil) == SQLITE_OK else {
+            print("insertUserAndInitialBudget: user prepare failed")
+            return false
+        }
+
+        sqlite3_bind_text(userStmt, 1, (userId.uuidString as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(userStmt, 2, (displayName as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(userStmt, 3, ("0000000000" as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(userStmt, 4, (email as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(userStmt, 5, (createdAt as NSString).utf8String, -1, nil)
+
+        guard sqlite3_step(userStmt) == SQLITE_DONE else {
+            print("insertUserAndInitialBudget: user insert failed: \(String(cString: sqlite3_errmsg(db)))")
+            sqlite3_finalize(userStmt)
+            return false
+        }
+        sqlite3_finalize(userStmt)
+
+        let budgetSQL = """
+        INSERT INTO budgets
+            (id, user_id, allocated_budget, total_expense, daily_limit, last_reset_date, created_at)
+        VALUES (?, ?, 0, 0, 0, ?, ?);
+        """
+
+        var budgetStmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, budgetSQL, -1, &budgetStmt, nil) == SQLITE_OK else {
+            print("insertUserAndInitialBudget: budget prepare failed")
+            execute("DELETE FROM users WHERE id = ?;", args: [userId.uuidString])
+            return false
+        }
+
+        sqlite3_bind_text(budgetStmt, 1, (budgetId.uuidString as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(budgetStmt, 2, (userId.uuidString as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(budgetStmt, 3, (lastResetDate as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(budgetStmt, 4, (createdAt as NSString).utf8String, -1, nil)
+
+        guard sqlite3_step(budgetStmt) == SQLITE_DONE else {
+            print("insertUserAndInitialBudget: budget insert failed: \(String(cString: sqlite3_errmsg(db)))")
+            sqlite3_finalize(budgetStmt)
+            execute("DELETE FROM users WHERE id = ?;", args: [userId.uuidString])
+            return false
+        }
+        sqlite3_finalize(budgetStmt)
+        return true
+    }
+
+    private func linkedAppleAccounts() -> [String: String] {
+        UserDefaults.standard.dictionary(forKey: Self.appleUserLinksKey) as? [String: String] ?? [:]
+    }
+
+    private func linkedUserId(forAppleUserIdentifier userIdentifier: String) -> UUID? {
+        guard let rawUserId = linkedAppleAccounts()[userIdentifier] else { return nil }
+        return UUID(uuidString: rawUserId)
+    }
+
+    private func linkAppleUserIdentifier(_ userIdentifier: String, to userId: UUID) {
+        var links = linkedAppleAccounts()
+        links[userIdentifier] = userId.uuidString
+        UserDefaults.standard.set(links, forKey: Self.appleUserLinksKey)
+    }
+
+    private func updateDisplayNameIfNeeded(for userId: UUID, fullName: PersonNameComponents?) {
+        guard let fullName else { return }
+        let formattedName = PersonNameComponentsFormatter().string(from: fullName)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !formattedName.isEmpty,
+              let user = fetchUser(id: userId)
+        else { return }
+
+        let currentName = user.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let generatedName = makeDisplayName(from: user.email)
+        let shouldReplaceName = currentName.isEmpty
+            || currentName == "User"
+            || currentName == "Apple User"
+            || currentName == generatedName
+
+        guard shouldReplaceName else { return }
+
+        execute(
+            "UPDATE users SET name = ? WHERE id = ?;",
+            args: [formattedName, userId.uuidString]
+        )
     }
 
     private func storedPasswords() -> [String: String] {
