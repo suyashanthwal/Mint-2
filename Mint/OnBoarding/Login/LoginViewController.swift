@@ -402,6 +402,8 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             return
         }
 
+        _ = try? ICloudBackupService.shared.restoreBackupIfAvailable(forAppleUserIdentifier: credential.user)
+
         guard DatabaseManager.shared.signInWithApple(
             userIdentifier: credential.user,
             email: credential.email,

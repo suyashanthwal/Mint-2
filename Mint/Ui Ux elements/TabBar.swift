@@ -151,8 +151,18 @@ final class CustomTabBarController: UITabBarController {
     @objc private func tabTap(_ g: UITapGestureRecognizer) {
         guard let i = g.view?.tag else { return }
         selectedIndex = i
+        resetSelectedTabToRoot()
         updateSelection()
         animateTabItem(at: i)
+    }
+
+    private func resetSelectedTabToRoot() {
+        if let navigationController = selectedViewController as? UINavigationController {
+            navigationController.popToRootViewController(animated: true)
+            return
+        }
+
+        selectedViewController?.navigationController?.popToRootViewController(animated: true)
     }
 
     @objc private func payTapped() {

@@ -7,6 +7,7 @@ extension DatabaseManager {
         let id: UUID
         let name: String
         let email: String
+        let profileImageName: String?
     }
 
     private static let passwordStoreKey = "stored_account_passwords"
@@ -164,7 +165,7 @@ extension DatabaseManager {
     }
 
     func fetchUser(id: UUID) -> UserRecord? {
-        let query = "SELECT id, name, email FROM users WHERE id = ? LIMIT 1;"
+        let query = "SELECT id, name, email, profile_image_name FROM users WHERE id = ? LIMIT 1;"
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else { return nil }
         defer { sqlite3_finalize(stmt) }
@@ -178,16 +179,19 @@ extension DatabaseManager {
               let emailPtr = sqlite3_column_text(stmt, 2)
         else { return nil }
 
+        let profileImageName = sqlite3_column_text(stmt, 3).map { String(cString: $0) }
+
         return UserRecord(
             id: userId,
             name: String(cString: namePtr),
-            email: String(cString: emailPtr)
+            email: String(cString: emailPtr),
+            profileImageName: profileImageName
         )
     }
 
     func fetchUser(email: String) -> UserRecord? {
         let normalizedEmail = normalizeEmail(email)
-        let query = "SELECT id, name, email FROM users WHERE lower(email) = lower(?) LIMIT 1;"
+        let query = "SELECT id, name, email, profile_image_name FROM users WHERE lower(email) = lower(?) LIMIT 1;"
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else { return nil }
         defer { sqlite3_finalize(stmt) }
@@ -201,10 +205,13 @@ extension DatabaseManager {
               let emailPtr = sqlite3_column_text(stmt, 2)
         else { return nil }
 
+        let profileImageName = sqlite3_column_text(stmt, 3).map { String(cString: $0) }
+
         return UserRecord(
             id: userId,
             name: String(cString: namePtr),
-            email: String(cString: emailPtr)
+            email: String(cString: emailPtr),
+            profileImageName: profileImageName
         )
     }
 
@@ -302,8 +309,78 @@ extension DatabaseManager {
         return userId
     }
 
+    func linkCurrentUserToApple(userIdentifier: String,
+                                email: String?,
+                                fullName: PersonNameComponents?) -> Bool {
+        guard let userId = currentUserId else { return false }
+
+        if let linkedUserId = linkedUserId(forAppleUserIdentifier: userIdentifier),
+           linkedUserId != userId {
+            return false
+        }
+
+        linkAppleUserIdentifier(userIdentifier, to: userId)
+        setCurrentAuthentication(provider: .apple, appleUserIdentifier: userIdentifier)
+        updateDisplayNameIfNeeded(for: userId, fullName: fullName)
+        return true
+    }
+
     func signOut() {
         setCurrentUser(id: nil)
+    }
+
+    func updateCurrentUserProfile(name: String, profileImageName: String?) -> Bool {
+        guard let userId = currentUserId else { return false }
+
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return false }
+
+        let query = """
+        UPDATE users
+        SET name = ?, profile_image_name = ?
+        WHERE id = ?;
+        """
+
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else {
+            print("updateCurrentUserProfile: prepare failed")
+            return false
+        }
+        defer { sqlite3_finalize(stmt) }
+
+        sqlite3_bind_text(stmt, 1, (trimmedName as NSString).utf8String, -1, nil)
+        if let profileImageName {
+            sqlite3_bind_text(stmt, 2, (profileImageName as NSString).utf8String, -1, nil)
+        } else {
+            sqlite3_bind_null(stmt, 2)
+        }
+        sqlite3_bind_text(stmt, 3, (userId.uuidString as NSString).utf8String, -1, nil)
+
+        guard sqlite3_step(stmt) == SQLITE_DONE else {
+            print("updateCurrentUserProfile failed: \(String(cString: sqlite3_errmsg(db)))")
+            return false
+        }
+
+        return sqlite3_changes(db) > 0
+    }
+
+    func resetOnboardingStateForCurrentUser() {
+        guard let userId = currentUserId else { return }
+
+        let deleteQuery = "DELETE FROM onboarding_states WHERE user_id = ?;"
+        execute(deleteQuery, args: [userId.uuidString])
+
+        let legacyKeys = [
+            OnboardingKeys.home,
+            OnboardingKeys.budget,
+            OnboardingKeys.reports,
+            OnboardingKeys.goals,
+            OnboardingKeys.payPlus
+        ]
+
+        legacyKeys.forEach {
+            UserDefaults.standard.removeObject(forKey: "\($0)_\(userId.uuidString)")
+        }
     }
 
     private func normalizeEmail(_ email: String) -> String {

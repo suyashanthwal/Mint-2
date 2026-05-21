@@ -57,6 +57,23 @@ final class DatabaseManager {
         return url.appendingPathComponent("mint.sqlite").path
     }
 
+    func documentsDirectoryURL() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+
+    func databaseFileURL() -> URL {
+        URL(fileURLWithPath: getDBPath())
+    }
+
+    func databaseSupportFileURLs() -> [URL] {
+        let databaseURL = databaseFileURL()
+        return [
+            databaseURL,
+            URL(fileURLWithPath: databaseURL.path + "-wal"),
+            URL(fileURLWithPath: databaseURL.path + "-shm")
+        ]
+    }
+
     private func openDatabase() {
         if sqlite3_open(getDBPath(), &db) != SQLITE_OK {
             print("Error opening DB")
@@ -102,6 +119,52 @@ final class DatabaseManager {
         )
         setCurrentUser(id: nil)
         print("DB reset complete")
+    }
+
+    func checkpointForBackup() {
+        guard let db else { return }
+        sqlite3_wal_checkpoint_v2(db, nil, SQLITE_CHECKPOINT_TRUNCATE, nil, nil)
+    }
+
+    @discardableResult
+    func replaceDatabaseFiles(with urls: [URL]) -> Bool {
+        sqlite3_close(db)
+        db = nil
+
+        let fileManager = FileManager.default
+        let localURLs = databaseSupportFileURLs()
+
+        do {
+            for localURL in localURLs where fileManager.fileExists(atPath: localURL.path) {
+                try fileManager.removeItem(at: localURL)
+            }
+
+            for sourceURL in urls where fileManager.fileExists(atPath: sourceURL.path) {
+                let destinationURL = documentsDirectoryURL().appendingPathComponent(sourceURL.lastPathComponent)
+                try fileManager.copyItem(at: sourceURL, to: destinationURL)
+            }
+
+            openDatabase()
+            setupDatabase(forceInitialize: false)
+            clearInvalidCurrentSessionIfNeeded()
+            return true
+        } catch {
+            print("replaceDatabaseFiles failed: \(error)")
+            openDatabase()
+            return false
+        }
+    }
+
+    func countNonAdminUsers() -> Int {
+        let query = "SELECT COUNT(*) FROM users WHERE id != ?;"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK else { return 0 }
+        defer { sqlite3_finalize(stmt) }
+
+        sqlite3_bind_text(stmt, 1, (Self.defaultAdminUserId.uuidString as NSString).utf8String, -1, nil)
+
+        guard sqlite3_step(stmt) == SQLITE_ROW else { return 0 }
+        return Int(sqlite3_column_int(stmt, 0))
     }
 
     func runSQLFile(named fileName: String) {
