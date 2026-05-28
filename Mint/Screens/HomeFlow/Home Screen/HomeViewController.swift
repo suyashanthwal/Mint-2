@@ -135,6 +135,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet private weak var confirmTransactionsTitleLabel: UILabel?
     @IBOutlet private weak var recentTransactionsTitleLabel: UILabel?
     
+    @IBOutlet weak var insightImage: UIImageView?
     @IBOutlet weak var monthlyFlipButton: UIButton!
     @IBOutlet weak var goalsButton: UIButton!
     @IBOutlet weak var insightsLabel: UILabel!
@@ -940,8 +941,9 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private func applyInsights(_ response: HomeInsightsResponse?) {
         let cleanedText = sanitizeInsight(response?.homeDigest)
         insightsLabel?.text = cleanedText
-        insightViewCard?.isHidden = cleanedText.isEmpty
+//        insightViewCard?.isHidden = cleanedText.isEmpty
     }
+    
 
     private func sanitizeInsight(_ text: String?) -> String {
         let cleanedText = text?
@@ -1471,6 +1473,7 @@ private extension HomeViewController {
         scrollView.indicatorStyle = .white
         clearContainerBackgrounds(in: view)
         applyUpperLayoutSizing()
+        insightImage!.transform = CGAffineTransform(scaleX: -1, y: 1)
 
         styleLabels(in: view, color: AppColors.textPrimary)
         styleLabels(in: goalcardview, color: .black)
@@ -1482,10 +1485,14 @@ private extension HomeViewController {
         styleCard(averageCardsView, cornerRadius: 14, borderColor: AppColors.cardBorder)
         styleCard(goalcardview, cornerRadius: 14, fillColor: AppColors.orange)
         styleCard(goalsCardView, cornerRadius: 14)
-        styleCard(insightViewCard, cornerRadius: 14)
+//        styleCard(insightViewCard, cornerRadius: 14)
         insightViewCard.applyShadow()
-        insightViewCard.isHidden = true
-        insightsLabel.text = nil
+        insightViewCard.backgroundColor = UIColor(hex: "#9FE48D")
+        insightViewCard.layer.borderWidth = 1
+        insightViewCard.layer.borderColor = UIColor(hex: "#0B1E12")
+            .cgColor
+        insightViewCard.isHidden = false
+//        insightsLabel.text = nil
 
         MonthlyView.clipsToBounds = true
         goalsCardView.clipsToBounds = true
@@ -1718,9 +1725,9 @@ private extension HomeViewController {
     }
 
     func applyUpperLayoutSizing() {
-        setHeightConstraint(on: MonthlyView.superview, to: 129)
+        setHeightConstraint(on: MonthlyView.superview, to: 160)
         setHeightConstraint(on: averageCardsView.superview?.superview, to: 115)
-        setHeightConstraint(on: goalsCardView.superview, to: 128)
+        setHeightConstraint(on: goalsCardView.superview, to: 160)
 
         if let cardsStack = MonthlyView.superview?.superview as? UIStackView {
             cardsStack.spacing = 19
