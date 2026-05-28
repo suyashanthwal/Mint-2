@@ -11,6 +11,7 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
     @IBOutlet private weak var accentDotView: UIView!
     private var currentGoalID: UUID?
     private var imageProcessingTask: Task<Void, Never>?
+    private var isTouchPressed = false
 
     var contextMenuPreviewView: UIView {
         cardView
@@ -91,9 +92,16 @@ final class ReachedGoalsCollectionViewCell: UICollectionViewCell {
     }
 
     private func updateInteractionAppearance() {
-        let pressed = isHighlighted || isSelected
-        cardView.transform = pressed ? CGAffineTransform(scaleX: 0.99, y: 0.99) : .identity
+        let pressed = isHighlighted || isSelected || isTouchPressed
+        cardView.transform = .identity
+        cardView.alpha = pressed ? 0.92 : 1
         layer.shadowOpacity = pressed ? 0.1 : 0.14
+    }
+
+    func setTouchPressed(_ pressed: Bool) {
+        guard isTouchPressed != pressed else { return }
+        isTouchPressed = pressed
+        updateInteractionAppearance()
     }
 
     func configure(with goal: Goal) {

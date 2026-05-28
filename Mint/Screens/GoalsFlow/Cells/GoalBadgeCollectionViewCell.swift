@@ -11,8 +11,10 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
 
     private let trackLayer = CAShapeLayer()
     private let highlightLayer = CAShapeLayer()
+    private let checkmarkImageView = UIImageView()
     private var currentGoalID: UUID?
     private var imageProcessingTask: Task<Void, Never>?
+    private var isTouchPressed = false
 
     var contextMenuPreviewView: UIView {
         cardView
@@ -57,9 +59,9 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
         selectedBackgroundView?.backgroundColor = .clear
 
         cardView.backgroundColor = .clear
-        imageContainerView.backgroundColor = UIColor(hex: "#11162F")
-        imageContainerView.layer.borderWidth = 1
-        imageContainerView.layer.borderColor = UIColor.white.withAlphaComponent(0.05).cgColor
+        imageContainerView.backgroundColor = UIColor(hex: "#17183A")
+        imageContainerView.layer.borderWidth = 0
+        imageContainerView.layer.borderColor = UIColor.clear.cgColor
         imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
 
@@ -68,16 +70,41 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 2
 
-        completedDotView.backgroundColor = UIColor(hex: "#33D95E")
-        completedDotView.layer.borderWidth = 2
-        completedDotView.layer.borderColor = UIColor(hex: "#070819").cgColor
+        completedDotView.backgroundColor = UIColor(hex: "#39E019")
+        completedDotView.layer.borderWidth = 5
+        completedDotView.layer.borderColor = UIColor(hex: "#050713").cgColor
+        completedDotView.layer.shadowColor = UIColor.black.cgColor
+        completedDotView.layer.shadowOpacity = 0.28
+        completedDotView.layer.shadowRadius = 10
+        completedDotView.layer.shadowOffset = CGSize(width: 0, height: 4)
+
+        if checkmarkImageView.superview == nil {
+            checkmarkImageView.translatesAutoresizingMaskIntoConstraints = false
+            checkmarkImageView.image = UIImage(
+                systemName: "checkmark",
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .bold)
+            )
+            checkmarkImageView.tintColor = .white
+            completedDotView.addSubview(checkmarkImageView)
+            NSLayoutConstraint.activate([
+                checkmarkImageView.centerXAnchor.constraint(equalTo: completedDotView.centerXAnchor),
+                checkmarkImageView.centerYAnchor.constraint(equalTo: completedDotView.centerYAnchor),
+                checkmarkImageView.widthAnchor.constraint(equalToConstant: 14),
+                checkmarkImageView.heightAnchor.constraint(equalToConstant: 14)
+            ])
+        }
     }
 
     private func updateInteractionAppearance() {
-        let pressed = isHighlighted || isSelected
-        let scale: CGFloat = pressed ? 0.98 : 1
-        cardView.transform = CGAffineTransform(scaleX: scale, y: scale)
-        titleLabel.alpha = pressed ? 0.92 : 1
+        let pressed = isHighlighted || isSelected || isTouchPressed
+        cardView.transform = .identity
+        cardView.alpha = pressed ? 0.92 : 1
+    }
+
+    func setTouchPressed(_ pressed: Bool) {
+        guard isTouchPressed != pressed else { return }
+        isTouchPressed = pressed
+        updateInteractionAppearance()
     }
 
     func configure(with goal: Goal) {
@@ -111,36 +138,38 @@ final class GoalBadgeCollectionViewCell: UICollectionViewCell {
     }
 
     private func updateRing() {
-        let inset: CGFloat = 4
+        let inset: CGFloat = 2
         let ringRect = ringContainerView.bounds.insetBy(dx: inset, dy: inset)
-        let start = -CGFloat.pi / 2
-        let end = (CGFloat.pi * 3 / 2)
-        let trackPath = UIBezierPath(arcCenter: CGPoint(x: ringRect.midX, y: ringRect.midY),
-                                     radius: ringRect.width / 2,
-                                     startAngle: start,
-                                     endAngle: end,
-                                     clockwise: true)
+        let center = CGPoint(x: ringRect.midX, y: ringRect.midY)
+        let radius = ringRect.width / 2
+        let circumference = 2 * CGFloat.pi * radius
+        let gapLength = circumference * 0.06
+        let segmentLength = (circumference - (gapLength * 4)) / 4
+        let segmentSweep = segmentLength / radius
+        let startAngle = (-CGFloat.pi / 2) - (segmentSweep / 2)
+        let endAngle = startAngle + (CGFloat.pi * 2)
+        let ringPath = UIBezierPath(
+            arcCenter: center,
+            radius: radius,
+            startAngle: startAngle,
+            endAngle: endAngle,
+            clockwise: true
+        )
 
         trackLayer.frame = ringContainerView.bounds
-        trackLayer.path = trackPath.cgPath
-        trackLayer.strokeColor = UIColor.white.withAlphaComponent(0.22).cgColor
+        trackLayer.path = ringPath.cgPath
+        trackLayer.strokeColor = UIColor(hex: "#D4A100").cgColor
         trackLayer.fillColor = UIColor.clear.cgColor
         trackLayer.lineWidth = 3
-
-        let shineStart = -CGFloat.pi * 0.92
-        let shineEnd = shineStart + (.pi * 0.42)
-        let shinePath = UIBezierPath(arcCenter: CGPoint(x: ringRect.midX, y: ringRect.midY),
-                                     radius: ringRect.width / 2,
-                                     startAngle: shineStart,
-                                     endAngle: shineEnd,
-                                     clockwise: true)
+        trackLayer.lineCap = .butt
+        trackLayer.lineDashPattern = [NSNumber(value: Double(segmentLength)), NSNumber(value: Double(gapLength))]
+        trackLayer.lineDashPhase = 0
 
         highlightLayer.frame = ringContainerView.bounds
-        highlightLayer.path = shinePath.cgPath
-        highlightLayer.strokeColor = UIColor(hex: "#E5BE33").cgColor
+        highlightLayer.path = ringPath.cgPath
+        highlightLayer.strokeColor = UIColor.clear.cgColor
         highlightLayer.fillColor = UIColor.clear.cgColor
-        highlightLayer.lineWidth = 3.2
-        highlightLayer.lineCap = .round
+        highlightLayer.lineWidth = 0
         highlightLayer.shadowOpacity = 0
     }
 }

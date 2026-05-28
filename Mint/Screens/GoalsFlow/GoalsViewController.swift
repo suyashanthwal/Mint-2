@@ -38,6 +38,8 @@ final class GoalsViewController: UIViewController {
     private var spotlightView: OnboardingSpotlightView?
     private var currentOnboardingStep = 0
     private var onboardingSteps: [OnboardingStep] = []
+    private var touchFeedbackRecognizer: UILongPressGestureRecognizer?
+    private var touchFeedbackIndexPath: IndexPath?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -119,6 +121,16 @@ final class GoalsViewController: UIViewController {
         goalsCollectionView.showsVerticalScrollIndicator = false
         goalsCollectionView.alwaysBounceVertical = true
         goalsCollectionView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 40, right: 0)
+
+        let touchFeedbackRecognizer = UILongPressGestureRecognizer(
+            target: self,
+            action: #selector(handleTouchFeedbackPress(_:))
+        )
+        touchFeedbackRecognizer.minimumPressDuration = 0
+        touchFeedbackRecognizer.cancelsTouchesInView = false
+        touchFeedbackRecognizer.delegate = self
+        goalsCollectionView.addGestureRecognizer(touchFeedbackRecognizer)
+        self.touchFeedbackRecognizer = touchFeedbackRecognizer
     }
 
     private func configureOnboarding() {
@@ -254,13 +266,13 @@ final class GoalsViewController: UIViewController {
             section = NSCollectionLayoutSection(group: group)
         } else {
             let itemSize = NSCollectionLayoutSize(
-                widthDimension: .absolute(104),
-                heightDimension: .absolute(138)
+                widthDimension: .absolute(116),
+                heightDimension: .absolute(148)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             let groupSize = NSCollectionLayoutSize(
-                widthDimension: .absolute(104),
-                heightDimension: .absolute(138)
+                widthDimension: .absolute(116),
+                heightDimension: .absolute(148)
             )
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
             section = NSCollectionLayoutSection(group: group)
@@ -293,7 +305,7 @@ final class GoalsViewController: UIViewController {
     private func makeAddButtonLayout() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(68)
+            heightDimension: .absolute(72)
         )
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: itemSize, subitems: [item])
@@ -448,6 +460,76 @@ final class GoalsViewController: UIViewController {
 
     @objc private func handleGoalDataChange() {
         reloadGoals()
+    }
+
+    @objc private func handleTouchFeedbackPress(_ gesture: UILongPressGestureRecognizer) {
+        let location = gesture.location(in: goalsCollectionView)
+
+        switch gesture.state {
+        case .began, .changed:
+            let nextIndexPath: IndexPath?
+
+            if let indexPath = goalsCollectionView.indexPathForItem(at: location),
+               shouldApplyTouchFeedback(at: indexPath) {
+                nextIndexPath = indexPath
+            } else {
+                nextIndexPath = nil
+            }
+
+            updateTouchFeedback(to: nextIndexPath)
+
+        case .ended, .cancelled, .failed:
+            updateTouchFeedback(to: nil)
+
+        default:
+            break
+        }
+    }
+
+    private func shouldApplyTouchFeedback(at indexPath: IndexPath) -> Bool {
+        guard let section = GoalsSection(rawValue: indexPath.section) else { return false }
+
+        switch section {
+        case .badges:
+            return badgeGoals.indices.contains(indexPath.item)
+        case .active:
+            return activeGoals.indices.contains(indexPath.item)
+        case .completed:
+            return completedGoals.indices.contains(indexPath.item)
+        case .inactive:
+            return inactiveGoals.indices.contains(indexPath.item)
+        case .addGoal:
+            return false
+        }
+    }
+
+    private func updateTouchFeedback(to indexPath: IndexPath?) {
+        guard touchFeedbackIndexPath != indexPath else { return }
+
+        if let previousIndexPath = touchFeedbackIndexPath,
+           let previousCell = goalsCollectionView.cellForItem(at: previousIndexPath) {
+            setTouchFeedback(false, for: previousCell)
+        }
+
+        touchFeedbackIndexPath = indexPath
+
+        if let indexPath,
+           let currentCell = goalsCollectionView.cellForItem(at: indexPath) {
+            setTouchFeedback(true, for: currentCell)
+        }
+    }
+
+    private func setTouchFeedback(_ pressed: Bool, for cell: UICollectionViewCell) {
+        switch cell {
+        case let cell as GoalBadgeCollectionViewCell:
+            cell.setTouchPressed(pressed)
+        case let cell as OngoingGoalCollectionViewCell:
+            cell.setTouchPressed(pressed)
+        case let cell as ReachedGoalsCollectionViewCell:
+            cell.setTouchPressed(pressed)
+        default:
+            break
+        }
     }
 
     private func showGoalsOnboarding() {
@@ -634,11 +716,22 @@ extension GoalsViewController: UICollectionViewDataSource {
 
 extension GoalsViewController: UICollectionViewDelegate {
 
+    func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
+        guard let section = GoalsSection(rawValue: indexPath.section) else { return false }
+        return section == .addGoal
+    }
+
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        guard let section = GoalsSection(rawValue: indexPath.section) else { return false }
+        return section == .addGoal
+    }
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let section = GoalsSection(rawValue: indexPath.section) else { return }
 
         switch section {
         case .addGoal:
+            collectionView.deselectItem(at: indexPath, animated: false)
             presentAddGoalFlow()
         case .badges, .active, .completed, .inactive:
             return
@@ -650,9 +743,10 @@ extension GoalsViewController: UICollectionViewDelegate {
         contextMenuConfigurationForItemAt indexPath: IndexPath,
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
-        guard let section = GoalsSection(rawValue: indexPath.section),
-              section != .addGoal
+        guard let section = GoalsSection(rawValue: indexPath.section)
         else { return nil }
+
+        guard section == .active || section == .inactive else { return nil }
 
         let goals = sectionGoals(for: section)
         guard goals.indices.contains(indexPath.item) else { return nil }
@@ -661,10 +755,19 @@ extension GoalsViewController: UICollectionViewDelegate {
         return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
 
-            let hold = UIAction(title: "Hold Goal", image: UIImage(systemName: "pause.circle")) { _ in
-                self.holdGoal(goal)
+            let primaryAction: UIAction
+            switch section {
+            case .active:
+                primaryAction = UIAction(title: "Hold Goal", image: UIImage(systemName: "pause.circle")) { _ in
+                    self.holdGoal(goal)
+                }
+            case .inactive:
+                primaryAction = UIAction(title: "Resume Goal", image: UIImage(systemName: "play.circle")) { _ in
+                    self.resumeGoal(goal)
+                }
+            case .badges, .addGoal, .completed:
+                return nil
             }
-            hold.attributes = goal.isActiveGoal && !goal.isCompleted && !goal.isOnHold ? [] : [.disabled]
 
             let edit = UIAction(title: "Edit Goal", image: UIImage(systemName: "pencil")) { _ in
                 self.presentEditGoal(for: goal)
@@ -674,7 +777,7 @@ extension GoalsViewController: UICollectionViewDelegate {
                 self.confirmDelete(goal)
             }
 
-            return UIMenu(title: goal.name, children: [hold, edit, delete])
+            return UIMenu(title: goal.name, children: [primaryAction, edit, delete])
         }
     }
 
@@ -759,5 +862,29 @@ extension GoalsViewController: AddMoneyAlertViewControllerDelegate {
         if success {
             postGoalDataChange()
         }
+    }
+}
+
+extension GoalsViewController: UIGestureRecognizerDelegate {
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard gestureRecognizer === touchFeedbackRecognizer else { return true }
+
+        var currentView = touch.view
+        while let view = currentView {
+            if view is UIControl {
+                return false
+            }
+            currentView = view.superview
+        }
+
+        return true
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        gestureRecognizer === touchFeedbackRecognizer
     }
 }

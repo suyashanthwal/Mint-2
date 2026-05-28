@@ -21,6 +21,11 @@ final class GoalAddButtonCollectionViewCell: UICollectionViewCell {
         selectedBackgroundView = UIView()
         selectedBackgroundView?.backgroundColor = .clear
         addButton.layer.cornerCurve = .continuous
+        addButton.backgroundColor = UIColor(hex: "#080A21")
+        addButton.layer.borderWidth = 2
+        addButton.layer.borderColor = UIColor(hex: "#2EF00E").cgColor
+        addButton.setTitleColor(.white, for: .normal)
+        addButton.titleLabel?.font = MintFont.space(size: 17, weight: .bold)
         updateInteractionAppearance()
     }
 

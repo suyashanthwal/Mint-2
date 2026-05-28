@@ -29,6 +29,7 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
     private var currentMode: Mode = .active
     private var currentGoalID: UUID?
     private var imageProcessingTask: Task<Void, Never>?
+    private var isTouchPressed = false
     private let baseGradientLayer = CAGradientLayer()
     private let fillGradientLayer = CAGradientLayer()
 
@@ -97,9 +98,14 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
     }
 
     private func updateInteractionAppearance() {
-        let pressed = isHighlighted || isSelected
-        cardView.transform = pressed ? CGAffineTransform(scaleX: 0.99, y: 0.99) : .identity
+        let pressed = isHighlighted || isSelected || isTouchPressed
+        cardView.transform = .identity
+        cardView.alpha = pressed ? restingCardAlpha * 0.92 : restingCardAlpha
         layer.shadowOpacity = pressed ? 0.12 : 0.16
+    }
+
+    private var restingCardAlpha: CGFloat {
+        currentMode == .inactive ? 0.94 : 1
     }
 
     private func configureGradientLayers() {
@@ -225,7 +231,14 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
 
         applyGradientPalette(for: mode)
         applyImage(for: goal)
+        updateInteractionAppearance()
         setNeedsLayout()
+    }
+
+    func setTouchPressed(_ pressed: Bool) {
+        guard isTouchPressed != pressed else { return }
+        isTouchPressed = pressed
+        updateInteractionAppearance()
     }
 
     private func subtitle(for goal: Goal, mode: Mode) -> String {
