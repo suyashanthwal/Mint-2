@@ -1473,6 +1473,7 @@ private extension HomeViewController {
         scrollView.indicatorStyle = .white
         clearContainerBackgrounds(in: view)
         applyUpperLayoutSizing()
+        applySectionTitleSpacing()
         insightImage!.transform = CGAffineTransform(scaleX: -1, y: 1)
 
         styleLabels(in: view, color: AppColors.textPrimary)
@@ -1533,8 +1534,18 @@ private extension HomeViewController {
     }
 
     func loadFireAnimation() {
-        streakFireImageView?.image = UIImage(systemName: "flame.fill")
-        streakFireImageView?.tintColor = AppColors.error
+        streakFireImageView?.contentMode = .scaleAspectFit
+        streakFireImageView?.backgroundColor = .clear
+        streakFireImageView?.image = nil
+
+        guard let gifURL = Bundle.main.url(forResource: "fire", withExtension: "gif")
+            ?? Bundle.main.url(forResource: "streak", withExtension: "gif") else {
+            streakFireImageView?.image = UIImage(systemName: "flame.fill")
+            streakFireImageView?.tintColor = AppColors.error
+            return
+        }
+
+        streakFireImageView?.sd_setImage(with: gifURL, placeholderImage: nil, options: [.continueInBackground])
     }
 
     func configureDashboardGoalBackground() {
@@ -1734,14 +1745,36 @@ private extension HomeViewController {
         }
     }
 
+    func applySectionTitleSpacing() {
+        let titleLabels = [
+            upcomingBillsTitleLabel,
+            confirmTransactionsTitleLabel,
+            recentTransactionsTitleLabel
+        ]
+
+        titleLabels.forEach { titleLabel in
+            guard let titleStack = titleLabel?.superview,
+                  let headerView = titleStack.superview,
+                  let sectionStack = headerView.superview as? UIStackView else { return }
+
+            sectionStack.spacing = 12
+            setHeightConstraint(on: headerView, to: 20)
+        }
+
+        setTopConstraint(on: billsCollectionView, to: 0)
+        setTopConstraint(on: confirmCollectionView, to: 0)
+        setTopConstraint(on: transactionsCollectionView, to: 0)
+    }
+
     func applyDashboardTypography() {
         applyBaseTypography(in: view)
+        let sectionHeadingFont = MintFont.space(size: 16, weight: .bold)
 
         dashboardLabel?.font = MintFont.space(size: 25, weight: .bold)
         dashboardLabel?.textColor = AppColors.textPrimary
         dashboardLabel?.removeCharacterSpacing()
 
-        titleLabel.font = MintFont.space(size: 16, weight: .bold)
+        titleLabel.font = sectionHeadingFont
         titleLabel.textColor = AppColors.textPrimary
         titleLabel.removeCharacterSpacing()
 
@@ -1759,7 +1792,7 @@ private extension HomeViewController {
         monthlyRemainingLabel?.textColor = AppColors.textPrimary.withAlphaComponent(0.9)
         monthlyRemainingLabel?.removeCharacterSpacing()
 
-        dailyAverageTitleLabel?.font = MintFont.space(size: 18, weight: .bold)
+        dailyAverageTitleLabel?.font = sectionHeadingFont
         dailyAverageTitleLabel?.textColor = AppColors.textPrimary
         dailyAverageTitleLabel?.removeCharacterSpacing()
 
@@ -1770,7 +1803,7 @@ private extension HomeViewController {
         dailyAverage.removeCharacterSpacing()
         dailyAverageUnitLabel?.removeCharacterSpacing()
 
-        streakTitleLabel?.font = MintFont.space(size: 18, weight: .bold)
+        streakTitleLabel?.font = sectionHeadingFont
         streakTitleLabel?.textColor = .black
         streakCountLabel?.font = MintFont.space(size: 24, weight: .heavy)
         streakCountLabel?.textColor = .black
@@ -1782,7 +1815,7 @@ private extension HomeViewController {
         streakCountLabel?.removeCharacterSpacing()
         streakCaptionLabel?.removeCharacterSpacing()
 
-        savingGoalsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        savingGoalsTitleLabel?.font = sectionHeadingFont
         savingGoalsTitleLabel?.textColor = AppColors.textPrimary
         savingGoalsTitleLabel?.removeCharacterSpacing()
         GoalNameLabel.font = MintFont.space(size: 24, weight: .bold)
@@ -1797,17 +1830,17 @@ private extension HomeViewController {
         SavedSoFarLabel.removeCharacterSpacing()
         completedLabel?.removeCharacterSpacing()
 
-        upcomingBillsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        upcomingBillsTitleLabel?.font = sectionHeadingFont
         upcomingBillsTitleLabel?.textColor = AppColors.textPrimary
         upcomingBillsTitleLabel?.removeCharacterSpacing()
 
         confirmTransactionsTitleLabel?.text = "CONFIRM TRANSACTIONS"
-        confirmTransactionsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        confirmTransactionsTitleLabel?.font = sectionHeadingFont
         confirmTransactionsTitleLabel?.textColor = AppColors.textPrimary
         confirmTransactionsTitleLabel?.removeCharacterSpacing()
 
         recentTransactionsTitleLabel?.text = "RECENT TRANSACTIONS"
-        recentTransactionsTitleLabel?.font = MintFont.space(size: 14, weight: .bold)
+        recentTransactionsTitleLabel?.font = sectionHeadingFont
         recentTransactionsTitleLabel?.textColor = AppColors.textPrimary
         recentTransactionsTitleLabel?.removeCharacterSpacing()
 
@@ -1820,16 +1853,16 @@ private extension HomeViewController {
             switch label.text {
             case "Confirm Transactions":
                 label.text = "CONFIRM TRANSACTIONS"
-                label.font = MintFont.space(size: 14, weight: .bold)
+                label.font = sectionHeadingFont
                 label.textColor = AppColors.textPrimary
                 label.removeCharacterSpacing()
             case "Recent Transactions":
                 label.text = "RECENT TRANSACTIONS"
-                label.font = MintFont.space(size: 14, weight: .bold)
+                label.font = sectionHeadingFont
                 label.textColor = AppColors.textPrimary
                 label.removeCharacterSpacing()
             case "DAILY AVERAGE", "STREAK", "SAVING GOALS", "UPCOMING BILLS", "CONFIRM TRANSACTIONS", "RECENT TRANSACTIONS":
-                label.font = MintFont.space(size: 14, weight: .bold)
+                label.font = sectionHeadingFont
                 label.textColor = label.text == "STREAK" ? .black : AppColors.textPrimary
                 label.removeCharacterSpacing()
             case "/ per day":
@@ -1927,6 +1960,17 @@ private extension HomeViewController {
         let constraints = view.constraints + (view.superview?.constraints ?? [])
         for constraint in constraints where constraint.firstAttribute == .height {
             if (constraint.firstItem as? UIView) === view || constraint.secondItem == nil {
+                constraint.constant = constant
+                return
+            }
+        }
+    }
+
+    func setTopConstraint(on view: UIView?, to constant: CGFloat) {
+        guard let view else { return }
+        let constraints = view.constraints + (view.superview?.constraints ?? [])
+        for constraint in constraints where constraint.firstAttribute == .top {
+            if (constraint.firstItem as? UIView) === view {
                 constraint.constant = constant
                 return
             }

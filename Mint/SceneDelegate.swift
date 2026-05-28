@@ -9,14 +9,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
-        _ = DatabaseManager.shared
-        BillSubscriptionReminderManager.shared.refreshAllReminders()
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
-            let window = UIWindow(windowScene: windowScene)
-            window.rootViewController = AppFlowManager.initialViewController()
-            self.window = window
-            window.makeKeyAndVisible()
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = AppFlowManager.initialViewController()
+        self.window = window
+        window.makeKeyAndVisible()
+
+        DispatchQueue.main.async {
+            _ = DatabaseManager.shared
+            BillSubscriptionReminderManager.shared.refreshAllReminders()
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

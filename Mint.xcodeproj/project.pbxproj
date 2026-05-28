@@ -7,14 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F150FBB32FC8BF3400D8311A /* fire.gif in Resources */ = {isa = PBXBuildFile; fileRef = F150FBB22FC8BF3400D8311A /* fire.gif */; };
 		F1858AB82FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F1858AB72FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf */; };
 		F1858AB92FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F1858AB62FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf */; };
 		F1E251612F8641780080379B /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = F1E251602F8641780080379B /* DGCharts */; };
 		F1E251632F8660000080379B /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = F1E251622F8660000080379B /* SDWebImage */; };
+		F1E251652F8660000080379B /* SDWebImageFLPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = F1E251672F8660000080379B /* SDWebImageFLPlugin */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		ACE05F6D2F70357B0000D8D3 /* Mint.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mint.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F150FBB22FC8BF3400D8311A /* fire.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = fire.gif; sourceTree = "<group>"; };
 		F1858AB62FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		F1858AB72FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Syne-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -47,6 +50,7 @@
 			files = (
 				F1E251612F8641780080379B /* DGCharts in Frameworks */,
 				F1E251632F8660000080379B /* SDWebImage in Frameworks */,
+				F1E251652F8660000080379B /* SDWebImageFLPlugin in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,6 +64,7 @@
 				ACE05F6E2F70357B0000D8D3 /* Products */,
 				F1858AB62FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf */,
 				F1858AB72FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf */,
+				F150FBB22FC8BF3400D8311A /* fire.gif */,
 			);
 			sourceTree = "<group>";
 		};
@@ -93,6 +98,7 @@
 			packageProductDependencies = (
 				F1E251602F8641780080379B /* DGCharts */,
 				F1E251622F8660000080379B /* SDWebImage */,
+				F1E251672F8660000080379B /* SDWebImageFLPlugin */,
 			);
 			productName = JustChecking;
 			productReference = ACE05F6D2F70357B0000D8D3 /* Mint.app */;
@@ -125,6 +131,7 @@
 			packageReferences = (
 				F1E2515F2F8641780080379B /* XCRemoteSwiftPackageReference "Charts" */,
 				F1E251642F8660000080379B /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				F1E251662F8660000080379B /* XCRemoteSwiftPackageReference "SDWebImageFLPlugin" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ACE05F6E2F70357B0000D8D3 /* Products */;
@@ -143,6 +150,7 @@
 			files = (
 				F1858AB82FA79E5800FA56A7 /* Syne-VariableFont_wght.ttf in Resources */,
 				F1858AB92FA79E5800FA56A7 /* SpaceGrotesk-VariableFont_wght.ttf in Resources */,
+				F150FBB32FC8BF3400D8311A /* fire.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,6 +398,14 @@
 				minimumVersion = 5.21.7;
 			};
 		};
+		F1E251662F8660000080379B /* XCRemoteSwiftPackageReference "SDWebImageFLPlugin" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageFLPlugin.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -402,6 +418,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F1E251642F8660000080379B /* XCRemoteSwiftPackageReference "SDWebImage" */;
 			productName = SDWebImage;
+		};
+		F1E251672F8660000080379B /* SDWebImageFLPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F1E251662F8660000080379B /* XCRemoteSwiftPackageReference "SDWebImageFLPlugin" */;
+			productName = SDWebImageFLPlugin;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

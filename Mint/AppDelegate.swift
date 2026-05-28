@@ -1,5 +1,6 @@
 
 import UIKit
+import SDWebImage
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {

@@ -1,5 +1,5 @@
 {
-  "originHash" : "c2f5d6e4ef23c16a83c94dd54d47ff466279b1ca94e2e094981e25e9dd77b552",
+  "originHash" : "b0ca59e77ac1a55329e858738cf6261ecf38622fcc7c9b87675da8d1094360a6",
   "pins" : [
     {
       "identity" : "charts",
@@ -11,12 +11,30 @@
       }
     },
     {
+      "identity" : "flanimatedimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flipboard/FLAnimatedImage.git",
+      "state" : {
+        "revision" : "d4f07b6f164d53c1212c3e54d6460738b1981e9f",
+        "version" : "1.0.17"
+      }
+    },
+    {
       "identity" : "sdwebimage",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SDWebImage/SDWebImage.git",
       "state" : {
         "revision" : "2de3a496eaf6df9a1312862adcfd54acd73c39c0",
         "version" : "5.21.7"
+      }
+    },
+    {
+      "identity" : "sdwebimageflplugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/SDWebImageFLPlugin.git",
+      "state" : {
+        "revision" : "40ea0e7c28189fcae5f03e5bc9acf2771ea0b224",
+        "version" : "0.6.0"
       }
     }
   ],

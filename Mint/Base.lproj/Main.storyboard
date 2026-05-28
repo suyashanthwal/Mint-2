@@ -283,6 +283,21 @@ with our effortless categorization.</string>
             </objects>
             <point key="canvasLocation" x="-8498.4732824427483" y="1500"/>
         </scene>
+        <!--Splash View Controller-->
+        <scene sceneID="u6M-NK-dYD">
+            <objects>
+                <viewController id="8Sy-Br-ycj" customClass="SplashViewController" customModule="Mint" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="pMk-RF-o01">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="Yni-5B-owF"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="rcC-wU-nS3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-6229" y="-322"/>
+        </scene>
         <!--Login View Controller-->
         <scene sceneID="4MB-ch-AZb">
             <objects>
@@ -8036,13 +8051,13 @@ spend on?</string>
                                 <rect key="frame" x="0.0" y="168" width="393" height="684"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CIZ-ot-bS2" userLabel="ContentView">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1612"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1660"/>
                                         <subviews>
-                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="6Z3-ZZ-ZYJ">
-                                                <rect key="frame" x="0.0" y="16" width="393" height="1496"/>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="32" translatesAutoresizingMaskIntoConstraints="NO" id="6Z3-ZZ-ZYJ">
+                                                <rect key="frame" x="0.0" y="16" width="393" height="1544"/>
                                                 <subviews>
-                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="rv0-5F-Wrq" userLabel="HomeScreen">
-                                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1496"/>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="32" translatesAutoresizingMaskIntoConstraints="NO" id="rv0-5F-Wrq" userLabel="HomeScreen">
+                                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1544"/>
                                                         <subviews>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CDF-jX-Xv3" userLabel="Monthly View">
                                                                 <rect key="frame" x="0.0" y="0.0" width="393" height="160"/>
@@ -8079,17 +8094,6 @@ spend on?</string>
                                                                                 <nil key="textColor"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
-                                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zc7-6n-dix">
-                                                                                <rect key="frame" x="305" y="119.66666666666667" width="48" height="28.333333333333329"/>
-                                                                                <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                                                                <state key="normal" title="Button"/>
-                                                                                <buttonConfiguration key="configuration" style="plain" image="rectangle.2.swap" catalog="system">
-                                                                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="12"/>
-                                                                                </buttonConfiguration>
-                                                                                <connections>
-                                                                                    <action selector="monthlyFlipButton:" destination="cie-AB-zfK" eventType="touchUpInside" id="DHI-TY-XNL"/>
-                                                                                </connections>
-                                                                            </button>
                                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VnJ-BT-lW8">
                                                                                 <rect key="frame" x="317.66666666666669" y="3.9999999999999982" width="35.333333333333314" height="28.333333333333329"/>
                                                                                 <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -8105,7 +8109,6 @@ spend on?</string>
                                                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="trailing" secondItem="VnJ-BT-lW8" secondAttribute="trailing" id="4rO-Je-a1y"/>
-                                                                            <constraint firstAttribute="trailing" secondItem="zc7-6n-dix" secondAttribute="trailing" id="6da-jy-2cO"/>
                                                                             <constraint firstItem="VnJ-BT-lW8" firstAttribute="top" secondItem="Mlh-At-Bd6" secondAttribute="top" constant="4" id="9HN-Ma-3Bx"/>
                                                                             <constraint firstItem="3rm-4b-L3h" firstAttribute="top" secondItem="Mlh-At-Bd6" secondAttribute="top" constant="12" id="ASg-1F-6oH"/>
                                                                             <constraint firstAttribute="bottom" secondItem="x84-pF-mEN" secondAttribute="bottom" constant="12" id="DxW-3L-lCK"/>
@@ -8113,7 +8116,6 @@ spend on?</string>
                                                                             <constraint firstItem="rWG-75-EOd" firstAttribute="centerY" secondItem="Mlh-At-Bd6" secondAttribute="centerY" id="QU8-d1-k9Y"/>
                                                                             <constraint firstItem="3rm-4b-L3h" firstAttribute="leading" secondItem="Mlh-At-Bd6" secondAttribute="leading" constant="12" id="TBu-ey-zBy"/>
                                                                             <constraint firstAttribute="trailing" secondItem="rWG-75-EOd" secondAttribute="trailing" constant="12" id="aOM-QH-5ju"/>
-                                                                            <constraint firstAttribute="bottom" secondItem="zc7-6n-dix" secondAttribute="bottom" constant="12" id="hSO-q1-XTu"/>
                                                                             <constraint firstItem="rWG-75-EOd" firstAttribute="leading" secondItem="Mlh-At-Bd6" secondAttribute="leading" constant="12" id="q9D-9m-Acj"/>
                                                                             <constraint firstItem="x84-pF-mEN" firstAttribute="leading" secondItem="Mlh-At-Bd6" secondAttribute="leading" constant="12" id="tfF-RN-95Z"/>
                                                                         </constraints>
@@ -8133,7 +8135,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eLs-qF-ddv" userLabel="insightsView">
-                                                                <rect key="frame" x="0.0" y="184" width="393" height="120"/>
+                                                                <rect key="frame" x="0.0" y="192" width="393" height="120"/>
                                                                 <subviews>
                                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ohl-Fh-C8o">
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="120"/>
@@ -8174,7 +8176,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sF1-cr-QuZ" userLabel="1st Card">
-                                                                <rect key="frame" x="0.0" y="328" width="393" height="140"/>
+                                                                <rect key="frame" x="0.0" y="344" width="393" height="140"/>
                                                                 <subviews>
                                                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="Pzq-NF-7SF">
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="140"/>
@@ -8234,7 +8236,7 @@ spend on?</string>
                                                                                                 <nil key="textColor"/>
                                                                                                 <nil key="highlightedColor"/>
                                                                                             </label>
-                                                                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="bdT-LI-EDH">
+                                                                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="bdT-LI-EDH" customClass="FLAnimatedImageView" customModule="Mint" customModuleProvider="target">
                                                                                                 <rect key="frame" x="54.333333333333371" y="0.0" width="44" height="44"/>
                                                                                                 <constraints>
                                                                                                     <constraint firstAttribute="width" constant="44" id="Kxr-81-zcQ"/>
@@ -8283,7 +8285,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dRx-bm-jIw">
-                                                                <rect key="frame" x="0.0" y="492" width="393" height="160"/>
+                                                                <rect key="frame" x="0.0" y="516" width="393" height="160"/>
                                                                 <subviews>
                                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bq5-58-kTZ">
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="160"/>
@@ -8369,7 +8371,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="r9V-Yy-SMZ">
-                                                                <rect key="frame" x="0.0" y="676" width="393" height="220"/>
+                                                                <rect key="frame" x="0.0" y="708" width="393" height="220"/>
                                                                 <subviews>
                                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="BoQ-mK-cht">
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="220"/>
@@ -8387,11 +8389,12 @@ spend on?</string>
                                                                                                 <nil key="highlightedColor"/>
                                                                                             </label>
                                                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7bh-vK-ptN">
-                                                                                                <rect key="frame" x="285.66666666666669" y="0.0" width="67.333333333333314" height="40"/>
-                                                                                                <color key="tintColor" red="0.2260742188" green="0.3195800781" blue="0.2231445312" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                                                                <rect key="frame" x="317.66666666666669" y="0.0" width="35.333333333333314" height="40"/>
+                                                                                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                                                 <state key="normal" title="Button"/>
-                                                                                                <buttonConfiguration key="configuration" style="plain" title="View all">
-                                                                                                    <fontDescription key="titleFontDescription" type="system" pointSize="12"/>
+                                                                                                <buttonConfiguration key="configuration" style="plain" image="chevron.right" catalog="system" title="">
+                                                                                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="12"/>
+                                                                                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                                                 </buttonConfiguration>
                                                                                             </button>
                                                                                         </subviews>
@@ -8465,7 +8468,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="m7M-Fd-QwY">
-                                                                <rect key="frame" x="0.0" y="920" width="393" height="164"/>
+                                                                <rect key="frame" x="0.0" y="960" width="393" height="164"/>
                                                                 <subviews>
                                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="kH3-Yd-AVm">
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="164"/>
@@ -8497,7 +8500,7 @@ spend on?</string>
                                                                                 <rect key="frame" x="0.0" y="40" width="353" height="124"/>
                                                                                 <subviews>
                                                                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="aLg-H4-aIH" customClass="SelfSizingCollectionView" customModule="Mint" customModuleProvider="target">
-                                                                                        <rect key="frame" x="0.0" y="8" width="353" height="108"/>
+                                                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="124"/>
                                                                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                                                         <constraints>
                                                                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="52" id="kRm-3Y-hDk"/>
@@ -8521,8 +8524,8 @@ spend on?</string>
                                                                                     </collectionView>
                                                                                 </subviews>
                                                                                 <constraints>
-                                                                                    <constraint firstItem="aLg-H4-aIH" firstAttribute="top" secondItem="LcO-W3-GdE" secondAttribute="top" constant="8" id="V96-rw-n6T"/>
-                                                                                    <constraint firstAttribute="bottom" secondItem="aLg-H4-aIH" secondAttribute="bottom" constant="8" id="WrE-gY-G4r"/>
+                                                                                    <constraint firstItem="aLg-H4-aIH" firstAttribute="top" secondItem="LcO-W3-GdE" secondAttribute="top" id="V96-rw-n6T"/>
+                                                                                    <constraint firstAttribute="bottom" secondItem="aLg-H4-aIH" secondAttribute="bottom" id="WrE-gY-G4r"/>
                                                                                     <constraint firstAttribute="trailing" secondItem="aLg-H4-aIH" secondAttribute="trailing" id="lUa-xA-eip"/>
                                                                                     <constraint firstItem="aLg-H4-aIH" firstAttribute="leading" secondItem="LcO-W3-GdE" secondAttribute="leading" id="lXH-Xc-XQl"/>
                                                                                 </constraints>
@@ -8538,7 +8541,7 @@ spend on?</string>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZH3-kY-vr4">
-                                                                <rect key="frame" x="0.0" y="1108" width="393" height="388"/>
+                                                                <rect key="frame" x="0.0" y="1156" width="393" height="388"/>
                                                                 <subviews>
                                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="462-6S-aRY">
                                                                         <rect key="frame" x="20" y="0.0" width="353" height="388"/>
@@ -8556,11 +8559,11 @@ spend on?</string>
                                                                                                 <nil key="highlightedColor"/>
                                                                                             </label>
                                                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KFU-VP-e4Y">
-                                                                                                <rect key="frame" x="284" y="0.0" width="69" height="40"/>
+                                                                                                <rect key="frame" x="317.66666666666669" y="0.0" width="35.333333333333314" height="40"/>
                                                                                                 <state key="normal" title="Button"/>
-                                                                                                <buttonConfiguration key="configuration" style="plain" title="View All">
-                                                                                                    <fontDescription key="titleFontDescription" type="system" pointSize="12"/>
-                                                                                                    <color key="baseForegroundColor" red="0.28627450980000002" green="0.4038085938" blue="0.2829589844" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                                                                <buttonConfiguration key="configuration" style="plain" image="chevron.right" catalog="system" title="">
+                                                                                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="12"/>
+                                                                                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                                                 </buttonConfiguration>
                                                                                                 <connections>
                                                                                                     <segue destination="53D-CP-tB7" kind="show" id="w96-TN-EiR"/>
@@ -8706,7 +8709,6 @@ spend on?</string>
                         <outlet property="insightImage" destination="511-S8-W9z" id="h8v-6W-GK9"/>
                         <outlet property="insightViewCard" destination="ohl-Fh-C8o" id="K0h-Ix-fSp"/>
                         <outlet property="insightsLabel" destination="Quw-Rw-IDE" id="kfX-tE-qub"/>
-                        <outlet property="monthlyFlipButton" destination="zc7-6n-dix" id="Tr0-Dp-Otr"/>
                         <outlet property="monthlyRemainingLabel" destination="x84-pF-mEN" id="new-home-monthly-left"/>
                         <outlet property="profileButton" destination="Yqk-Hf-Vke" id="new-home-profile-button"/>
                         <outlet property="recentTransactionsTitleLabel" destination="MCs-0z-N9g" id="new-home-recent-title"/>
@@ -9410,7 +9412,6 @@ spend on?</string>
         <image name="plus" catalog="system" width="128" height="113"/>
         <image name="power" catalog="system" width="127" height="128"/>
         <image name="questionmark.circle.dashed" catalog="system" width="128" height="123"/>
-        <image name="rectangle.2.swap" catalog="system" width="128" height="102"/>
         <image name="sparkles.rectangle.stack" catalog="system" width="126" height="128"/>
         <image name="square.grid.2x2" catalog="system" width="128" height="114"/>
         <image name="text.alignleft" catalog="system" width="128" height="101"/>
