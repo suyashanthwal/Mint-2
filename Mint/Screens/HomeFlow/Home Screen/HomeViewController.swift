@@ -3,7 +3,7 @@ import UIKit
 import CoreText
 import SDWebImage
 
-private struct HomeInsightsPayload: Codable {
+struct HomeInsightsPayload: Codable {
 
     struct SummarySection: Codable {
         let monthName: String
@@ -59,13 +59,13 @@ private struct HomeInsightsPayload: Codable {
     let goals: [GoalItem]
 }
 
-private struct HomeInsightsEnvelope: Codable {
+struct HomeInsightsEnvelope: Codable {
     let payload: HomeInsightsPayload
     let fields: [String]
     let forceRefresh: Bool
 }
 
-private struct HomeInsightsResponse: Codable {
+struct HomeInsightsResponse: Codable {
     let homeDigest: String?
 }
 
@@ -135,6 +135,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet private weak var confirmTransactionsTitleLabel: UILabel?
     @IBOutlet private weak var recentTransactionsTitleLabel: UILabel?
     
+    @IBOutlet weak var insightViewOuterCard: UIView!
     @IBOutlet weak var insightImage: UIImageView?
     @IBOutlet weak var monthlyFlipButton: UIButton!
     @IBOutlet weak var goalsButton: UIButton!
@@ -154,20 +155,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private var categories: [Category] = []
     private var goalImageProcessingTask: Task<Void, Never>?
     private let db = DatabaseManager.shared
-    private static let insightsBaseURLDefaultsKey = "mint_insights_base_url"
-    private var insightsBaseURL: URL? {
-        if let override = UserDefaults.standard.string(forKey: Self.insightsBaseURLDefaultsKey),
-           let url = sanitizedInsightsBaseURL(from: override) {
-            return url
-        }
-
-        let configuredBaseURL = Bundle.main.object(forInfoDictionaryKey: "MintInsightsBaseURL") as? String
-        return configuredBaseURL.flatMap(sanitizedInsightsBaseURL(from:))
-    }
-    private var insightsURL: URL? {
-        insightsBaseURL?.appendingPathComponent("insights")
-    }
-    private var insightTask: URLSessionDataTask?
+    private var insightTask: Task<Void, Never>?
     private let contextMenuFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let actionFeedbackGenerator = UINotificationFeedbackGenerator()
 
@@ -716,7 +704,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         let requestPayload = makeInsightsPayload()
         let requestEnvelope = makeInsightsEnvelope(from: requestPayload)
 
-        guard shouldRequestInsights(for: requestPayload), let insightsURL else {
+        guard shouldRequestInsights(for: requestPayload) else {
             applyInsights(nil)
             return
         }
@@ -727,61 +715,22 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         }
 
         insightTask?.cancel()
-
-        var request = URLRequest(url: insightsURL)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 25
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-
-        guard let body = try? encoder.encode(requestEnvelope) else {
-            applyInsights(nil)
-            return
-        }
-
-        request.httpBody = body
-
-        insightTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        insightTask = Task { [weak self] in
             guard let self else { return }
 
-            if let nsError = error as NSError?, nsError.code == NSURLErrorCancelled {
-                return
+            let generatedResponse = await LocalInsightsService.shared.generateHomeInsights(for: requestEnvelope)
+            guard !Task.isCancelled else { return }
+
+            if self.hasUsableInsights(generatedResponse) {
+                self.storeInsightsResponse(generatedResponse, for: requestEnvelope)
+            } else {
+                self.clearCachedInsightsResponse()
             }
 
-            guard error == nil,
-                  let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode),
-                  let data
-            else {
-                DispatchQueue.main.async {
-                    if cachedResponse == nil {
-                        self.applyInsights(nil)
-                    }
-                }
-                return
-            }
-
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            let decodedResponse = try? decoder.decode(HomeInsightsResponse.self, from: data)
-
-            DispatchQueue.main.async {
-                if let decodedResponse, self.hasUsableInsights(decodedResponse) {
-                    self.storeInsightsResponse(decodedResponse, for: requestEnvelope)
-                } else {
-                    self.clearCachedInsightsResponse()
-                }
-
-                if decodedResponse != nil || cachedResponse == nil {
-                    self.applyInsights(decodedResponse)
-                }
+            if self.hasUsableInsights(generatedResponse) || cachedResponse == nil {
+                self.applyInsights(generatedResponse)
             }
         }
-
-        insightTask?.resume()
     }
 
     private func shouldRequestInsights(for requestPayload: HomeInsightsPayload) -> Bool {
@@ -941,7 +890,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private func applyInsights(_ response: HomeInsightsResponse?) {
         let cleanedText = sanitizeInsight(response?.homeDigest)
         insightsLabel?.text = cleanedText
-//        insightViewCard?.isHidden = cleanedText.isEmpty
+        insightViewOuterCard?.isHidden = cleanedText.isEmpty
     }
     
 
@@ -1078,12 +1027,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         if let signatureKey = insightsCacheSignatureKey {
             UserDefaults.standard.removeObject(forKey: signatureKey)
         }
-    }
-
-    private func sanitizedInsightsBaseURL(from rawValue: String) -> URL? {
-        let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedValue.isEmpty else { return nil }
-        return URL(string: trimmedValue)?.standardized
     }
 
     private func toggleBillPaymentState(for billId: UUID) {
@@ -1488,12 +1431,12 @@ private extension HomeViewController {
         styleCard(goalsCardView, cornerRadius: 14)
 //        styleCard(insightViewCard, cornerRadius: 14)
         insightViewCard.applyShadow()
-        insightViewCard.backgroundColor = UIColor(hex: "#9FE48D")
+        insightViewCard.backgroundColor = UIColor(hex: "#A8E38F")
         insightViewCard.layer.borderWidth = 1
         insightViewCard.layer.borderColor = UIColor(hex: "#0B1E12")
             .cgColor
-        insightViewCard.isHidden = false
-//        insightsLabel.text = nil
+        insightViewCard.isHidden = true
+        insightsLabel.text = nil
 
         MonthlyView.clipsToBounds = true
         goalsCardView.clipsToBounds = true

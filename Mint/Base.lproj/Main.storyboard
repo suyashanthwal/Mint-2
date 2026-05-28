@@ -8143,14 +8143,14 @@ spend on?</string>
                                                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="1du-kg-504">
                                                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="120"/>
                                                                                 <subviews>
-                                                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" image="Insights" translatesAutoresizingMaskIntoConstraints="NO" id="511-S8-W9z">
-                                                                                        <rect key="frame" x="0.0" y="0.0" width="120" height="120"/>
+                                                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" image="Blub" translatesAutoresizingMaskIntoConstraints="NO" id="511-S8-W9z">
+                                                                                        <rect key="frame" x="0.0" y="0.0" width="80" height="120"/>
                                                                                         <constraints>
-                                                                                            <constraint firstAttribute="width" constant="120" id="mcT-UL-ksw"/>
+                                                                                            <constraint firstAttribute="width" constant="80" id="mcT-UL-ksw"/>
                                                                                         </constraints>
                                                                                     </imageView>
                                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Insights Will be Shown Here" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Quw-Rw-IDE">
-                                                                                        <rect key="frame" x="124" y="0.0" width="229" height="120"/>
+                                                                                        <rect key="frame" x="84" y="0.0" width="269" height="120"/>
                                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                         <nil key="textColor"/>
                                                                                         <nil key="highlightedColor"/>
@@ -8708,6 +8708,7 @@ spend on?</string>
                         <outlet property="goalsCardView" destination="Bq5-58-kTZ" id="ZGG-ip-URu"/>
                         <outlet property="insightImage" destination="511-S8-W9z" id="h8v-6W-GK9"/>
                         <outlet property="insightViewCard" destination="ohl-Fh-C8o" id="K0h-Ix-fSp"/>
+                        <outlet property="insightViewOuterCard" destination="eLs-qF-ddv" id="1kZ-8W-wuP"/>
                         <outlet property="insightsLabel" destination="Quw-Rw-IDE" id="kfX-tE-qub"/>
                         <outlet property="monthlyRemainingLabel" destination="x84-pF-mEN" id="new-home-monthly-left"/>
                         <outlet property="profileButton" destination="Yqk-Hf-Vke" id="new-home-profile-button"/>
@@ -9375,7 +9376,7 @@ spend on?</string>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="1" width="416" height="416"/>
-        <image name="Insights" width="347" height="330"/>
+        <image name="Blub" width="2000" height="2000"/>
         <image name="Page 1" width="563" height="418"/>
         <image name="airplane.departure" catalog="system" width="128" height="84"/>
         <image name="apple_logo" width="32" height="32"/>

@@ -1,7 +1,7 @@
 
 import UIKit
 
-private struct ReportsInsightsPayload: Codable {
+struct ReportsInsightsPayload: Codable {
 
     struct SummarySection: Codable {
         let monthName: String
@@ -49,13 +49,13 @@ private struct ReportsInsightsPayload: Codable {
     let subsAndBills: SubsAndBillsSection
 }
 
-private struct ReportsInsightsEnvelope: Codable {
+struct ReportsInsightsEnvelope: Codable {
     let payload: ReportsInsightsPayload
     let fields: [String]
     let forceRefresh: Bool
 }
 
-private struct ReportsInsightsResponse: Codable {
+struct ReportsInsightsResponse: Codable {
     let summary: String?
     let categoryHighlight: String?
     let subsAndBills: String?
@@ -65,6 +65,14 @@ class ReportsViewController: UIViewController {
 
     private enum EmptyStateMessage {
         static let topCategories = "Your top 4 categories will be shown here once you log transactions."
+    }
+
+    private enum InsightCardStyle {
+        static let bulbImageViewTag = 9201
+        static let height: CGFloat = 120
+        static let imageWidth: CGFloat = 80
+        static let textLeading: CGFloat = 84
+        static let textTrailing: CGFloat = 40
     }
 
     private var hasCheckedOnboarding = false
@@ -87,20 +95,6 @@ class ReportsViewController: UIViewController {
     @IBOutlet weak var SubsAndBillsButton: UIButton!
     
     private let db = DatabaseManager.shared
-    private static let insightsBaseURLDefaultsKey = "mint_insights_base_url"
-    private var insightsBaseURL: URL? {
-        if let override = UserDefaults.standard.string(forKey: Self.insightsBaseURLDefaultsKey),
-           let url = sanitizedInsightsBaseURL(from: override) {
-            return url
-        }
-
-        let configuredBaseURL = Bundle.main.object(forInfoDictionaryKey: "MintInsightsBaseURL") as? String
-        return configuredBaseURL.flatMap(sanitizedInsightsBaseURL(from:))
-    }
-    private var insightsURL: URL? {
-        insightsBaseURL?.appendingPathComponent("insights")
-    }
-
     @IBOutlet weak var subsAndBillsInsightLabel: UILabel!
     @IBOutlet weak var categoryInsightLabel: UILabel!
     @IBOutlet weak var summaryInsightLabel: UILabel!
@@ -116,7 +110,7 @@ class ReportsViewController: UIViewController {
     private var previousMonthAverage: Double?
     private var categoryData: [CategorySpending] = []
     private var subsBillsCalendarData: SubsBillsCalendarData?
-    private var insightTask: URLSessionDataTask?
+    private var insightTask: Task<Void, Never>?
     private var hasLoadedOnce = false
 
     private var spotlightView: OnboardingSpotlightView?
@@ -335,16 +329,56 @@ class ReportsViewController: UIViewController {
         SubsAndBillsButton.tintColor = AppColors.accent
 
         
-        [summaryInsightVIew, categoryInsightView, subsAndBillsInsightView].forEach { insightView in
-            insightView?.applyShadow()
-            insightView?.isHidden = true
+        configureInsightCard(summaryInsightVIew, label: summaryInsightLabel)
+        configureInsightCard(categoryInsightView, label: categoryInsightLabel)
+        configureInsightCard(subsAndBillsInsightView, label: subsAndBillsInsightLabel)
+    }
+
+    private func configureInsightCard(_ insightView: UIView?, label: UILabel?) {
+        guard let insightView, let label else { return }
+
+        insightView.backgroundColor = .clear
+        insightView.isHidden = true
+        insightView.constraints
+            .filter { $0.firstAttribute == .height }
+            .forEach { $0.constant = InsightCardStyle.height }
+
+        let cardView = label.superview ?? insightView
+        cardView.applyShadow()
+        cardView.backgroundColor = UIColor(hex: "#A8E38F")
+        cardView.layer.borderWidth = 1
+        cardView.layer.borderColor = UIColor(hex: "#0B1E12").cgColor
+        cardView.clipsToBounds = false
+
+        cardView.viewWithTag(InsightCardStyle.bulbImageViewTag)?.removeFromSuperview()
+        let imageView = UIImageView(image: UIImage(named: "Blub"))
+        imageView.tag = InsightCardStyle.bulbImageViewTag
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        imageView.transform = CGAffineTransform(scaleX: -1, y: 1)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        cardView.insertSubview(imageView, at: 0)
+
+        NSLayoutConstraint.activate([
+            imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
+            imageView.topAnchor.constraint(equalTo: cardView.topAnchor),
+            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: InsightCardStyle.imageWidth)
+        ])
+
+        cardView.constraints.forEach { constraint in
+            if constraint.firstItem === label && constraint.firstAttribute == .leading {
+                constraint.constant = InsightCardStyle.textLeading
+            } else if constraint.secondItem === label && constraint.secondAttribute == .trailing {
+                constraint.constant = InsightCardStyle.textTrailing
+            }
         }
 
-        [summaryInsightLabel, categoryInsightLabel, subsAndBillsInsightLabel].forEach { label in
-            label?.textColor = AppColors.textPrimary
-            label?.text = nil
-            
-            }
+        label.font = MintFont.space(size: 14, weight: .medium)
+        label.textColor = AppColors.textPrimary
+        label.numberOfLines = 0
+        label.removeCharacterSpacing()
+        label.text = nil
     }
 
     private func showReportsOnboarding() { startOnboarding() }
@@ -694,7 +728,7 @@ class ReportsViewController: UIViewController {
         let requestPayload = makeInsightsRequest()
         let requestEnvelope = makeInsightsEnvelope(from: requestPayload)
 
-        guard shouldRequestInsights(for: requestPayload), let insightsURL else {
+        guard shouldRequestInsights(for: requestPayload) else {
             applyInsights(nil)
             return
         }
@@ -705,60 +739,22 @@ class ReportsViewController: UIViewController {
         }
 
         insightTask?.cancel()
-
-        var request = URLRequest(url: insightsURL)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 25
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-
-        guard let body = try? encoder.encode(requestEnvelope) else {
-            applyInsights(nil)
-            return
-        }
-
-        request.httpBody = body
-
-        insightTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        insightTask = Task { [weak self] in
             guard let self else { return }
 
-            if let nsError = error as NSError?, nsError.code == NSURLErrorCancelled {
-                return
+            let generatedResponse = await LocalInsightsService.shared.generateReportsInsights(for: requestEnvelope)
+            guard !Task.isCancelled else { return }
+
+            if self.hasUsableInsights(generatedResponse) {
+                self.storeInsightsResponse(generatedResponse, for: requestEnvelope)
+            } else {
+                self.clearCachedInsightsResponse()
             }
 
-            guard error == nil,
-                  let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode),
-                  let data
-            else {
-                DispatchQueue.main.async {
-                    if cachedResponse == nil {
-                        self.applyInsights(nil)
-                    }
-                }
-                return
-            }
-
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            let decodedResponse = try? decoder.decode(ReportsInsightsResponse.self, from: data)
-
-            DispatchQueue.main.async {
-                if let decodedResponse, self.hasUsableInsights(decodedResponse) {
-                    self.storeInsightsResponse(decodedResponse, for: requestEnvelope)
-                } else {
-                    self.clearCachedInsightsResponse()
-                }
-                if decodedResponse != nil || cachedResponse == nil {
-                    self.applyInsights(decodedResponse)
-                }
+            if self.hasUsableInsights(generatedResponse) || cachedResponse == nil {
+                self.applyInsights(generatedResponse)
             }
         }
-
-        insightTask?.resume()
     }
 
     private func shouldRequestInsights(for requestPayload: ReportsInsightsPayload) -> Bool {
@@ -1017,11 +1013,6 @@ class ReportsViewController: UIViewController {
         }
     }
 
-    private func sanitizedInsightsBaseURL(from rawValue: String) -> URL? {
-        let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedValue.isEmpty else { return nil }
-        return URL(string: trimmedValue)?.standardized
-    }
 }
 
 extension ReportsViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
