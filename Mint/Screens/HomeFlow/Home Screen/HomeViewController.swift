@@ -137,7 +137,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     
     @IBOutlet weak var insightViewOuterCard: UIView!
     @IBOutlet weak var insightImage: UIImageView?
-    @IBOutlet weak var monthlyFlipButton: UIButton!
     @IBOutlet weak var goalsButton: UIButton!
     @IBOutlet weak var insightsLabel: UILabel!
     @IBOutlet weak var insightViewCard: UIView!
@@ -496,7 +495,9 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private func updateStreakCard() {
         let streak = continuousUnderBudgetDays()
         streakCountLabel?.text = "\(streak)x"
-        streakCaptionLabel?.text = streak == 1 ? "day under budget" : "days under budget"
+        streakCaptionLabel?.text = streak == 0
+            ? "log expenses to start"
+            : (streak == 1 ? "day under budget" : "days under budget")
     }
 
     private func updateGoalCard() {
@@ -559,30 +560,29 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         return budgetAmount / Double(daysInMonth)
     }
 
-    private func expenseTotal(on day: Date) -> Double {
-        let calendar = Calendar.current
-        return allTransactions
-            .filter { $0.type == .expense && calendar.isDate($0.timestamp, inSameDayAs: day) }
-            .reduce(0) { $0 + $1.amount }
-    }
-
     private func continuousUnderBudgetDays() -> Int {
         let dailyBudget = currentDailyBudget()
         guard dailyBudget > 0 else { return 0 }
 
         let calendar = Calendar.current
-        let startOfMonth = calendar.dateInterval(of: .month, for: Date())?.start ?? Date()
-        var day = calendar.startOfDay(for: Date())
+        let now = Date()
+        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
+        let dailyExpenseTotals = currentMonthExpenseTransactions().reduce(into: [Date: Double]()) { totals, transaction in
+            let day = calendar.startOfDay(for: transaction.timestamp)
+            totals[day, default: 0] += transaction.amount
+        }
+        guard var day = dailyExpenseTotals.keys.max() else { return 0 }
+
         var count = 0
 
         while day >= startOfMonth {
-            if expenseTotal(on: day) <= dailyBudget {
-                count += 1
-                guard let previousDay = calendar.date(byAdding: .day, value: -1, to: day) else { break }
-                day = previousDay
-            } else {
+            guard let total = dailyExpenseTotals[day], total <= dailyBudget else {
                 break
             }
+
+            count += 1
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: day) else { break }
+            day = previousDay
         }
 
         return count
@@ -1753,7 +1753,6 @@ private extension HomeViewController {
         streakCaptionLabel?.font = MintFont.space(size: 14, weight: .bold)
         streakCaptionLabel?.textColor = .black
         streakCaptionLabel?.numberOfLines = 2
-        streakCaptionLabel?.textAlignment = .center
         streakTitleLabel?.removeCharacterSpacing()
         streakCountLabel?.removeCharacterSpacing()
         streakCaptionLabel?.removeCharacterSpacing()

@@ -18,7 +18,8 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var signUpConfirmPasswordTextField: UITextField!
     private var hasPresentedApplePromptThisSession = false
     private var hasAppliedFieldRenderingCleanup = false
-
+    @IBOutlet weak var IconImageBackground: UIView!
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
@@ -51,6 +52,7 @@ class LoginViewController: UIViewController {
             refreshFieldRendering()
         }
     }
+    
     @IBAction func goToSignUp(_ sender: Any) {
         signUpView.transform = CGAffineTransform(translationX: -view.frame.width, y: 0)
         signUpView.alpha = 1
@@ -191,6 +193,12 @@ class LoginViewController: UIViewController {
     }
 
     private func setupUI() {
+        
+        if let backgroundView = IconImageBackground {
+            backgroundView.backgroundColor = AppColors.accent
+        }
+            
+        
         view.backgroundColor = AppColors.background
         signInView.backgroundColor = AppColors.background
         signUpView.backgroundColor = AppColors.background
@@ -202,8 +210,6 @@ class LoginViewController: UIViewController {
         styleFieldBackgroundViews()
         stylePrimaryButtons()
         styleLabels()
-        styleButtons()
-        styleDecorativeViews()
     }
 
     private func styleFieldBackgroundViews() {
@@ -279,14 +285,6 @@ class LoginViewController: UIViewController {
     private func stylePrimaryButtons() {
         for button in primaryAuthButtons() {
             button.superview?.backgroundColor = AppColors.brand
-            button.superview?.layer.cornerRadius = 18
-            button.superview?.clipsToBounds = true
-
-            var config = button.configuration ?? .plain()
-            config.baseBackgroundColor = .clear
-            config.baseForegroundColor = AppColors.brandText
-            button.configuration = config
-            button.tintColor = AppColors.brandText
             button.titleLabel?.font = MintFont.space(size: 17, weight: .bold)
         }
     }
@@ -330,22 +328,6 @@ class LoginViewController: UIViewController {
         }
     }
 
-    private func styleButtons() {
-        for button in view.allSubviews.compactMap({ $0 as? UIButton }) {
-            switch button.currentTitle {
-            case "Sign In", "Sign Up":
-                if primaryAuthButtons().contains(where: { $0 === button }) {
-                    continue
-                }
-                applyAccentTextButtonStyle(button)
-            case "Forgot Password?":
-                applyAccentTextButtonStyle(button)
-            default:
-                break
-            }
-        }
-    }
-
     private func applyAccentTextButtonStyle(_ button: UIButton) {
         button.superview?.backgroundColor = .clear
         button.superview?.layer.cornerRadius = 0
@@ -374,23 +356,6 @@ class LoginViewController: UIViewController {
             }
     }
 
-    private func styleDecorativeViews() {
-        for decorativeView in view.allSubviews where decorativeView.bounds.height <= 2 {
-            decorativeView.backgroundColor = AppColors.cardBorder.withAlphaComponent(0.7)
-        }
-
-        if let logoContainer = view.allSubviews.first(where: {
-            $0.subviews.contains(where: { ($0 as? UIImageView) != nil }) && $0.bounds.width == 56 && $0.bounds.height == 56
-        }) {
-            logoContainer.backgroundColor = AppColors.brandLight
-            logoContainer.layer.cornerRadius = 18
-            logoContainer.layer.borderWidth = 1
-            logoContainer.layer.borderColor = AppColors.cardBorder.cgColor
-            logoContainer.subviews.compactMap { $0 as? UIImageView }.forEach {
-                $0.tintColor = AppColors.textPrimary
-            }
-        }
-    }
 }
 
 extension LoginViewController: ASAuthorizationControllerDelegate {
