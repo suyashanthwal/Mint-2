@@ -4324,6 +4324,7 @@ spend on?</string>
                     <connections>
                         <outlet property="goalsCollectionView" destination="goals-main-collection" id="goals-main-collection-outlet"/>
                         <outlet property="headerContainerView" destination="BUc-9Y-ZZt" id="goals-header-outlet"/>
+                        <outlet property="profileButton" destination="GCn-AK-2Uk" id="JWf-Ka-Zst"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nAa-Gf-6TC" sceneMemberID="firstResponder"/>
@@ -4512,19 +4513,20 @@ spend on?</string>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1FR-bs-h9W">
                                 <rect key="frame" x="0.0" y="172" width="393" height="50"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Analysis" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iiU-pO-KhT">
-                                        <rect key="frame" x="20.000000000000007" y="0.0" width="107.66666666666669" height="50"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Reports" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iiU-pO-KhT">
+                                        <rect key="frame" x="20.000000000000007" y="0.0" width="100.66666666666669" height="50"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wrm-3Q-yov">
                                         <rect key="frame" x="339" y="8" width="34" height="34"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="34" id="2cB-bl-5hs"/>
                                             <constraint firstAttribute="height" constant="34" id="hP3-EX-PJC"/>
                                         </constraints>
-                                        <color key="tintColor" red="0.2260742188" green="0.3195800781" blue="0.2231445312" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                        <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain">
                                             <imageReference key="image" image="person.circle.fill" catalog="system" symbolScale="large"/>
@@ -5034,6 +5036,7 @@ spend on?</string>
                         <outlet property="categoryBreakdownView" destination="huw-PT-UAy" id="9E1-d5-7ux"/>
                         <outlet property="categoryInsightLabel" destination="BfX-FN-MYJ" id="ndS-9f-gwt"/>
                         <outlet property="categoryInsightView" destination="eV1-7Y-7oY" id="imr-EU-Oqh"/>
+                        <outlet property="profileButton" destination="wrm-3Q-yov" id="9W9-GU-K0t"/>
                         <outlet property="subsAndBillsInsightLabel" destination="hQs-2T-QiI" id="lIl-Jx-7Cf"/>
                         <outlet property="subsAndBillsInsightView" destination="IAa-cM-css" id="wjk-6Q-sL7"/>
                         <outlet property="subsAndBillsView" destination="zfb-XD-xYc" id="ds1-Ce-NeN"/>
@@ -5492,11 +5495,11 @@ spend on?</string>
             <objects>
                 <viewController storyboardIdentifier="SummaryViewController" id="AZp-Kr-Mo7" customClass="SummaryViewController" customModule="Mint" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Ub4-rn-ULr">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="793"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="khM-Gi-KbU">
-                                <rect key="frame" x="0.0" y="59" width="393" height="734"/>
+                                <rect key="frame" x="0.0" y="172" width="393" height="563"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="RIs-3j-IFr">
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="902"/>
@@ -5577,7 +5580,7 @@ spend on?</string>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6En-yl-d7g">
-                                                                <rect key="frame" x="151" y="43.333333333333343" width="91.333333333333314" height="43.333333333333343"/>
+                                                                <rect key="frame" x="151" y="43.333333333333314" width="91.333333333333314" height="43.333333333333343"/>
                                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="36"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
@@ -5928,7 +5931,7 @@ spend on?</string>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AyH-JK-Wke" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1570" y="3420"/>
+            <point key="canvasLocation" x="2091" y="3420"/>
         </scene>
         <!--Payment Mode View Controller-->
         <scene sceneID="zvR-UK-SQx">
@@ -7529,8 +7532,8 @@ spend on?</string>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Jx3-a0-v8c">
                                 <rect key="frame" x="0.0" y="118" width="393" height="50"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Dashboard" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Hhq-Cm-h8n">
-                                        <rect key="frame" x="20" y="0.0" width="139.66666666666666" height="50"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Overview" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Hhq-Cm-h8n">
+                                        <rect key="frame" x="20" y="0.0" width="120" height="50"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="28"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -8881,7 +8884,7 @@ spend on?</string>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="mN7-3Q-Hs2"/>
+        <segue reference="79i-Hc-Ndo"/>
         <segue reference="gK4-Lp-9Tx"/>
         <segue reference="0Uj-7W-r3N"/>
         <segue reference="AYU-Fn-3ax"/>

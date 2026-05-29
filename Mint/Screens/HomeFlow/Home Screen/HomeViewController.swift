@@ -107,8 +107,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var amountLabel: UILabel!
     @IBOutlet weak var budgetAmountLabel: UILabel?
     @IBOutlet weak var monthlyRemainingLabel: UILabel?
-    @IBOutlet weak var profileButton: UIButton?
-
+    @IBOutlet private weak var profileButton: UIButton!
+    
     @IBOutlet private weak var confirmCardView: UIView!
     @IBOutlet private weak var confirmSectionContainerView: UIView!
     @IBOutlet private weak var transactionsCollectionView: UICollectionView!
@@ -140,6 +140,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var goalsButton: UIButton!
     @IBOutlet weak var insightsLabel: UILabel!
     @IBOutlet weak var insightViewCard: UIView!
+    
     private var hasCheckedOnboarding = false
     private var transactions: [Transaction] = []
     private var allTransactions: [Transaction] = []
@@ -1458,13 +1459,10 @@ private extension HomeViewController {
         goalProgressContainerView?.clipsToBounds = false
         goalProgressContainerView?.isHidden = false
         loadFireAnimation()
-        profileButton?.backgroundColor = AppColors.textPrimary
-        profileButton?.tintColor = AppColors.background
-        profileButton?.layer.cornerRadius = 19
-        profileButton?.clipsToBounds = true
-        profileButton?.setImage(UIImage(systemName: "person.crop.circle"), for: .normal)
-        profileButton?.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
-    }
+        profileButton.tintColor = AppColors.background
+        profileButton.backgroundColor = AppColors.textPrimary
+        profileButton.layer.cornerRadius = 17
+        profileButton.addTarget(self, action: #selector(showProfile), for: .touchUpInside)    }
 
     func applyDashboardGradients() {
         MonthlyView.applyGradient(
