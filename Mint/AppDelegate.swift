@@ -23,13 +23,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let tabFont = MintFont.space(size: 10, weight: .medium)
         let barButtonFont = MintFont.space(size: 17, weight: .semibold)
 
-        let navigationBarAppearance = UINavigationBar.appearance()
-        navigationBarAppearance.titleTextAttributes = [
-            .font: navTitleFont
-        ]
-        navigationBarAppearance.largeTitleTextAttributes = [
-            .font: navTitleFont
-        ]
 
         let tabBarItemAppearance = UITabBarItem.appearance()
         tabBarItemAppearance.setTitleTextAttributes([.font: tabFont], for: .normal)
