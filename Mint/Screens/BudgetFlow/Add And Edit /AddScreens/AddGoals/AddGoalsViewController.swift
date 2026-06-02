@@ -23,6 +23,7 @@ class AddGoalsViewController: UIViewController {
     var onGoalSaved: (() -> Void)?
     var datePickerVisible = false
     private var selectedGoalImage: UIImage?
+    private var userEditedMonthlyTarget = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,6 +48,17 @@ class AddGoalsViewController: UIViewController {
             targetAmount > 0, monthlyGoal > 0
         else {
             showValidationError()
+            return
+        }
+
+        let minimumMonthlyGoal = requiredMonthlyTarget(
+            targetAmount: targetAmount,
+            currentlySaved: 0,
+            targetDate: datePicker.date
+        )
+
+        guard monthlyGoal >= minimumMonthlyGoal else {
+            showMonthlyTargetTooLowError(minimumMonthlyGoal)
             return
         }
 
@@ -79,6 +91,23 @@ class AddGoalsViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
+
+    private func showMonthlyTargetTooLowError(_ minimumAmount: Double) {
+        let roundedMinimum = Int(minimumAmount)
+        let alert = UIAlertController(
+            title: "Monthly Target Too Low",
+            message: "Minimum monthly target is ₹\(roundedMinimum) to reach this goal by the selected date.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Use ₹\(roundedMinimum)", style: .default) { [weak self] _ in
+            self?.monthlyTargetTextField.text = String(roundedMinimum)
+            self?.userEditedMonthlyTarget = false
+        })
+        alert.addAction(UIAlertAction(title: "Change Date", style: .cancel))
+
+        present(alert, animated: true)
+    }
 }
 
 extension AddGoalsViewController {
@@ -97,6 +126,9 @@ extension AddGoalsViewController {
         nameTextField.applyAddEditInputStyle()
         amountTextField.applyAddEditInputStyle(keyboardType: .numberPad)
         monthlyTargetTextField.applyAddEditInputStyle(keyboardType: .numberPad)
+        monthlyTargetTextField.placeholder = "Auto calculated"
+        amountTextField.addTarget(self, action: #selector(goalAmountChanged), for: .editingChanged)
+        monthlyTargetTextField.addTarget(self, action: #selector(monthlyTargetChanged), for: .editingChanged)
         notesTextView.applyAddEditInputStyle()
         targetDateTitleLabel.textColor = AppColors.textPrimary
         targetDateValueLabel.textColor = AppColors.textSecondary
@@ -149,12 +181,57 @@ extension AddGoalsViewController {
 
     @objc func dateChanged() {
         updateDateLabel(datePicker.date)
+        updateSuggestedMonthlyTargetIfNeeded()
+    }
+
+    @objc func goalAmountChanged() {
+        updateSuggestedMonthlyTargetIfNeeded()
+    }
+
+    @objc func monthlyTargetChanged() {
+        userEditedMonthlyTarget = true
     }
 
     func updateDateLabel(_ date: Date) {
         let fmt = DateFormatter()
         fmt.dateStyle = .medium
         targetDateValueLabel.text = fmt.string(from: date)
+    }
+
+    private func updateSuggestedMonthlyTargetIfNeeded() {
+        guard !userEditedMonthlyTarget else { return }
+        guard let targetAmount = parsedAmount(from: amountTextField.text), targetAmount > 0 else {
+            monthlyTargetTextField.text = nil
+            return
+        }
+
+        let minimumMonthlyGoal = requiredMonthlyTarget(
+            targetAmount: targetAmount,
+            currentlySaved: 0,
+            targetDate: datePicker.date
+        )
+
+        monthlyTargetTextField.text = String(Int(minimumMonthlyGoal))
+    }
+
+    private func parsedAmount(from text: String?) -> Double? {
+        guard let text else { return nil }
+        return Double(text.filter { $0.isNumber || $0 == "." })
+    }
+
+    private func requiredMonthlyTarget(
+        targetAmount: Double,
+        currentlySaved: Double,
+        targetDate: Date
+    ) -> Double {
+        let remainingAmount = max(targetAmount - currentlySaved, 0)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let targetDay = calendar.startOfDay(for: targetDate)
+        let daysRemaining = max(calendar.dateComponents([.day], from: today, to: targetDay).day ?? 0, 1)
+        let monthsRemaining = max(Int(ceil(Double(daysRemaining) / 30.0)), 1)
+
+        return ceil(remainingAmount / Double(monthsRemaining))
     }
 
     @IBAction func choosePhotoTapped(_ sender: UIButton) {
