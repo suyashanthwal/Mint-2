@@ -51,6 +51,10 @@ final class NewBudgetViewController: UIViewController {
     private var currentBudget: Budget?
     private var subsAndBillsItems: [NewBudgetSubsOrBillItem] = []
     private var isBreakdownExpanded = false
+    private var hasCheckedOnboarding = false
+    private var spotlightView: OnboardingSpotlightView?
+    private var currentOnboardingStep = 0
+    private var onboardingSteps: [OnboardingStep] = []
     private let categoriesPerPage = 4
     private let categoryGridRows = 2
     private let categoryGridColumns = 2
@@ -81,6 +85,19 @@ final class NewBudgetViewController: UIViewController {
         reloadAll()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard !hasCheckedOnboarding else { return }
+        hasCheckedOnboarding = true
+
+        if OnboardingHelper.shouldShow(key: OnboardingKeys.budget) {
+            configureOnboardingSteps()
+            startOnboarding()
+            OnboardingHelper.markSeen(key: OnboardingKeys.budget)
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollections()
@@ -102,6 +119,118 @@ final class NewBudgetViewController: UIViewController {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+
+    private func configureOnboardingSteps() {
+        onboardingSteps = [
+            OnboardingStep(
+                view: totalSpendingCardView,
+                title: "Total Budget",
+                message: "See this month’s budget, current spending, and time left in one place.",
+                tooltipBelow: true
+            ),
+            OnboardingStep(
+                view: categoriesCollectionView,
+                title: "Categories",
+                message: "Long press a category to set limits, edit details, or delete it.",
+                tooltipBelow: false
+            ),
+            OnboardingStep(
+                view: subsAndBillsCollectionView,
+                title: "Subs & Bills",
+                message: "Track recurring payments and mark bills paid directly from the hold menu.",
+                tooltipBelow: false
+            ),
+            OnboardingStep(
+                view: goalsCollectionView,
+                title: "Saving Goals",
+                message: "Review monthly saving commitments and edit goals when plans change.",
+                tooltipBelow: false
+            )
+        ]
+    }
+
+    private func startOnboarding() {
+        guard !onboardingSteps.isEmpty else { return }
+
+        let overlay = OnboardingSpotlightView(frame: view.bounds)
+        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        overlay.configure(totalSteps: onboardingSteps.count)
+        overlay.onTap = { [weak self] in self?.advanceOnboarding() }
+        view.addSubview(overlay)
+        spotlightView = overlay
+        currentOnboardingStep = 0
+
+        overlay.alpha = 0
+        UIView.animate(withDuration: 0.25) {
+            overlay.alpha = 1
+        } completion: { [weak self] _ in
+            self?.showCurrentOnboardingStep(animated: false)
+        }
+    }
+
+    private func advanceOnboarding() {
+        currentOnboardingStep += 1
+
+        if currentOnboardingStep < onboardingSteps.count {
+            showCurrentOnboardingStep(animated: true)
+        } else {
+            finishOnboarding()
+        }
+    }
+
+    private func showCurrentOnboardingStep(animated: Bool) {
+        guard onboardingSteps.indices.contains(currentOnboardingStep) else { return }
+        let step = onboardingSteps[currentOnboardingStep]
+
+        spotlightView?.isUserInteractionEnabled = false
+        scrollToOnboardingStep(step, animated: animated) { [weak self] in
+            guard let self else { return }
+            self.spotlightView?.isUserInteractionEnabled = true
+            self.spotlightView?.spotlight(
+                on: step.view,
+                title: step.title,
+                message: step.message,
+                stepIndex: self.currentOnboardingStep,
+                tooltipBelow: step.tooltipBelow,
+                animated: animated
+            )
+        }
+    }
+
+    private func scrollToOnboardingStep(
+        _ step: OnboardingStep,
+        animated: Bool,
+        completion: @escaping () -> Void
+    ) {
+        let targetRect = step.view.convert(step.view.bounds.insetBy(dx: -16, dy: -16), to: scrollView)
+        let visibleHeight = max(scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom, 1)
+        let targetY = min(
+            max(targetRect.midY - (visibleHeight * 0.42), -scrollView.adjustedContentInset.top),
+            max(scrollView.contentSize.height - visibleHeight + scrollView.adjustedContentInset.bottom, -scrollView.adjustedContentInset.top)
+        )
+
+        UIView.animate(
+            withDuration: animated ? 0.42 : 0,
+            delay: 0,
+            options: [.curveEaseInOut, .beginFromCurrentState],
+            animations: {
+                self.scrollView.setContentOffset(CGPoint(x: 0, y: targetY), animated: false)
+            },
+            completion: { _ in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.08, execute: completion)
+            }
+        )
+    }
+
+    private func finishOnboarding() {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.spotlightView?.alpha = 0
+        }, completion: { _ in
+            self.spotlightView?.removeFromSuperview()
+            self.spotlightView = nil
+            self.scrollView.setContentOffset(.zero, animated: true)
+        })
     }
 
     private func setupCollections() {

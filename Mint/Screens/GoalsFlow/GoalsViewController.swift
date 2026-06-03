@@ -554,6 +554,7 @@ final class GoalsViewController: UIViewController {
 
     private func startOnboarding() {
         let overlay = OnboardingSpotlightView(frame: view.bounds)
+        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         overlay.configure(totalSteps: onboardingSteps.count)
         overlay.onTap = { [weak self] in self?.advanceOnboarding() }
         view.addSubview(overlay)

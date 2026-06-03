@@ -214,38 +214,67 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         
         loadDataFromDatabase()
 
-        onboardingSteps = [
+        configureOnboardingSteps()
+    }
+
+    private func configureOnboardingSteps() {
+        var steps = [
             OnboardingStep(
                 view: MonthlyView,
                 title: "Monthly Overview",
-                message: "See your total spending for the month at a glance.",
+                message: "Track spending, budget, and remaining money for the current month.",
                 tooltipBelow: true
             ),
             OnboardingStep(
-                view: todaycardview,
-                title: "Daily Limit",
-                message: "Track today's spending against your daily budget so you stay on track.",
+                view: averageCardsView,
+                title: "Daily Rhythm",
+                message: "Use daily average, streak, and trend cards to keep spending habits visible.",
                 tooltipBelow: true
             ),
             OnboardingStep(
                 view: goalsCardView,
                 title: "Savings Goal",
-                message: "Monitor your progress toward a specific savings target.",
+                message: "See the active goal, saved amount, and progress without leaving the dashboard.",
                 tooltipBelow: true
             ),
             OnboardingStep(
                 view: upcomingcardview,
                 title: "Upcoming Bills",
-                message: "Bills due soon appear here so you're never caught off guard.",
+                message: "Review upcoming bills and subscriptions before they hit your budget.",
                 tooltipBelow: false
             ),
             OnboardingStep(
                 view: recentcardview,
                 title: "Recent Transactions",
-                message: "Your latest spending activity, always one glance away.",
+                message: "Long press a transaction to edit or delete it from the quick menu.",
                 tooltipBelow: false
-            ),
+            )
         ]
+
+        if !confirmSectionContainerView.isHidden {
+            steps.insert(
+                OnboardingStep(
+                    view: confirmSectionContainerView,
+                    title: "Confirm Activity",
+                    message: "Approve detected transactions before they affect your totals.",
+                    tooltipBelow: false
+                ),
+                at: min(4, steps.count)
+            )
+        }
+
+        if !insightViewOuterCard.isHidden {
+            steps.append(
+                OnboardingStep(
+                    view: insightViewOuterCard,
+                    title: "Money Insight",
+                    message: "Read the quick coaching note for the month before drilling into reports.",
+                    tooltipBelow: false
+                )
+            )
+        }
+
+        onboardingSteps = steps
     }
 
     @IBAction func goalSummaryToGoalPage(_ sender: Any) {
@@ -263,6 +292,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         hasCheckedOnboarding = true
 
         if OnboardingHelper.shouldShow(key: OnboardingKeys.home) {
+            configureOnboardingSteps()
             showHomeOnboarding()
             OnboardingHelper.markSeen(key: OnboardingKeys.home)
         }
@@ -400,6 +430,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
 
     private func startOnboarding() {
         let overlay = OnboardingSpotlightView(frame: view.bounds)
+        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         overlay.configure(totalSteps: onboardingSteps.count)
         overlay.onTap = { [weak self] in self?.advanceOnboarding() }
         view.addSubview(overlay)

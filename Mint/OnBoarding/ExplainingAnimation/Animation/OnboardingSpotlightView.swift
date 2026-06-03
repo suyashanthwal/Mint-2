@@ -13,22 +13,26 @@ final class OnboardingSpotlightView: UIView {
     var onTap: (() -> Void)?
 
     private enum Style {
-        static let accentGreen      = UIColor(red: 0.27, green: 0.45, blue: 0.31, alpha: 1.0)
-        static let accentGreenLight = UIColor(red: 0.27, green: 0.45, blue: 0.31, alpha: 0.15)
-        static let cornerRadius: CGFloat  = 12.0
+        static let accentColor            = AppColors.brand
+        static let cardBackground         = AppColors.card
+        static let borderColor            = AppColors.cardBorder.cgColor
+        static let cornerRadius: CGFloat  = 18.0
         static let shadowColor            = UIColor.black.cgColor
-        static let shadowOpacity: Float   = 0.05
-        static let shadowOffset           = CGSize(width: 0, height: 1)
-        static let shadowRadius: CGFloat  = 1
+        static let shadowOpacity: Float   = 0.22
+        static let shadowOffset           = CGSize(width: 0, height: 12)
+        static let shadowRadius: CGFloat  = 24
     }
 
     private let maskLayer = CAShapeLayer()
+    private let pulseLayer = CAShapeLayer()
     private let dimView   = UIView()
 
     private let tooltipContainer: UIView = {
         let v = UIView()
-        v.backgroundColor               = .white
+        v.backgroundColor               = Style.cardBackground
         v.layer.cornerRadius            = Style.cornerRadius
+        v.layer.borderColor             = Style.borderColor
+        v.layer.borderWidth             = 1
         v.layer.shadowColor             = Style.shadowColor
         v.layer.shadowOpacity           = Style.shadowOpacity
         v.layer.shadowOffset            = Style.shadowOffset
@@ -41,7 +45,7 @@ final class OnboardingSpotlightView: UIView {
 
     private let accentBar: UIView = {
         let v = UIView()
-        v.backgroundColor    = Style.accentGreen
+        v.backgroundColor    = Style.accentColor
         v.layer.cornerRadius = 2
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
@@ -50,7 +54,7 @@ final class OnboardingSpotlightView: UIView {
     private let stepBadge: UILabel = {
         let l = UILabel()
         l.font      = MintFont.space(size: 11, weight: .semibold)
-        l.textColor = Style.accentGreen
+        l.textColor = Style.accentColor
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
@@ -58,7 +62,7 @@ final class OnboardingSpotlightView: UIView {
     private let tooltipTitle: UILabel = {
         let l = UILabel()
         l.font      = MintFont.space(size: 17, weight: .bold)
-        l.textColor = UIColor.black
+        l.textColor = AppColors.textPrimary
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
     }()
@@ -66,7 +70,7 @@ final class OnboardingSpotlightView: UIView {
     private let tooltipMessage: UILabel = {
         let l = UILabel()
         l.font          = MintFont.space(size: 14, weight: .regular)
-        l.textColor     = UIColor.gray
+        l.textColor     = AppColors.textSecondary
         l.numberOfLines = 0
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
@@ -74,7 +78,7 @@ final class OnboardingSpotlightView: UIView {
 
     private let divider: UIView = {
         let v = UIView()
-        v.backgroundColor = UIColor.lightGray.withAlphaComponent(0.3)
+        v.backgroundColor = AppColors.cardBorder.withAlphaComponent(0.55)
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
@@ -92,7 +96,7 @@ final class OnboardingSpotlightView: UIView {
         let l = UILabel()
         l.text          = "Tap anywhere to continue"
         l.font          = MintFont.space(size: 12, weight: .medium)
-        l.textColor     = UIColor.lightGray
+        l.textColor     = AppColors.textSecondary
         l.textAlignment = .center
         l.translatesAutoresizingMaskIntoConstraints = false
         return l
@@ -119,6 +123,12 @@ final class OnboardingSpotlightView: UIView {
         dimView.backgroundColor  = UIColor.black.withAlphaComponent(0.55)
         dimView.layer.mask       = maskLayer
         addSubview(dimView)
+
+        pulseLayer.fillColor = UIColor.clear.cgColor
+        pulseLayer.strokeColor = Style.accentColor.cgColor
+        pulseLayer.lineWidth = 2
+        pulseLayer.opacity = 0
+        layer.addSublayer(pulseLayer)
 
         tooltipContainer.addSubview(accentBar)
         tooltipContainer.addSubview(stepBadge)
@@ -182,9 +192,11 @@ final class OnboardingSpotlightView: UIView {
         tooltipBelow: Bool,
         animated: Bool = true
     ) {
+        layoutIfNeeded()
         let targetFrame = targetView.convert(targetView.bounds, to: self)
         let inset        = targetFrame.insetBy(dx: -10, dy: -10)
-        let hole         = UIBezierPath(roundedRect: inset, cornerRadius: Style.cornerRadius)
+        let radius       = max(targetView.layer.cornerRadius, Style.cornerRadius)
+        let hole         = UIBezierPath(roundedRect: inset, cornerRadius: radius)
         let fullPath     = UIBezierPath(rect: bounds)
         fullPath.append(hole)
         fullPath.usesEvenOddFillRule = true
@@ -199,6 +211,7 @@ final class OnboardingSpotlightView: UIView {
             maskLayer.add(anim, forKey: "spotlight")
         }
         maskLayer.path = fullPath.cgPath
+        animatePulse(to: hole.cgPath)
 
         stepBadge.text      = "STEP \(stepIndex + 1) OF \(progressStack.arrangedSubviews.count)"
         tooltipTitle.text   = title
@@ -210,11 +223,15 @@ final class OnboardingSpotlightView: UIView {
 
         if tooltipBelow {
             tooltipTopConstraint = tooltipContainer.topAnchor.constraint(
-                equalTo: topAnchor, constant: inset.maxY + 20)
+                equalTo: topAnchor,
+                constant: min(max(inset.maxY + 20, safeAreaInsets.top + 16), bounds.height - 210)
+            )
             tooltipTopConstraint?.isActive = true
         } else {
             tooltipBottomConstraint = tooltipContainer.bottomAnchor.constraint(
-                equalTo: topAnchor, constant: inset.minY - 20)
+                equalTo: topAnchor,
+                constant: max(inset.minY - 20, safeAreaInsets.top + 190)
+            )
             tooltipBottomConstraint?.isActive = true
         }
 
@@ -237,7 +254,7 @@ final class OnboardingSpotlightView: UIView {
             v.heightAnchor.constraint(equalToConstant: size),
         ])
         v.layer.cornerRadius = size / 2
-        v.backgroundColor    = active ? Style.accentGreen : UIColor.lightGray.withAlphaComponent(0.3)
+        v.backgroundColor    = active ? Style.accentColor : AppColors.cardBorder.withAlphaComponent(0.45)
         return v
     }
 
@@ -246,8 +263,8 @@ final class OnboardingSpotlightView: UIView {
             let isActive = i == activeIndex
             UIView.animate(withDuration: 0.25) {
                 dot.backgroundColor    = isActive
-                    ? Style.accentGreen
-                    : UIColor.lightGray.withAlphaComponent(0.3)
+                    ? Style.accentColor
+                    : AppColors.cardBorder.withAlphaComponent(0.45)
                 let size: CGFloat      = isActive ? 8 : 6
                 dot.layer.cornerRadius = size / 2
                 dot.constraints.forEach { c in
@@ -257,6 +274,21 @@ final class OnboardingSpotlightView: UIView {
                 }
             }
         }
+    }
+
+    private func animatePulse(to path: CGPath) {
+        pulseLayer.path = path
+        pulseLayer.opacity = 1
+        pulseLayer.removeAnimation(forKey: "pulse")
+
+        let pulse = CABasicAnimation(keyPath: "opacity")
+        pulse.fromValue = 0.95
+        pulse.toValue = 0.35
+        pulse.duration = 0.9
+        pulse.autoreverses = true
+        pulse.repeatCount = .infinity
+        pulse.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        pulseLayer.add(pulse, forKey: "pulse")
     }
 
     @objc private func tapped() { onTap?() }
