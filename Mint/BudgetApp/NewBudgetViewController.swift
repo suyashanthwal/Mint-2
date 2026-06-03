@@ -56,7 +56,7 @@ final class NewBudgetViewController: UIViewController {
     private let categoryGridColumns = 2
     private let categoryGridSpacing: CGFloat = 20
     private let categoryGridCellHeight: CGFloat = 140
-    private let totalBudgetCardHeight: CGFloat = 128
+    private let totalBudgetCardHeight: CGFloat = 160
     private let expandedBreakdownHeight: CGFloat = 282
     private var totalBudgetCardHeightConstraint: NSLayoutConstraint?
     private var expandedBudgetHeight: CGFloat {
@@ -123,7 +123,12 @@ final class NewBudgetViewController: UIViewController {
             $0?.backgroundColor = .clear
             $0?.showsHorizontalScrollIndicator = false
             $0?.showsVerticalScrollIndicator = false
+            if let collectionView = $0 {
+                allowContextMenuPreviewOverflow(for: collectionView)
+            }
         }
+        categoriesCollectionView.clipsToBounds = true
+        categoriesCollectionView.layer.masksToBounds = true
         categoriesCollectionView.isScrollEnabled = true
         categoriesCollectionView.collectionViewLayout = makeCategoriesGridLayout()
         categoriesPageControl.addTarget(self, action: #selector(categoriesPageChanged(_:)), for: .valueChanged)
@@ -229,7 +234,7 @@ final class NewBudgetViewController: UIViewController {
 
     private func applyBudgetTypography() {
         totalBudgetTitleLabel.textColor = AppColors.brandText
-        totalBudgetTitleLabel.font = MintFont.space(size: 18, weight: .bold)
+        totalBudgetTitleLabel.font = MintFont.space(size: 16, weight: .bold)
         totalBudgetTitleLabel.removeCharacterSpacing()
 
         totalBudgetAmountLabel.textColor = AppColors.brandText
@@ -269,11 +274,12 @@ final class NewBudgetViewController: UIViewController {
 
     private func configureAddButton(_ button: UIButton?, action: Selector, accessibilityLabel: String) {
         var config = UIButton.Configuration.plain()
-        config.image = UIImage(systemName: "plus")
-        config.baseForegroundColor = AppColors.brand
+        config.image = UIImage(systemName: "plus")?
+            .withConfiguration(UIImage.SymbolConfiguration(pointSize: 12, weight: .regular))
+        config.baseForegroundColor = .white
         config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 6, bottom: 6, trailing: 6)
         button?.configuration = config
-        button?.tintColor = AppColors.brand
+        button?.tintColor = .white
         button?.accessibilityLabel = accessibilityLabel
         button?.addTarget(self, action: action, for: .touchUpInside)
     }
@@ -386,7 +392,6 @@ final class NewBudgetViewController: UIViewController {
             heightDimension: .absolute(categoryGridCellHeight)
         )
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-
         let rowSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .absolute(categoryGridCellHeight)
@@ -842,6 +847,15 @@ final class NewBudgetViewController: UIViewController {
         present(alert, animated: true)
     }
 
+    private func allowContextMenuPreviewOverflow(for collectionView: UICollectionView) {
+        var currentView: UIView? = collectionView
+        while let view = currentView, !(view is UIScrollView && view !== collectionView) {
+            view.clipsToBounds = false
+            view.layer.masksToBounds = false
+            currentView = view.superview
+        }
+    }
+
 }
 
 extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -915,8 +929,9 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
         if collectionView == categoriesCollectionView {
+            guard categories.indices.contains(indexPath.item) else { return nil }
             let category = categories[indexPath.item]
-            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
                 let setLimit = UIAction(title: "Set Limit", image: UIImage(systemName: "slider.horizontal.3")) { _ in
                     self?.presentSetLimitPrompt(for: category)
                 }
@@ -936,8 +951,9 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
         }
 
         if collectionView == subsAndBillsCollectionView {
+            guard subsAndBillsItems.indices.contains(indexPath.item) else { return nil }
             let item = subsAndBillsItems[indexPath.item]
-            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
                 switch item {
                 case .subscription(let payment):
                     let markPaid = UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { [weak self] _ in
@@ -977,8 +993,9 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
             }
         }
 
+        guard goals.indices.contains(indexPath.item) else { return nil }
         let goal = goals[indexPath.item]
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
                 self?.openEditGoal(goal: goal)
             }
@@ -994,7 +1011,27 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
             return UIMenu(title: goal.name, children: [edit, delete])
         }
     }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        contextMenuPreview(for: collectionView, configuration: configuration)
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        contextMenuPreview(for: collectionView, configuration: configuration)
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        willEndContextMenuInteraction configuration: UIContextMenuConfiguration,
+                        animator: (any UIContextMenuInteractionAnimating)?) {
+        animator?.addCompletion { [weak self, weak collectionView] in
+            guard let self, let collectionView else { return }
+            self.resetContextMenuCells(in: collectionView)
+        }
+    }
 }
+
 private extension UIView {
     func applyGradient(colors: [CGColor], name: String) {
         let gradient = (layer.sublayers?.first { $0.name == name } as? CAGradientLayer) ?? CAGradientLayer()
@@ -1006,6 +1043,64 @@ private extension UIView {
 
         if gradient.superlayer == nil {
             layer.insertSublayer(gradient, at: 0)
+        }
+    }
+}
+
+private extension NewBudgetViewController {
+    func contextMenuPreview(
+        for collectionView: UICollectionView,
+        configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        guard let indexPath = configuration.identifier as? NSIndexPath else { return nil }
+
+        let previewView: UIView
+        if collectionView == categoriesCollectionView,
+           let cell = collectionView.cellForItem(at: indexPath as IndexPath) as? CategoryCollectionViewCell {
+            previewView = cell.contextMenuPreviewView
+        } else if collectionView == subsAndBillsCollectionView,
+                  let cell = collectionView.cellForItem(at: indexPath as IndexPath) as? BillCollectionViewCell {
+            previewView = cell.contextMenuPreviewView
+        } else if collectionView == goalsCollectionView,
+                  let cell = collectionView.cellForItem(at: indexPath as IndexPath) as? GoalCollectionViewCell {
+            previewView = cell.contextMenuPreviewView
+        } else {
+            return nil
+        }
+
+        guard previewView.window != nil,
+              let previewSuperview = previewView.superview,
+              !previewView.bounds.isEmpty
+        else { return nil }
+
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        parameters.visiblePath = UIBezierPath(
+            roundedRect: previewView.bounds,
+            cornerRadius: previewView.layer.cornerRadius
+        )
+
+        let targetCenter = previewSuperview.convert(
+            CGPoint(x: previewView.frame.midX, y: previewView.frame.midY),
+            to: view
+        )
+        let target = UIPreviewTarget(container: view, center: targetCenter)
+        return UITargetedPreview(view: previewView, parameters: parameters, target: target)
+    }
+
+    func resetContextMenuCells(in collectionView: UICollectionView) {
+        collectionView.visibleCells.forEach { cell in
+            if let categoryCell = cell as? CategoryCollectionViewCell {
+                categoryCell.resetContextMenuState()
+            } else if let billCell = cell as? BillCollectionViewCell {
+                billCell.resetContextMenuState()
+            } else if let goalCell = cell as? GoalCollectionViewCell {
+                goalCell.resetContextMenuState()
+            }
+
+            cell.layer.zPosition = 0
+            cell.transform = .identity
+            cell.contentView.transform = .identity
         }
     }
 }

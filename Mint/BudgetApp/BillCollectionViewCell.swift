@@ -23,6 +23,19 @@ final class BillCollectionViewCell: UICollectionViewCell {
 
     private let brandLogoLabel = UILabel()
 
+    var contextMenuPreviewView: UIView {
+        statusFrameView ?? cardView
+    }
+
+    func resetContextMenuState() {
+        transform = .identity
+        contentView.transform = .identity
+        cardView.transform = .identity
+        statusFrameView?.transform = .identity
+        cardView.layer.cornerRadius = 8
+        statusFrameView?.layer.cornerRadius = 8
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         setupUI()
@@ -69,6 +82,7 @@ final class BillCollectionViewCell: UICollectionViewCell {
         dateLabel.text = item.date
         applyBrandIcon(for: item.title, fallbackIcon: item.symbolName)
         normalizeTextAppearance()
+        resetContextMenuState()
     }
 
     private func normalizeTextAppearance() {

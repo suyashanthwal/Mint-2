@@ -14,6 +14,17 @@ final class GoalCollectionViewCell: UICollectionViewCell {
     @IBOutlet private weak var titleLabel: UILabel!
     @IBOutlet private weak var amountLabel: UILabel!
 
+    var contextMenuPreviewView: UIView {
+        cardView
+    }
+
+    func resetContextMenuState() {
+        transform = .identity
+        contentView.transform = .identity
+        cardView.transform = .identity
+        cardView.layer.cornerRadius = 8
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         setupUI()
@@ -38,5 +49,6 @@ final class GoalCollectionViewCell: UICollectionViewCell {
         amountLabel.text = item.amount
         titleLabel.removeCharacterSpacing()
         amountLabel.removeCharacterSpacing()
+        resetContextMenuState()
     }
 }

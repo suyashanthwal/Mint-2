@@ -22,6 +22,18 @@ final class CategoryCollectionViewCell: UICollectionViewCell {
     @IBOutlet private weak var progressFillView: UIView!
     @IBOutlet private weak var progressFillWidthConstraint: NSLayoutConstraint!
 
+    var contextMenuPreviewView: UIView {
+        cardView
+    }
+
+    func resetContextMenuState() {
+        transform = .identity
+        contentView.transform = .identity
+        cardView.transform = .identity
+        cardView.layer.cornerRadius = 18
+        cardView.clipsToBounds = true
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         setupUI()
@@ -68,5 +80,6 @@ final class CategoryCollectionViewCell: UICollectionViewCell {
         amountLabel.text = item.amount
         titleLabel.removeCharacterSpacing()
         amountLabel.removeCharacterSpacing()
+        resetContextMenuState()
     }
 }

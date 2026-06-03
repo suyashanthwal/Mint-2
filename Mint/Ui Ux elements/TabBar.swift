@@ -8,9 +8,9 @@ enum AppTab: Int {
 
     var title: String {
         switch self {
-        case .home:    return "Overview"
+        case .home:    return "OVERVIEW"
         case .budget:  return "BUDGET"
-        case .reports: return "REPORTS"
+        case .reports: return "ANALYSIS"
         case .goals:   return "GOALS"
         }
     }

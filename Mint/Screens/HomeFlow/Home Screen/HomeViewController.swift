@@ -98,7 +98,6 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var todaycardview: UIView!
     @IBOutlet weak var goalcardview: UIView!
-    @IBOutlet weak var recentcardview: UIView!
     @IBOutlet weak var upcomingcardview: UIView!
 
     @IBOutlet private weak var dashboardLabel: UILabel?
@@ -109,6 +108,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBOutlet weak var monthlyRemainingLabel: UILabel?
     @IBOutlet private weak var profileButton: UIButton!
     
+    @IBOutlet weak var recentcardview: UIView!
     @IBOutlet private weak var confirmCardView: UIView!
     @IBOutlet private weak var confirmSectionContainerView: UIView!
     @IBOutlet private weak var transactionsCollectionView: UICollectionView!
@@ -391,6 +391,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         confirmCollectionView.collectionViewLayout.invalidateLayout()
         transactionsCollectionView.collectionViewLayout.invalidateLayout()
         billsCollectionView.collectionViewLayout.invalidateLayout()
+        applyUpperLayoutSizing()
         applyDashboardGradients()
         updateDashboardGoalBackground()
         updateGoalImageMask()
@@ -891,6 +892,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     private func applyInsights(_ response: HomeInsightsResponse?) {
         let cleanedText = sanitizeInsight(response?.homeDigest)
         insightsLabel?.text = cleanedText
+        insightViewCard?.isHidden = cleanedText.isEmpty
         insightViewOuterCard?.isHidden = cleanedText.isEmpty
     }
     
@@ -1134,6 +1136,10 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         confirmCollectionView.delegate = self
     }
     private func setupTransactionsCollectionView() {
+        recentcardview.backgroundColor = AppColors.card
+        recentcardview.layer.cornerRadius = 14
+        recentcardview.layer.masksToBounds = false
+
         registerPlaceholderCell(for: transactionsCollectionView)
         transactionsCollectionView.register(
             UINib(nibName: "RecentTransactionsCollectionViewCell", bundle: nil),
@@ -1166,6 +1172,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         billsCollectionView.delegate   = self
         billsCollectionView.bounces = false
         billsCollectionView.isDirectionalLockEnabled = true
+        allowContextMenuPreviewOverflow(for: billsCollectionView)
     }
 
     private func registerPlaceholderCell(for collectionView: UICollectionView) {
@@ -1173,6 +1180,15 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
             UINib(nibName: PlaceHolderCollectionViewCell.nibName, bundle: nil),
             forCellWithReuseIdentifier: PlaceHolderCollectionViewCell.reuseIdentifier
         )
+    }
+
+    private func allowContextMenuPreviewOverflow(for collectionView: UICollectionView) {
+        var currentView: UIView? = collectionView
+        while let view = currentView, !(view is UIScrollView && view !== collectionView) {
+            view.clipsToBounds = false
+            view.layer.masksToBounds = false
+            currentView = view.superview
+        }
     }
 
     private func updateHomeCollectionLayouts() {
@@ -1363,7 +1379,7 @@ extension HomeViewController {
                         contextMenuConfigurationForItemAt indexPath: IndexPath,
                         point: CGPoint) -> UIContextMenuConfiguration? {
         if collectionView == transactionsCollectionView {
-            guard !transactions.isEmpty else { return nil }
+            guard transactions.indices.contains(indexPath.item) else { return nil }
             let transaction = transactions[indexPath.item]
             contextMenuFeedbackGenerator.prepare()
             contextMenuFeedbackGenerator.impactOccurred()
@@ -1389,12 +1405,12 @@ extension HomeViewController {
         }
 
         if collectionView == billsCollectionView {
-            guard !upcomingItems.isEmpty else { return nil }
+            guard upcomingItems.indices.contains(indexPath.item) else { return nil }
             guard case .bill(let bill) = upcomingItems[indexPath.item] else { return nil }
             contextMenuFeedbackGenerator.prepare()
             contextMenuFeedbackGenerator.impactOccurred()
 
-            return UIContextMenuConfiguration(identifier: bill.id.uuidString as NSString, previewProvider: nil) { [weak self] _ in
+            return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
                 let title = bill.isPaid ? "Mark as Not Paid" : "Mark as Paid"
                 let imageName = bill.isPaid ? "arrow.uturn.backward.circle" : "checkmark.circle"
 
@@ -1408,9 +1424,49 @@ extension HomeViewController {
 
         return nil
     }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        contextMenuPreview(for: collectionView, configuration: configuration)
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        contextMenuPreview(for: collectionView, configuration: configuration)
+    }
 }
 
 private extension HomeViewController {
+    func contextMenuPreview(
+        for collectionView: UICollectionView,
+        configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        guard collectionView == billsCollectionView,
+              let indexPath = configuration.identifier as? NSIndexPath,
+              let cell = collectionView.cellForItem(at: indexPath as IndexPath) as? UpcomingBillsCollectionViewCell
+        else { return nil }
+
+        let previewView = cell.contextMenuPreviewView
+        guard previewView.window != nil,
+              let previewSuperview = previewView.superview,
+              !previewView.bounds.isEmpty
+        else { return nil }
+
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        parameters.visiblePath = UIBezierPath(
+            roundedRect: previewView.bounds,
+            cornerRadius: previewView.layer.cornerRadius
+        )
+
+        let targetCenter = previewSuperview.convert(
+            CGPoint(x: previewView.frame.midX, y: previewView.frame.midY),
+            to: view
+        )
+        let target = UIPreviewTarget(container: view, center: targetCenter)
+        return UITargetedPreview(view: previewView, parameters: parameters, target: target)
+    }
+
     func setupDashboardAppearance() {
         view.backgroundColor = AppColors.background
         scrollView.backgroundColor = AppColors.background
@@ -1437,6 +1493,7 @@ private extension HomeViewController {
         insightViewCard.layer.borderColor = UIColor(hex: "#0B1E12")
             .cgColor
         insightViewCard.isHidden = true
+        insightViewOuterCard.isHidden = true
         insightsLabel.text = nil
 
         MonthlyView.clipsToBounds = true
@@ -1684,6 +1741,15 @@ private extension HomeViewController {
         if let cardsStack = MonthlyView.superview?.superview as? UIStackView {
             cardsStack.spacing = 19
         }
+
+        if let averageCardsStack = dailyAverageTitleLabel?.superview?.superview as? UIStackView,
+           let dailyAverageCard = dailyAverageTitleLabel?.superview {
+            let availableWidth = max(view.bounds.width - 40, 0)
+            let spacing = averageCardsStack.spacing
+            let preferredDailyAverageWidth: CGFloat = availableWidth >= 340 ? 204 : 178
+            let maxDailyAverageWidth = max(166, availableWidth - spacing - 104)
+            setWidthConstraint(on: dailyAverageCard, to: min(preferredDailyAverageWidth, maxDailyAverageWidth))
+        }
     }
 
     func applySectionTitleSpacing() {
@@ -1748,9 +1814,17 @@ private extension HomeViewController {
         streakTitleLabel?.textColor = .black
         streakCountLabel?.font = MintFont.space(size: 24, weight: .heavy)
         streakCountLabel?.textColor = .black
+        streakCountLabel?.adjustsFontSizeToFitWidth = true
+        streakCountLabel?.minimumScaleFactor = 0.78
         streakCaptionLabel?.font = MintFont.space(size: 14, weight: .bold)
         streakCaptionLabel?.textColor = .black
         streakCaptionLabel?.numberOfLines = 2
+        streakCaptionLabel?.textAlignment = .center
+        streakCaptionLabel?.lineBreakMode = .byWordWrapping
+        streakCaptionLabel?.adjustsFontSizeToFitWidth = true
+        streakCaptionLabel?.minimumScaleFactor = 0.78
+        streakCaptionLabel?.setContentCompressionResistancePriority(.required, for: .vertical)
+        streakCaptionLabel?.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         streakTitleLabel?.removeCharacterSpacing()
         streakCountLabel?.removeCharacterSpacing()
         streakCaptionLabel?.removeCharacterSpacing()
@@ -1899,6 +1973,17 @@ private extension HomeViewController {
         guard let view else { return }
         let constraints = view.constraints + (view.superview?.constraints ?? [])
         for constraint in constraints where constraint.firstAttribute == .height {
+            if (constraint.firstItem as? UIView) === view || constraint.secondItem == nil {
+                constraint.constant = constant
+                return
+            }
+        }
+    }
+
+    func setWidthConstraint(on view: UIView?, to constant: CGFloat) {
+        guard let view else { return }
+        let constraints = view.constraints + (view.superview?.constraints ?? [])
+        for constraint in constraints where constraint.firstAttribute == .width {
             if (constraint.firstItem as? UIView) === view || constraint.secondItem == nil {
                 constraint.constant = constant
                 return

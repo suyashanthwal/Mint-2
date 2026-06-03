@@ -19,6 +19,10 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
     private let urgentThreshold = 3
     private let brandLogoLabel = UILabel()
 
+    var contextMenuPreviewView: UIView {
+        statusFrameView ?? cardContainerView ?? contentView
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
 

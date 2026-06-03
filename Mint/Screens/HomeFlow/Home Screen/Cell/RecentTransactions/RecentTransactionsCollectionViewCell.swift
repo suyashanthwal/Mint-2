@@ -2,7 +2,6 @@
 import UIKit
 
 class RecentTransactionsCollectionViewCell: UICollectionViewCell {
-
     @IBOutlet weak var BillDate: UILabel!
     @IBOutlet weak var BillIcon: UIImageView!
     @IBOutlet weak var BillIconBackgroundView: UIView!

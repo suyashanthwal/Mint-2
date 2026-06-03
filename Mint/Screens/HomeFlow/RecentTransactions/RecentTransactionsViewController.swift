@@ -62,6 +62,7 @@ final class RecentTransactionsViewController: UIViewController {
 
     private let calendar = Calendar.current
     private let db = DatabaseManager.shared
+    private let contextMenuFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     private var dateSortOrder   : DateSortOrder   = .newestFirst
     private var amountSortOrder : AmountSortOrder = .none
@@ -108,8 +109,8 @@ final class RecentTransactionsViewController: UIViewController {
         amountButton.backgroundColor = AppColors.brandLight
         paymentButton.backgroundColor = AppColors.brandLight
         MonthCard.backgroundColor = AppColors.card
-        
-        
+        MonthCard.layer.cornerRadius = 14
+        MonthCard.layer.masksToBounds = false
     }
 
     private func setupCollectionView() {
@@ -130,7 +131,10 @@ final class RecentTransactionsViewController: UIViewController {
         layout.minimumLineSpacing      = 1
         layout.minimumInteritemSpacing = 0
         collectionView.collectionViewLayout = layout
+        collectionView.backgroundColor              = .white
+        collectionView.layer.cornerRadius           = 14
         collectionView.layer.masksToBounds          = true
+        collectionView.clipsToBounds                = true
         collectionView.showsVerticalScrollIndicator = true
         collectionView.alwaysBounceVertical         = false
         collectionView.bounces                      = false
@@ -326,6 +330,15 @@ final class RecentTransactionsViewController: UIViewController {
         guard db.deleteTransaction(id: transaction.id) else { return }
         NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
     }
+
+    private func allowContextMenuPreviewOverflow(for collectionView: UICollectionView) {
+        var currentView: UIView? = collectionView
+        while let view = currentView, !(view is UIScrollView && view !== collectionView) {
+            view.clipsToBounds = false
+            view.layer.masksToBounds = false
+            currentView = view.superview
+        }
+    }
 }
 
 extension RecentTransactionsViewController: UICollectionViewDataSource {
@@ -367,6 +380,18 @@ extension RecentTransactionsViewController: UICollectionViewDataSource {
 
 extension RecentTransactionsViewController: UICollectionViewDelegateFlowLayout {
 
+    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+        guard !isShowingPlaceholder,
+              let cell = collectionView.cellForItem(at: indexPath) else { return }
+        collectionView.superview?.bringSubviewToFront(collectionView)
+        cell.layer.zPosition = 1000
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) else { return }
+        cell.layer.zPosition = 0
+    }
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard !isShowingPlaceholder else { return }
         let transaction = displayedTransactions[indexPath.item]
@@ -383,5 +408,34 @@ extension RecentTransactionsViewController: UICollectionViewDelegateFlowLayout {
         }
 
         return CGSize(width: collectionView.bounds.width, height: 60)
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        contextMenuConfigurationForItemAt indexPath: IndexPath,
+                        point: CGPoint) -> UIContextMenuConfiguration? {
+        guard !isShowingPlaceholder else { return nil }
+
+        let transaction = displayedTransactions[indexPath.item]
+        contextMenuFeedbackGenerator.prepare()
+        contextMenuFeedbackGenerator.impactOccurred()
+
+        return UIContextMenuConfiguration(identifier: transaction.id.uuidString as NSString, previewProvider: nil) { [weak self] _ in
+            let editAction = UIAction(
+                title: "Edit",
+                image: UIImage(systemName: "square.and.pencil")
+            ) { _ in
+                self?.presentEditTransaction(transaction)
+            }
+
+            let deleteAction = UIAction(
+                title: "Delete",
+                image: UIImage(systemName: "trash"),
+                attributes: .destructive
+            ) { _ in
+                self?.promptDeleteTransaction(transaction)
+            }
+
+            return UIMenu(title: transaction.name, children: [editAction, deleteAction])
+        }
     }
 }
