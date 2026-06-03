@@ -3,6 +3,76 @@ import SQLite3
 
 extension DatabaseManager {
 
+    @discardableResult
+    func insertGoal(
+        for userId: UUID,
+        name: String,
+        targetAmount: Double,
+        targetDate: Date,
+        monthlyGoal: Double,
+        iconName: String,
+        imageName: String? = nil
+    ) -> UUID? {
+        let sql = """
+        INSERT INTO goals
+            (id,
+             user_id,
+             name,
+             target_amount,
+             currently_saved,
+             target_date,
+             monthly_goal,
+             icon_name,
+             image_name,
+             is_completed,
+             is_on_hold,
+             completed_on,
+             created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """
+
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
+            print("insertGoal: prepare failed")
+            return nil
+        }
+
+        let newId = UUID()
+        let iso = ISO8601DateFormatter()
+        let createdAt = iso.string(from: Date())
+
+        sqlite3_bind_text(stmt, 1, (newId.uuidString as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(stmt, 2, (userId.uuidString as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(stmt, 3, (name as NSString).utf8String, -1, nil)
+        sqlite3_bind_double(stmt, 4, targetAmount)
+        sqlite3_bind_double(stmt, 5, 0)
+        sqlite3_bind_text(stmt, 6, (iso.string(from: targetDate) as NSString).utf8String, -1, nil)
+        sqlite3_bind_double(stmt, 7, monthlyGoal)
+        sqlite3_bind_text(stmt, 8, (iconName as NSString).utf8String, -1, nil)
+
+        if let imageName {
+            sqlite3_bind_text(stmt, 9, (imageName as NSString).utf8String, -1, nil)
+        } else {
+            sqlite3_bind_null(stmt, 9)
+        }
+
+        sqlite3_bind_int(stmt, 10, 0)
+        sqlite3_bind_int(stmt, 11, 0)
+        sqlite3_bind_null(stmt, 12)
+        sqlite3_bind_text(stmt, 13, (createdAt as NSString).utf8String, -1, nil)
+
+        let success = sqlite3_step(stmt) == SQLITE_DONE
+        sqlite3_finalize(stmt)
+
+        if success {
+            print("Goal inserted: \(name)")
+            return newId
+        } else {
+            print("insertGoal failed: \(String(cString: sqlite3_errmsg(db)))")
+            return nil
+        }
+    }
+
     func fetchGoals() -> [Goal] {
         var result: [Goal] = []
         guard let userId = currentUserIdString else { return result }
@@ -77,71 +147,25 @@ extension DatabaseManager {
         iconName: String,
         imageName: String? = nil
     ) -> UUID? {
-        let sql = """
-        INSERT INTO goals
-            (id,
-             user_id,
-             name,
-             target_amount,
-             currently_saved,
-             target_date,
-             monthly_goal,
-             icon_name,
-             image_name,
-             is_completed,
-             is_on_hold,
-             completed_on,
-             created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """
-
-        var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
-            print("insertGoal: prepare failed")
-            return nil
-        }
-
-        let newId = UUID()
-        let iso = ISO8601DateFormatter()
-
         guard let userId = currentUserIdString else {
-            sqlite3_finalize(stmt)
             print("insertGoal: no signed-in user")
             return nil
         }
 
-        let createdAt = iso.string(from: Date())
-
-        sqlite3_bind_text(stmt, 1, (newId.uuidString as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(stmt, 2, (userId as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(stmt, 3, (name as NSString).utf8String, -1, nil)
-        sqlite3_bind_double(stmt, 4, targetAmount)
-        sqlite3_bind_double(stmt, 5, 0)
-        sqlite3_bind_text(stmt, 6, (iso.string(from: targetDate) as NSString).utf8String, -1, nil)
-        sqlite3_bind_double(stmt, 7, monthlyGoal)
-        sqlite3_bind_text(stmt, 8, (iconName as NSString).utf8String, -1, nil)
-
-        if let imageName {
-            sqlite3_bind_text(stmt, 9, (imageName as NSString).utf8String, -1, nil)
-        } else {
-            sqlite3_bind_null(stmt, 9)
-        }
-
-        sqlite3_bind_int(stmt, 10, 0)
-        sqlite3_bind_int(stmt, 11, 0)
-        sqlite3_bind_null(stmt, 12)
-        sqlite3_bind_text(stmt, 13, (createdAt as NSString).utf8String, -1, nil)
-
-        let success = sqlite3_step(stmt) == SQLITE_DONE
-        sqlite3_finalize(stmt)
-
-        if success {
-            print("Goal inserted: \(name)")
-            return newId
-        } else {
-            print("insertGoal failed: \(String(cString: sqlite3_errmsg(db)))")
+        guard let userUUID = UUID(uuidString: userId) else {
+            print("insertGoal: invalid signed-in user id")
             return nil
         }
+
+        return insertGoal(
+            for: userUUID,
+            name: name,
+            targetAmount: targetAmount,
+            targetDate: targetDate,
+            monthlyGoal: monthlyGoal,
+            iconName: iconName,
+            imageName: imageName
+        )
     }
 
     func linkGoalToCurrentBudget(goalId: UUID) {

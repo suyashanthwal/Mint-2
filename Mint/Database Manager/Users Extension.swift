@@ -13,6 +13,7 @@ extension DatabaseManager {
     private static let passwordStoreKey = "stored_account_passwords"
     private static let appleUserLinksKey = "apple_account_links"
     private static let defaultAdminPassword = "admin123"
+    private static let starterGoalName = "Savings"
     private static let defaultAdminOnboardingKeys = [
         OnboardingKeys.home,
         OnboardingKeys.budget,
@@ -243,6 +244,8 @@ extension DatabaseManager {
             lastResetDate: lastResetDate
         ) else { return nil }
 
+        seedStarterGoalIfNeeded(for: userId)
+
         storePassword(password, for: normalizedEmail)
         setCurrentUser(id: userId)
         setCurrentAuthentication(provider: .emailPassword)
@@ -301,6 +304,8 @@ extension DatabaseManager {
             createdAt: createdAt,
             lastResetDate: lastResetDate
         ) else { return nil }
+
+        seedStarterGoalIfNeeded(for: userId)
 
         linkAppleUserIdentifier(userIdentifier, to: userId)
         setCurrentUser(id: userId)
@@ -479,6 +484,33 @@ extension DatabaseManager {
         }
         sqlite3_finalize(budgetStmt)
         return true
+    }
+
+    private func seedStarterGoalIfNeeded(for userId: UUID) {
+        let existingGoalCountQuery = "SELECT COUNT(*) FROM goals WHERE user_id = ?;"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, existingGoalCountQuery, -1, &stmt, nil) == SQLITE_OK else {
+            print("seedStarterGoalIfNeeded: prepare failed")
+            return
+        }
+        defer { sqlite3_finalize(stmt) }
+
+        sqlite3_bind_text(stmt, 1, (userId.uuidString as NSString).utf8String, -1, nil)
+
+        guard sqlite3_step(stmt) == SQLITE_ROW else { return }
+        guard sqlite3_column_int(stmt, 0) == 0 else { return }
+
+        let calendar = Calendar.current
+        let targetDate = calendar.date(byAdding: .month, value: 6, to: Date()) ?? Date()
+
+        _ = insertGoal(
+            for: userId,
+            name: Self.starterGoalName,
+            targetAmount: 10000,
+            targetDate: targetDate,
+            monthlyGoal: 1500,
+            iconName: "banknote.fill"
+        )
     }
 
     private func linkedAppleAccounts() -> [String: String] {

@@ -149,6 +149,12 @@ class AddCategoryViewController: UIViewController {
 
         let db = DatabaseManager.shared
 
+        if let validation = db.validateCategoryBudgetLimit(proposedBudget: budget),
+           validation.exceedsTotalBudget {
+            showBudgetExceededAlert(validation: validation)
+            return
+        }
+
         if let newCategoryId = db.insertCategory(
             name: name.trimmingCharacters(in: .whitespaces),
             color: colorHex,
@@ -173,6 +179,24 @@ class AddCategoryViewController: UIViewController {
         let alert = UIAlertController(
             title: "Missing Information",
             message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
+    private func showBudgetExceededAlert(validation: DatabaseManager.CategoryBudgetValidation) {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "₹"
+        formatter.maximumFractionDigits = 0
+
+        let proposedTotal = formatter.string(from: NSNumber(value: validation.proposedCategoryTotal)) ?? "₹\(Int(validation.proposedCategoryTotal))"
+        let totalBudget = formatter.string(from: NSNumber(value: validation.allocatedBudget)) ?? "₹\(Int(validation.allocatedBudget))"
+
+        let alert = UIAlertController(
+            title: "Total Budget Exceeded",
+            message: "This limit would push your category allocations to \(proposedTotal), above your total monthly budget of \(totalBudget). Please deallocate some budget from another category before saving this one.",
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))

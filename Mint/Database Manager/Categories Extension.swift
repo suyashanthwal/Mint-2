@@ -3,6 +3,15 @@ import SQLite3
 
 extension DatabaseManager {
 
+    struct CategoryBudgetValidation {
+        let allocatedBudget: Double
+        let proposedCategoryTotal: Double
+
+        var exceedsTotalBudget: Bool {
+            proposedCategoryTotal > allocatedBudget
+        }
+    }
+
     func fetchCategories() -> [Category] {
         var result: [Category] = []
 
@@ -208,5 +217,21 @@ extension DatabaseManager {
     func deleteAllCategoriesForCurrentUser() {
         guard let userId = currentUserIdString else { return }
         execute("DELETE FROM categories WHERE user_id = ?;", args: [userId])
+    }
+
+    func validateCategoryBudgetLimit(
+        proposedBudget: Double,
+        excludingCategoryId categoryIdToExclude: UUID? = nil
+    ) -> CategoryBudgetValidation? {
+        guard let allocatedBudget = fetchCurrentBudget()?.allocatedBudget else { return nil }
+
+        let existingCategoryTotal = fetchCategories()
+            .filter { $0.id != categoryIdToExclude }
+            .reduce(0) { $0 + $1.budget }
+
+        return CategoryBudgetValidation(
+            allocatedBudget: allocatedBudget,
+            proposedCategoryTotal: existingCategoryTotal + proposedBudget
+        )
     }
 }

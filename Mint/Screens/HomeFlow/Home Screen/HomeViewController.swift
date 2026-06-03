@@ -176,6 +176,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupDashboardAppearance()
+        configureUpcomingBillsNavigation()
 
         setupConfirmCollectionView()
         setupTransactionsCollectionView()
@@ -285,6 +286,14 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBAction func monthlyToSummaryButton(_ sender: Any) {
         performSegue(withIdentifier: SegueIdentifier.summary, sender: sender)
     }
+
+    @objc private func openUpcomingBillsScreen() {
+        guard let billsViewController = storyboard?.instantiateViewController(
+            withIdentifier: "BillsSubscriptionCalenderViewController"
+        ) as? BillsSubscriptionCalenderViewController else { return }
+
+        navigationController?.pushViewController(billsViewController, animated: true)
+    }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
@@ -314,6 +323,14 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
                 tabBarController.selectedIndex = index
                 return
             }
+        }
+    }
+
+    private func configureUpcomingBillsNavigation() {
+        let chevronButtons = upcomingcardview.allSubviews.compactMap { $0 as? UIButton }
+        chevronButtons.forEach {
+            $0.removeTarget(nil, action: nil, for: .touchUpInside)
+            $0.addTarget(self, action: #selector(openUpcomingBillsScreen), for: .touchUpInside)
         }
     }
 
