@@ -281,7 +281,7 @@ final class OngoingGoalCollectionViewCell: UICollectionViewCell {
             return
         }
 
-        let config = UIImage.SymbolConfiguration(pointSize: 42, weight: .medium)
+        let config = UIImage.SymbolConfiguration(pointSize: 58, weight: .medium)
         goalImageView.image = UIImage(systemName: goal.iconName, withConfiguration: config)?
             .withTintColor(.white.withAlphaComponent(currentMode == .inactive ? 0.7 : 0.9), renderingMode: .alwaysOriginal)
     }

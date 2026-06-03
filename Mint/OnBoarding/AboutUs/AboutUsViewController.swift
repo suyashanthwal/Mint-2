@@ -170,14 +170,14 @@ class AboutUsViewController: UIViewController{
         navigationController?.navigationBar.tintColor = AppColors.textPrimary
 
         yellowCircle.backgroundColor = AppColors.brand.withAlphaComponent(0.28)
-        greenCircle.backgroundColor = UIColor(hex: "#1D9B63").withAlphaComponent(0.24)
+        greenCircle.backgroundColor = AppColors.background.withAlphaComponent(0.28)
         yellowCircle.effect = UIBlurEffect(style: .systemUltraThinMaterialDark)
         greenCircle.effect = UIBlurEffect(style: .systemThinMaterialDark)
 
         centerImage.superview?.applyOnboardingCardStyle()
         infoLabel.superview?.applyOnboardingCardStyle()
 
-        titleLabel.font = MintFont.syne(size: 26, weight: .bold)
+        titleLabel.font = MintFont.syne(size: 24, weight: .bold)
         titleLabel.textColor = AppColors.textPrimary
         titleLabel.numberOfLines = 2
         titleLabel.adjustsFontSizeToFitWidth = true

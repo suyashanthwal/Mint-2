@@ -109,16 +109,16 @@
                                         <rect key="frame" x="0.0" y="0.0" width="394" height="156"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="top-spacer">
-                                                <rect key="frame" x="0.0" y="0.0" width="394" height="58"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="394" height="28"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="58" id="top-spacer-height"/>
+                                                    <constraint firstAttribute="height" constant="28" id="top-spacer-height"/>
                                                 </constraints>
                                             </view>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="bottom" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="bottom-row-stack">
-                                                <rect key="frame" x="0.0" y="58" width="394" height="98"/>
+                                                <rect key="frame" x="0.0" y="28" width="394" height="128"/>
                                                 <subviews>
                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="text-stack">
-                                                        <rect key="frame" x="0.0" y="55.666666666666657" width="150" height="42.333333333333343"/>
+                                                        <rect key="frame" x="0.0" y="85.666666666666657" width="150" height="42.333333333333343"/>
                                                         <subviews>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalCompressionResistancePriority="1000" text="Headphones" lineBreakMode="tailTruncation" numberOfLines="2" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="title-label">
                                                                 <rect key="frame" x="0.0" y="0.0" width="150" height="24"/>
@@ -136,20 +136,20 @@
                                                         </constraints>
                                                     </stackView>
                                                     <view contentMode="scaleToFill" horizontalHuggingPriority="249" verticalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="middle-spacer">
-                                                        <rect key="frame" x="162" y="48" width="36" height="50"/>
+                                                        <rect key="frame" x="162" y="78" width="36" height="50"/>
                                                     </view>
-                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="bottom" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="right-column-stack">
-                                                        <rect key="frame" x="210" y="0.0" width="184" height="98"/>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="bottom" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="right-column-stack">
+                                                        <rect key="frame" x="210" y="0.0" width="184" height="128"/>
                                                         <subviews>
-                                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="252" verticalHuggingPriority="252" translatesAutoresizingMaskIntoConstraints="NO" id="goal-image">
-                                                                <rect key="frame" x="0.0" y="0.0" width="184" height="52"/>
+                                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="252" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="goal-image">
+                                                                <rect key="frame" x="0.0" y="0.0" width="184" height="84"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="height" constant="84" id="image-height"/>
                                                                     <constraint firstAttribute="width" constant="184" id="image-width"/>
                                                                 </constraints>
                                                             </imageView>
                                                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="action-button">
-                                                                <rect key="frame" x="72" y="62" width="112" height="36"/>
+                                                                <rect key="frame" x="72" y="92" width="112" height="36"/>
                                                                 <color key="backgroundColor" white="1" alpha="0.12" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="height" constant="36" id="button-height"/>

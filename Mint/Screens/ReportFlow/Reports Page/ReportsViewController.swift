@@ -98,6 +98,7 @@ class ReportsViewController: UIViewController {
     @IBOutlet weak var subsAndBillsInsightLabel: UILabel!
     @IBOutlet weak var categoryInsightLabel: UILabel!
     @IBOutlet weak var summaryInsightLabel: UILabel!
+    @IBOutlet private weak var profileButton: UIButton!
     
     
     private var transactions: [Transaction] = []
@@ -291,6 +292,12 @@ class ReportsViewController: UIViewController {
             return calendar.date(from: DateComponents(year: year, month: month, day: day)).map { [$0] } ?? []
         }
     }
+    
+    @objc private func showProfile() {
+        guard let profile = storyboard?.instantiateViewController(withIdentifier: "ProfileViewController") else { return }
+        navigationController?.pushViewController(profile, animated: true)
+    }
+
 
     private func nextRecurringEventDate(for subscription: RecurringPayment, onOrAfter date: Date) -> Date? {
         let calendar = Calendar.current
@@ -317,6 +324,7 @@ class ReportsViewController: UIViewController {
     }
 
     private func setupUI() {
+        
         view.backgroundColor = AppColors.background
         MainScrollView.backgroundColor = AppColors.background
         SummaryCard.backgroundColor = AppColors.card
@@ -327,6 +335,11 @@ class ReportsViewController: UIViewController {
         CategoryBreakdownButton.tintColor = AppColors.accent
         SummaryButton.tintColor = AppColors.accent
         SubsAndBillsButton.tintColor = AppColors.accent
+        
+        profileButton.tintColor = AppColors.background
+        profileButton.backgroundColor = AppColors.textPrimary
+        profileButton.layer.cornerRadius = 17
+        profileButton.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
 
         
         configureInsightCard(summaryInsightVIew, label: summaryInsightLabel)

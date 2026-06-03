@@ -19,6 +19,8 @@ final class BillCollectionViewCell: UICollectionViewCell {
     @IBOutlet private weak var dateLabel: UILabel!
     @IBOutlet private weak var statusFrameView: UIView?
 
+    
+
     private let brandLogoLabel = UILabel()
 
     override func awakeFromNib() {

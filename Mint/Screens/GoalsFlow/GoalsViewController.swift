@@ -27,6 +27,9 @@ final class GoalsViewController: UIViewController {
 
     @IBOutlet private weak var headerContainerView: UIView!
     @IBOutlet private weak var goalsCollectionView: UICollectionView!
+    
+    @IBOutlet private weak var profileButton: UIButton!
+    
 
     private var hasCheckedOnboarding = false
     private var allGoals: [Goal] = []
@@ -84,6 +87,13 @@ final class GoalsViewController: UIViewController {
         view.backgroundColor = AppColors.background
         headerContainerView.backgroundColor = .clear
         goalsCollectionView.backgroundColor = .clear
+        
+        profileButton.tintColor = AppColors.background
+        profileButton.backgroundColor = AppColors.textPrimary
+        profileButton.layer.cornerRadius = 17
+        profileButton.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
+        
+        
     }
 
     private func registerReusableViews() {
@@ -531,6 +541,12 @@ final class GoalsViewController: UIViewController {
             break
         }
     }
+    
+    @objc private func showProfile() {
+            guard let profile = storyboard?.instantiateViewController(withIdentifier: "ProfileViewController") else { return }
+            navigationController?.pushViewController(profile, animated: true)
+        }
+
 
     private func showGoalsOnboarding() {
         startOnboarding()

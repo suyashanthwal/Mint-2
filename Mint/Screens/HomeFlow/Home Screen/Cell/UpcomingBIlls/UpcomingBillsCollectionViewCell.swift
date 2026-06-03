@@ -12,6 +12,9 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var timelineConnectorView: UIView?
     @IBOutlet weak var dateLabel: UILabel?
     @IBOutlet weak var timelineConnectorTrailingConstraint: NSLayoutConstraint?
+    
+    @IBOutlet private weak var dotView: UIView!
+    @IBOutlet private weak var dotLabel: UILabel!
 
     private let urgentThreshold = 3
     private let brandLogoLabel = UILabel()
@@ -30,6 +33,11 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
         statusFrameView?.layer.cornerRadius = 8
         statusFrameView?.layer.masksToBounds = false
         statusFrameView?.backgroundColor = .clear
+        dotView.layer.cornerRadius = 4
+        dotView.clipsToBounds = true
+        dotLabel.font = MintFont.space(size: 8, weight: .bold)
+        dotLabel.textColor = AppColors.textSecondary
+        dotLabel.textAlignment = .left
 
         contentView.layer.cornerRadius  = 8
         contentView.layer.masksToBounds = false
@@ -71,8 +79,8 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
             dateLabel?.text = shortDate(bill.billDate)
             iconImageView?.image = iconImage(named: bill.icon)
             applyBrandIcon(for: bill.name, fallbackIcon: bill.icon)
-            normalizeTextAppearance()
             applyTimelineStyle(for: bill.billDate, isPaid: true, isFirst: isFirst, isLast: isLast)
+            normalizeTextAppearance()
             return
         }
 
@@ -81,8 +89,8 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
         dateLabel?.text = shortDate(bill.billDate)
         iconImageView?.image = iconImage(named: bill.icon)
         applyBrandIcon(for: bill.name, fallbackIcon: bill.icon)
-        normalizeTextAppearance()
         applyTimelineStyle(for: bill.billDate, isPaid: false, isFirst: isFirst, isLast: isLast)
+        normalizeTextAppearance()
     }
 
     func configureCell(with subscription: RecurringPayment, isFirst: Bool, isLast: Bool) {
@@ -92,8 +100,8 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
         let icon = subscription.icon ?? "creditcard.fill"
         iconImageView?.image = iconImage(named: icon)
         applyBrandIcon(for: subscription.name, fallbackIcon: icon)
-        normalizeTextAppearance()
         applyTimelineStyle(for: subscription.nextDate, isPaid: false, isFirst: isFirst, isLast: isLast)
+        normalizeTextAppearance()
     }
 
     private func shortDate(_ date: Date) -> String {
@@ -112,28 +120,31 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
         let daysUntilDue = Calendar.current.dateComponents([.day], from: today, to: dueDay).day ?? 0
 
         let statusColor: UIColor
+        let statusText: String
         let borderWidth: CGFloat
 
         let isPastDue = daysUntilDue < 0
 
         if isPaid {
             statusColor = AppColors.cardBorder
+            statusText = "Paid"
             borderWidth = 1
             contentView.alpha = 0.72
         } else if isPastDue {
             statusColor = AppColors.error
+            statusText = "Overdue"
             borderWidth = 1.5
             contentView.alpha = 1
-        } else if daysUntilDue <= 7 {
-            statusColor = AppColors.orange
-            borderWidth = 1.25
-            contentView.alpha = 1
         } else {
-            statusColor = AppColors.cardBorder
-            borderWidth = 1
+            statusColor = AppColors.orange
+            statusText = "Upcoming"
+            borderWidth = 1.25
             contentView.alpha = 1
         }
 
+        dotView.backgroundColor = statusColor
+        dotLabel.text = statusText
+        dotLabel.textColor = isPaid ? AppColors.textSecondary : statusColor
         statusFrameView?.layer.borderColor = statusColor.cgColor
         statusFrameView?.layer.borderWidth = borderWidth
         cardContainerView?.backgroundColor = AppColors.card
@@ -159,7 +170,8 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
         [
             (Title, Title?.font, Title?.textColor),
             (Amount, Amount?.font, Amount?.textColor),
-            (dateLabel, dateLabel?.font, dateLabel?.textColor)
+            (dateLabel, dateLabel?.font, dateLabel?.textColor),
+            (dotLabel, dotLabel.font, dotLabel.textColor)
         ].forEach { label, font, color in
             guard let label, let font, let color, let text = label.text else { return }
             label.attributedText = NSAttributedString(

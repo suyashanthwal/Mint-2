@@ -88,7 +88,7 @@
                 <outlet property="statusFrameView" destination="J7E-0Y-KbO" id="budget-bill-status"/>
                 <outlet property="titleLabel" destination="nOo-mU-tQX" id="budget-bill-title"/>
             </connections>
-            <point key="canvasLocation" x="280.91603053435114" y="152.46478873239437"/>
+            <point key="canvasLocation" x="280.91603053435114" y="152.11267605633805"/>
         </collectionViewCell>
     </objects>
     <resources>
