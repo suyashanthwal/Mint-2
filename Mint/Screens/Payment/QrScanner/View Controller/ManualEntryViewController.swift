@@ -100,7 +100,7 @@ import UIKit
             categoryValueLabel.text     = Constants.fallbackExpenseCategoryName
             categoryIconImageView.image = UIImage(systemName: Constants.fallbackExpenseCategoryIcon)
         }
-        categoryIconImageView.tintColor = AppColors.brand
+        
       
         noteValueLabel.textColor = noteText.isEmpty
             ? AppColors.textSecondary
@@ -286,7 +286,7 @@ import UIKit
              }
          
          iconCircles?.suffix(from: 2).forEach { circle in
-                 circle.backgroundColor = AppColors.inputBackground
+                 circle.backgroundColor = AppColors.brandLight
                  circle.layer.borderWidth = 1
                  circle.layer.borderColor = AppColors.cardBorder.cgColor
                  
@@ -303,7 +303,6 @@ import UIKit
              $0?.textColor = AppColors.textPrimary
          }
          fromTitleLabel.textColor = AppColors.textSecondary
-         categoryIconImageView.tintColor = AppColors.brand
 
          expenseIncomeSegment.backgroundColor          = AppColors.sectionBackground
          expenseIncomeSegment.selectedSegmentTintColor = AppColors.inputBackground
@@ -320,7 +319,6 @@ import UIKit
              for: .selected
          )
 
-         nextDateButton.tintColor = AppColors.brand
          view.applyMintTypography()
      }
 

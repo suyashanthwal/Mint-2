@@ -912,9 +912,21 @@ class ReportsViewController: UIViewController {
             "none",
             "null"
         ]
+        let blockedExactValues = [
+            "home digest",
+            "home_digest",
+            "summary",
+            "category highlight",
+            "category_highlight",
+            "subs and bills",
+            "subs_and_bills",
+            "goal insight",
+            "goal_insight"
+        ]
 
         if cleanedText.isEmpty ||
             blockedPrefixes.contains(where: { lowercaseText.hasPrefix($0) }) ||
+            blockedExactValues.contains(lowercaseText) ||
             isLowValueInsight(lowercaseText)
         {
             return ""

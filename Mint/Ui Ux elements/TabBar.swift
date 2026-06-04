@@ -132,6 +132,17 @@ final class CustomTabBarController: UITabBarController {
         payButton.addTarget(self, action: #selector(payTapped), for: .touchUpInside)
     }
 
+    func select(_ tab: AppTab, resetToRoot: Bool = true, animated: Bool = true) {
+        selectedIndex = tab.rawValue
+        if resetToRoot {
+            resetSelectedTabToRoot(animated: animated)
+        }
+        updateSelection()
+        if animated {
+            animateTabItem(at: tab.rawValue)
+        }
+    }
+
     private func layoutBar() {
         let width = view.bounds.width - 32
         let x: CGFloat = 16
@@ -150,25 +161,23 @@ final class CustomTabBarController: UITabBarController {
 
     @objc private func tabTap(_ g: UITapGestureRecognizer) {
         guard let i = g.view?.tag else { return }
-        selectedIndex = i
-        resetSelectedTabToRoot()
-        updateSelection()
-        animateTabItem(at: i)
+        guard let tab = AppTab(rawValue: i) else { return }
+        select(tab)
     }
 
-    private func resetSelectedTabToRoot() {
+    private func resetSelectedTabToRoot(animated: Bool = true) {
         if let navigationController = selectedViewController as? UINavigationController {
-            navigationController.popToRootViewController(animated: true)
+            navigationController.popToRootViewController(animated: animated)
             return
         }
 
-        selectedViewController?.navigationController?.popToRootViewController(animated: true)
+        selectedViewController?.navigationController?.popToRootViewController(animated: animated)
     }
 
     @objc private func payTapped() {
         UIView.animate(
             withDuration: 0.12,
-            animations: { self.payButton.transform = CGAffineTransform(scaleX: 0.88, y: 0.88) },
+            animations: { self.payButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0) },
             completion: { _ in
                 UIView.animate(withDuration: 0.35,
                                delay: 0,
@@ -184,6 +193,9 @@ final class CustomTabBarController: UITabBarController {
         if let sheet = payment.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.prefersGrabberVisible = false
+            sheet.preferredCornerRadius = 20
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         }
         present(payment, animated: true)
     }

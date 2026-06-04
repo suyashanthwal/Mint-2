@@ -176,6 +176,8 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupDashboardAppearance()
+        configureMonthlySummaryNavigation()
+        configureSavingGoalsNavigation()
         configureUpcomingBillsNavigation()
 
         setupConfirmCollectionView()
@@ -284,7 +286,15 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     @IBAction func monthlyFlipButton(_ sender: Any) {
     }
     @IBAction func monthlyToSummaryButton(_ sender: Any) {
+        openMonthlySummary(sender)
+    }
+
+    @objc private func openMonthlySummary(_ sender: Any) {
         performSegue(withIdentifier: SegueIdentifier.summary, sender: sender)
+    }
+
+    @objc private func openSavingGoals(_ sender: Any) {
+        switchToGoalsTab()
     }
 
     @objc private func openUpcomingBillsScreen() {
@@ -308,6 +318,11 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func switchToGoalsTab() {
+        if let customTabBarController = tabBarController as? CustomTabBarController {
+            customTabBarController.select(.goals)
+            return
+        }
+
         guard let tabBarController,
               let viewControllers = tabBarController.viewControllers else { return }
 
@@ -324,6 +339,30 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
                 return
             }
         }
+    }
+
+    private func configureMonthlySummaryNavigation() {
+        MonthlyView.isUserInteractionEnabled = true
+        removeChevronButtons(from: MonthlyView)
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openMonthlySummary(_:)))
+        tapGesture.cancelsTouchesInView = false
+        MonthlyView.addGestureRecognizer(tapGesture)
+    }
+
+    private func configureSavingGoalsNavigation() {
+        goalsCardView.isUserInteractionEnabled = true
+        removeChevronButtons(from: goalsCardView)
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openSavingGoals(_:)))
+        tapGesture.cancelsTouchesInView = false
+        goalsCardView.addGestureRecognizer(tapGesture)
+    }
+
+    private func removeChevronButtons(from container: UIView) {
+        container.allSubviews
+            .compactMap { $0 as? UIButton }
+            .forEach { $0.removeFromSuperview() }
     }
 
     private func configureUpcomingBillsNavigation() {
@@ -959,9 +998,21 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
             "none",
             "null"
         ]
+        let blockedExactValues = [
+            "home digest",
+            "home_digest",
+            "summary",
+            "category highlight",
+            "category_highlight",
+            "subs and bills",
+            "subs_and_bills",
+            "goal insight",
+            "goal_insight"
+        ]
 
         if cleanedText.isEmpty ||
             blockedPrefixes.contains(where: { lowercaseText.hasPrefix($0) }) ||
+            blockedExactValues.contains(lowercaseText) ||
             isLowValueInsight(lowercaseText)
         {
             return ""

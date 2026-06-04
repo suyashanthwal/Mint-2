@@ -142,7 +142,11 @@ final class LocalInsightsService {
     }
 
     private func fallbackHomeDigest(_ payload: LocalInsightsPayload) -> String {
-        if let projectionVsBudget = payload.projectionVsBudget, projectionVsBudget > 0 {
+        let daysLeft = payload.summary.daysInMonth - payload.summary.daysElapsed
+
+        if let projectionVsBudget = payload.projectionVsBudget,
+           projectionVsBudget > 0,
+           payload.summary.daysElapsed >= 7 {
             return "At this pace, you may exceed budget by \(formatRupees(projectionVsBudget)); trim one flexible category today."
         }
 
@@ -161,11 +165,28 @@ final class LocalInsightsService {
             return "\(goal.name) is almost done; one focused top-up can finish the stretch."
         }
 
+        if payload.summary.budget == nil,
+           payload.summary.daysElapsed > 0,
+           payload.summary.totalExpense > 0,
+           daysLeft > 0 {
+            let projectedTotal = payload.summary.dailyAverage * Double(payload.summary.daysInMonth)
+            return "On current pace, you'll spend \(formatRupees(projectedTotal)) this month across all categories."
+        }
+
+        if let goal = payload.goals.first(where: { $0.completionPercent < 30 && $0.target > 0 }) {
+            let remaining = goal.target - goal.saved
+            return "\(goal.name) still needs \(formatRupees(remaining)); even a small top-up this week builds momentum."
+        }
+
         return ""
     }
 
     private func fallbackSummary(_ payload: LocalInsightsPayload) -> String {
-        if let projectionVsBudget = payload.projectionVsBudget, projectionVsBudget > 0 {
+        let daysLeft = payload.summary.daysInMonth - payload.summary.daysElapsed
+
+        if let projectionVsBudget = payload.projectionVsBudget,
+           projectionVsBudget > 0,
+           payload.summary.daysElapsed >= 7 {
             return "Projected overspend is \(formatRupees(projectionVsBudget)); one skipped restaurant visit can narrow the gap."
         }
 
@@ -174,6 +195,14 @@ final class LocalInsightsService {
            previousAverage > 0 {
             let difference = previousAverage - payload.summary.dailyAverage
             return "Your daily pace is \(formatRupees(difference)) below last month; keeping it steady compounds."
+        }
+
+        if daysLeft > 5, payload.summary.dailyAverage > 0 {
+            let projectedSpend = payload.summary.dailyAverage * Double(payload.summary.daysInMonth)
+            if let budget = payload.summary.budget, projectedSpend < budget {
+                return "You're currently tracking \(formatRupees(budget - projectedSpend)) under budget for \(payload.summary.monthName)."
+            }
+            return "Your daily average so far is \(formatRupees(payload.summary.dailyAverage)); \(daysLeft) days left in \(payload.summary.monthName)."
         }
 
         return ""
@@ -188,18 +217,26 @@ final class LocalInsightsService {
 
         if payload.category.topCategories.count >= 2 {
             let secondCategory = payload.category.topCategories[1]
-            return "\(topCategory.name) and \(secondCategory.name) are your pattern pair; set one small rule this week."
+            let combinedShare = topCategory.sharePercent + secondCategory.sharePercent
+            return "\(topCategory.name) and \(secondCategory.name) together account for \(combinedShare)% of spending this month."
         }
 
-        return ""
+        return "\(topCategory.name) is your top category at \(formatRupees(topCategory.amount)); reviewing it first gives the most leverage."
     }
 
     private func fallbackSubsAndBills(_ payload: LocalInsightsPayload) -> String {
+        if payload.subsAndBills.unpaidBillsCount > 0,
+           payload.subsAndBills.upcomingBillsTotal > 0 {
+            let billLabel = payload.subsAndBills.unpaidBillsCount == 1 ? "bill" : "bills"
+            return "\(payload.subsAndBills.unpaidBillsCount) unpaid \(billLabel) totalling \(formatRupees(payload.subsAndBills.upcomingBillsTotal)) still outstanding this month."
+        }
+
         if let days = payload.subsAndBills.daysUntilNextBill,
-           (0...3).contains(days),
+           (0...7).contains(days),
            let name = payload.subsAndBills.nextBillName,
            let amount = payload.subsAndBills.nextBillAmount {
-            return "\(name) needs \(formatRupees(amount)) in \(days) days; move the money before spending elsewhere."
+            let dayLabel = days == 1 ? "day" : "days"
+            return "\(name) needs \(formatRupees(amount)) in \(days) \(dayLabel); move the money before spending elsewhere."
         }
 
         if payload.subsAndBills.monthlySubscriptionTotal > 0 {
@@ -238,8 +275,21 @@ final class LocalInsightsService {
             .joined(separator: " ")
         let lowered = cleaned.lowercased()
         let blockedPrefixes = ["could not", "no insight", "n/a", "none", "null"]
+        let blockedExactValues = [
+            "home digest",
+            "home_digest",
+            "summary",
+            "category highlight",
+            "category_highlight",
+            "subs and bills",
+            "subs_and_bills",
+            "goal insight",
+            "goal_insight"
+        ]
 
-        if cleaned.isEmpty || blockedPrefixes.contains(where: { lowered.hasPrefix($0) }) {
+        if cleaned.isEmpty ||
+            blockedPrefixes.contains(where: { lowered.hasPrefix($0) }) ||
+            blockedExactValues.contains(lowered) {
             return ""
         }
 
