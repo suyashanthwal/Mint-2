@@ -19,15 +19,7 @@ class AddMoneyAlertViewController: UIViewController {
     
     
     @IBAction func DoneButtonTapped(_ sender: Any) {
-        guard let text = EntryAmountTextField.text,
-                  let amount = Double(text),
-                  amount > 0,
-                  amount <= budgetRemaining else {
-                return
-            }
-
-            delegate?.didAddMoney(amount: amount, goalId: goal.id)
-            dismiss(animated: true)
+        submitAmount()
     }
 
     var goal: Goal!
@@ -80,6 +72,14 @@ class AddMoneyAlertViewController: UIViewController {
     }
 
     @IBAction func confirmTapped(_ sender: UIButton) {
+        submitAmount()
+    }
+
+    @IBAction func cancelTapped(_ sender: Any) {
+        dismiss(animated: true)
+    }
+    
+    private func submitAmount() {
         guard let text = EntryAmountTextField.text,
               let amount = Double(text),
               amount > 0,
@@ -88,10 +88,6 @@ class AddMoneyAlertViewController: UIViewController {
         }
 
         delegate?.didAddMoney(amount: amount, goalId: goal.id)
-        dismiss(animated: true)
-    }
-
-    @IBAction func cancelTapped(_ sender: UIButton) {
         dismiss(animated: true)
     }
 }

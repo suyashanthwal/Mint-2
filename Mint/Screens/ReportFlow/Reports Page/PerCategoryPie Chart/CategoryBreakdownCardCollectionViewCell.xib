@@ -36,7 +36,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7E3-uB-sXd">
-                                        <rect key="frame" x="59.333333333333329" y="106.66666666666667" width="41.333333333333329" height="20"/>
+                                        <rect key="frame" x="40" y="106.66666666666667" width="80" height="20.333333333333329"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -48,9 +48,11 @@
                                     <constraint firstItem="7E3-uB-sXd" firstAttribute="centerX" secondItem="Jq3-BJ-YNd" secondAttribute="centerX" id="XFK-Mm-Y1z"/>
                                     <constraint firstAttribute="height" constant="160" id="cOi-aV-vGK"/>
                                     <constraint firstItem="af6-ae-aSD" firstAttribute="centerX" secondItem="Jq3-BJ-YNd" secondAttribute="centerX" id="fff-WR-7GK"/>
+                                    <constraint firstAttribute="trailing" secondItem="7E3-uB-sXd" secondAttribute="trailing" constant="40" id="gfU-Dc-Eai"/>
                                     <constraint firstAttribute="width" constant="160" id="r7Y-tR-GTr"/>
                                     <constraint firstItem="7E3-uB-sXd" firstAttribute="top" secondItem="af6-ae-aSD" secondAttribute="bottom" constant="4" id="s9M-BG-bkJ"/>
                                     <constraint firstItem="Jq3-BJ-YNd" firstAttribute="centerX" secondItem="ZOy-ZV-j0u" secondAttribute="centerX" id="scZ-2M-OwX"/>
+                                    <constraint firstItem="7E3-uB-sXd" firstAttribute="leading" secondItem="ZOy-ZV-j0u" secondAttribute="leading" constant="40" id="zjw-ae-ovL"/>
                                 </constraints>
                             </view>
                         </subviews>

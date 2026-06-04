@@ -361,15 +361,17 @@ final class GoalsViewController: UIViewController {
 
     private func presentAddMoney(for goal: Goal) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let vc = storyboard.instantiateViewController(
-            withIdentifier: "AddMoneyAlertViewController"
-        ) as! AddMoneyAlertViewController
-
+        let nav = storyboard.instantiateViewController(
+            withIdentifier: "AddMoneyNav"
+        ) as! UINavigationController
+        guard let vc = nav.viewControllers.first as? AddMoneyAlertViewController else { return }
+        
         vc.goal = goal
         vc.budgetRemaining = max(DatabaseManager.shared.fetchCurrentBudget()?.remainingBudget ?? 0, 0)
         vc.delegate = self
 
-        if let sheet = vc.sheetPresentationController {
+        nav.modalPresentationStyle = .pageSheet
+        if let sheet = nav.sheetPresentationController {
             sheet.detents = [
                 .custom { context in
                     context.maximumDetentValue * 0.5
@@ -379,7 +381,7 @@ final class GoalsViewController: UIViewController {
             sheet.preferredCornerRadius = 24
         }
 
-        present(vc, animated: true)
+        present(nav, animated: true)
     }
 
     private func presentAddGoalFlow() {

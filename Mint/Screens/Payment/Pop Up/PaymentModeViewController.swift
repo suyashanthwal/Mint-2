@@ -6,6 +6,12 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
         static let entryToManual = "EntryToManual"
         static let entryToReceipt = "EntryToReceipt"
     }
+    
+    private enum CardIndex {
+        static let manualEntry = 0
+        static let scanQRCode = 1
+        static let scanReceipt = 2
+    }
 
     @IBOutlet var CardViews: [UIView]!
     
@@ -67,6 +73,12 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
             cview.layer.borderWidth = 1
             cview.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.7).cgColor
             cview.tag = index
+            
+            if index == CardIndex.scanQRCode {
+                configureLockedQRCodeCard(cview)
+                continue
+            }
+            
             cview.isUserInteractionEnabled = true
             let tap = UITapGestureRecognizer(target: self, action: #selector(cardTapped(_:)))
             tap.delegate = self
@@ -90,6 +102,8 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
 
         AllPrimaryText.forEach { $0.textColor = AppColors.textPrimary }
         AllSecondaryText.forEach { $0.textColor = AppColors.textSecondary }
+        
+        configureLockedQRCodeCardIfNeeded()
     }
     
     @objc func cardTapped(_ sender: UITapGestureRecognizer) {
@@ -102,6 +116,11 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
 
     func selectCard(at index: Int) {
         for (i, cview) in CardViews.enumerated() {
+            if i == CardIndex.scanQRCode {
+                configureLockedQRCodeCard(cview)
+                continue
+            }
+            
             cview.backgroundColor = AppColors.card
             cview.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.7).cgColor
             if i < InsideIconView.count {
@@ -127,12 +146,39 @@ class PaymentModeViewController: UIViewController, UIGestureRecognizerDelegate {
 
     private func performSegueForCard(at index: Int) {
         switch index {
-        case 0:
+        case CardIndex.manualEntry:
             performSegue(withIdentifier: SegueIdentifier.entryToManual, sender: self)
-        case 2:
+        case CardIndex.scanReceipt:
             performSegue(withIdentifier: SegueIdentifier.entryToReceipt, sender: self)
         default:
             break
+        }
+    }
+    
+    private func configureLockedQRCodeCardIfNeeded() {
+        guard CardIndex.scanQRCode < CardViews.count else { return }
+        configureLockedQRCodeCard(CardViews[CardIndex.scanQRCode])
+    }
+    
+    private func configureLockedQRCodeCard(_ cardView: UIView) {
+        cardView.isUserInteractionEnabled = false
+        cardView.backgroundColor = AppColors.card.withAlphaComponent(0.58)
+        cardView.layer.borderColor = AppColors.cardBorder.withAlphaComponent(0.35).cgColor
+        cardView.accessibilityTraits.insert(.notEnabled)
+        cardView.accessibilityLabel = "Scan QR locked. Available in the next update."
+        
+        if CardIndex.scanQRCode < InsideIconView.count {
+            InsideIconView[CardIndex.scanQRCode].backgroundColor = AppColors.inputBackground.withAlphaComponent(0.55)
+        }
+        
+        if CardIndex.scanQRCode < InsideIconImageView.count {
+            InsideIconImageView[CardIndex.scanQRCode].image = UIImage(systemName: "lock.fill")
+            InsideIconImageView[CardIndex.scanQRCode].tintColor = AppColors.textSecondary.withAlphaComponent(0.65)
+        }
+        
+        if CardIndex.scanQRCode < AllPrimaryText.count {
+            AllPrimaryText[CardIndex.scanQRCode].text = "Scan QR - Available in next update"
+            AllPrimaryText[CardIndex.scanQRCode].textColor = AppColors.textSecondary.withAlphaComponent(0.65)
         }
     }
 
