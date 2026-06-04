@@ -18,6 +18,7 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
 
     private let urgentThreshold = 3
     private let brandLogoLabel = UILabel()
+    private let connectorWidth: CGFloat = 126
 
     var contextMenuPreviewView: UIView {
         statusFrameView ?? cardContainerView ?? contentView
@@ -160,10 +161,13 @@ class UpcomingBillsCollectionViewCell: UICollectionViewCell {
         timelineVerticalLineView?.backgroundColor = AppColors.cardBorder
         timelineDotView?.backgroundColor = AppColors.cardBorder
         timelineConnectorView?.backgroundColor = AppColors.cardBorder
+        timelineConnectorView?.constraints
+            .first(where: { $0.firstAttribute == .width })?
+            .constant = connectorWidth
 
         timelineVerticalLineView?.isHidden = false
         timelineDotView?.isHidden = false
-        timelineConnectorView?.isHidden = isLast && !isFirst
+        timelineConnectorView?.isHidden = isLast
     }
 
     private func iconImage(named name: String) -> UIImage? {

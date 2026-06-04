@@ -1113,6 +1113,92 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         loadDataFromDatabase()
     }
 
+    private func markSubscriptionAsPaid(_ payment: RecurringPayment) {
+        guard let categoryId = payment.categoryId else {
+            showAlert(title: "Missing Category", message: "This subscription needs a category before it can be marked as paid.")
+            return
+        }
+
+        _ = db.insertExpenseTransaction(
+            name: payment.name,
+            amount: payment.amount,
+            timestamp: Date(),
+            categoryId: categoryId,
+            status: true,
+            expenseType: "subscription",
+            source: .manual,
+            note: "subscription-payment:\(payment.id.uuidString)"
+        )
+
+        let nextDate = advancedDate(from: payment.nextDate, duration: payment.duration)
+        db.updateRecurringPayment(
+            id: payment.id,
+            name: payment.name,
+            duration: payment.duration,
+            amount: payment.amount,
+            nextDate: nextDate,
+            isAlertEnabled: payment.isAlertEnabled,
+            isAddAutomatically: payment.isAddAutomatically,
+            isActive: payment.isActive,
+            note: payment.note
+        )
+
+        db.resetMonthlyExpense()
+        actionFeedbackGenerator.notificationOccurred(.success)
+        NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+        NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
+        loadDataFromDatabase()
+    }
+
+    private func openEditSubscription(payment: RecurringPayment) {
+        guard let nav = storyboard?.instantiateViewController(withIdentifier: "EditSubsAndBillsNav") as? UINavigationController,
+              let viewController = nav.viewControllers.first as? EditSubsAndBillsViewController
+        else { return }
+
+        viewController.mode = .subscription
+        viewController.recurringPayment = payment
+        viewController.onEntryUpdated = { [weak self] in
+            self?.loadDataFromDatabase()
+        }
+        nav.modalPresentationStyle = .pageSheet
+        present(nav, animated: true)
+    }
+
+    private func confirmDeleteSubscription(_ payment: RecurringPayment) {
+        let alert = UIAlertController(
+            title: "Delete \"\(payment.name)\"?",
+            message: "This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            BillSubscriptionReminderManager.shared.cancelReminder(forSubscriptionId: payment.id)
+            DatabaseManager.shared.deleteRecurringPayment(id: payment.id)
+            self?.actionFeedbackGenerator.notificationOccurred(.warning)
+            NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+            self?.loadDataFromDatabase()
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
+
+    private func advancedDate(from date: Date, duration: PaymentDuration) -> Date {
+        let calendar = Calendar.current
+        switch duration {
+        case .daily: return calendar.date(byAdding: .day, value: 1, to: date) ?? date
+        case .weekly: return calendar.date(byAdding: .day, value: 7, to: date) ?? date
+        case .monthly: return calendar.date(byAdding: .month, value: 1, to: date) ?? date
+        case .quarterly: return calendar.date(byAdding: .month, value: 3, to: date) ?? date
+        case .halfYearly: return calendar.date(byAdding: .month, value: 6, to: date) ?? date
+        case .yearly: return calendar.date(byAdding: .year, value: 1, to: date) ?? date
+        }
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
     private func confirmBufferedTransaction(id: UUID) {
         guard db.confirmBufferedTransaction(id: id) else { return }
 
@@ -1454,19 +1540,38 @@ extension HomeViewController {
 
         if collectionView == billsCollectionView {
             guard upcomingItems.indices.contains(indexPath.item) else { return nil }
-            guard case .bill(let bill) = upcomingItems[indexPath.item] else { return nil }
             contextMenuFeedbackGenerator.prepare()
             contextMenuFeedbackGenerator.impactOccurred()
 
-            return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
-                let title = bill.isPaid ? "Mark as Not Paid" : "Mark as Paid"
-                let imageName = bill.isPaid ? "arrow.uturn.backward.circle" : "checkmark.circle"
+            switch upcomingItems[indexPath.item] {
+            case .bill(let bill):
+                return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+                    let title = bill.isPaid ? "Mark as Not Paid" : "Mark as Paid"
+                    let imageName = bill.isPaid ? "arrow.uturn.backward.circle" : "checkmark.circle"
 
-                let toggleAction = UIAction(title: title, image: UIImage(systemName: imageName)) { _ in
-                    self?.toggleBillPaymentState(for: bill.id)
+                    let toggleAction = UIAction(title: title, image: UIImage(systemName: imageName)) { _ in
+                        self?.toggleBillPaymentState(for: bill.id)
+                    }
+
+                    return UIMenu(title: bill.name, children: [toggleAction])
                 }
 
-                return UIMenu(title: bill.name, children: [toggleAction])
+            case .subscription(let payment):
+                return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+                    let markPaid = UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { _ in
+                        self?.markSubscriptionAsPaid(payment)
+                    }
+
+                    let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
+                        self?.openEditSubscription(payment: payment)
+                    }
+
+                    let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
+                        self?.confirmDeleteSubscription(payment)
+                    }
+
+                    return UIMenu(title: payment.name, children: [markPaid, edit, delete])
+                }
             }
         }
 
