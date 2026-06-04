@@ -468,6 +468,7 @@ final class GoalsViewController: UIViewController {
         reloadGoals()
         NotificationCenter.default.post(name: .goalDataDidChange, object: nil)
         NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
+        NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
     }
 
     @objc private func handleGoalDataChange() {

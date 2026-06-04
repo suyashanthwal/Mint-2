@@ -4250,11 +4250,11 @@ spend on?</string>
             <objects>
                 <viewController storyboardIdentifier="GoalsViewController" id="vLu-2N-UBY" customClass="GoalsViewController" customModule="Mint" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="yVW-of-S7e">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="793"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BUc-9Y-ZZt">
-                                <rect key="frame" x="0.0" y="172" width="393" height="50"/>
+                                <rect key="frame" x="0.0" y="59" width="393" height="50"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Goals" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aZL-0M-DWa">
                                         <rect key="frame" x="20" y="0.0" width="73" height="50"/>
@@ -4289,7 +4289,7 @@ spend on?</string>
                                 </constraints>
                             </view>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="goals-main-collection">
-                                <rect key="frame" x="0.0" y="234" width="393" height="401"/>
+                                <rect key="frame" x="0.0" y="121" width="393" height="572"/>
                                 <color key="backgroundColor" red="0.039215686274509803" green="0.039215686274509803" blue="0.039215686274509803" alpha="1" colorSpace="calibratedRGB"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="goals-fallback-layout">
                                     <size key="itemSize" width="100" height="100"/>
@@ -5442,11 +5442,11 @@ spend on?</string>
             <objects>
                 <viewController storyboardIdentifier="SummaryViewController" id="AZp-Kr-Mo7" customClass="SummaryViewController" customModule="Mint" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Ub4-rn-ULr">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="793"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="khM-Gi-KbU">
-                                <rect key="frame" x="0.0" y="172" width="393" height="563"/>
+                                <rect key="frame" x="0.0" y="59" width="393" height="734"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="RIs-3j-IFr">
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="902"/>
@@ -5527,7 +5527,7 @@ spend on?</string>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6En-yl-d7g">
-                                                                <rect key="frame" x="151" y="43.333333333333314" width="91.333333333333314" height="43.333333333333343"/>
+                                                                <rect key="frame" x="151" y="43.333333333333343" width="91.333333333333314" height="43.333333333333343"/>
                                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="36"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
@@ -8789,8 +8789,8 @@ spend on?</string>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="79i-Hc-Ndo"/>
-        <segue reference="77P-xF-J8j"/>
+        <segue reference="mN7-3Q-Hs2"/>
+        <segue reference="gK4-Lp-9Tx"/>
         <segue reference="0Uj-7W-r3N"/>
         <segue reference="8HH-lh-D8q"/>
     </inferredMetricsTieBreakers>

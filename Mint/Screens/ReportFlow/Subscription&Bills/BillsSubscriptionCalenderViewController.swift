@@ -139,6 +139,8 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         MonthLabel.textColor = AppColors.textPrimary
         ThisMonthLabel.textColor = AppColors.textPrimary
         TotalAmountLabel.textColor = AppColors.textPrimary
+        SegmentedControl.backgroundColor = AppColors.sectionBackground
+        SegmentedControl.selectedSegmentTintColor = AppColors.brand
         SegmentedControl.selectedSegmentIndex = selectedBillStatus.rawValue
         SegmentedControl.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
  

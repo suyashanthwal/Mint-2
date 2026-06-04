@@ -250,7 +250,10 @@ extension DatabaseManager {
     func addMoneyToGoal(goalId: UUID, amount: Double) -> Bool {
         guard amount > 0, var goal = fetchGoal(id: goalId) else { return false }
 
-        goal.currentlySaved = min(goal.currentlySaved + amount, goal.targetAmount)
+        let amountToApply = min(amount, max(goal.targetAmount - goal.currentlySaved, 0))
+        guard amountToApply > 0 else { return false }
+
+        goal.currentlySaved = min(goal.currentlySaved + amountToApply, goal.targetAmount)
 
         updateGoal(
             id: goal.id,
@@ -264,6 +267,14 @@ extension DatabaseManager {
             isCompleted: goal.isCompleted,
             isOnHold: goal.isOnHold,
             completedOn: goal.completedOn
+        )
+
+        insertExpenseTransaction(
+            name: "Goal: \(goal.name)",
+            amount: amountToApply,
+            categoryId: nil,
+            expenseType: "goal",
+            note: "Added funds to goal \(goal.id.uuidString)"
         )
 
         return true
