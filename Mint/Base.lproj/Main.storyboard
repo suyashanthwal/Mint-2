@@ -8282,19 +8282,6 @@ spend on?</string>
                                                                                             <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="10"/>
                                                                                         </buttonConfiguration>
                                                                                     </button>
-                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="+" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sXu-h3-WAW">
-                                                                                        <rect key="frame" x="169" y="54" width="11" height="21"/>
-                                                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                                                        <nil key="textColor"/>
-                                                                                        <nil key="highlightedColor"/>
-                                                                                    </label>
-                                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HlO-UJ-3hl">
-                                                                                        <rect key="frame" x="188" y="54" width="42" height="21"/>
-                                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                                                        <nil key="textColor"/>
-                                                                                        <nil key="highlightedColor"/>
-                                                                                    </label>
                                                                                 </subviews>
                                                                                 <color key="backgroundColor" red="0.44705882349999998" green="0.31764705879999999" blue="0.96078431369999995" alpha="1" colorSpace="calibratedRGB"/>
                                                                                 <constraints>
@@ -8306,7 +8293,6 @@ spend on?</string>
                                                                                     <constraint firstAttribute="trailing" secondItem="VgF-PI-wCy" secondAttribute="trailing" constant="8" id="J12-zb-c8U"/>
                                                                                     <constraint firstItem="s6n-EX-AEa" firstAttribute="centerX" secondItem="XPu-b9-Nin" secondAttribute="centerX" id="Tjz-gh-o3h"/>
                                                                                     <constraint firstAttribute="trailing" secondItem="9Ay-TR-GFh" secondAttribute="trailing" constant="8" id="TmI-gi-Yax"/>
-                                                                                    <constraint firstItem="sXu-h3-WAW" firstAttribute="centerY" secondItem="s6n-EX-AEa" secondAttribute="centerY" id="UVb-rI-NrZ"/>
                                                                                     <constraint firstItem="s6n-EX-AEa" firstAttribute="centerY" secondItem="XPu-b9-Nin" secondAttribute="centerY" id="ddO-iC-VL7"/>
                                                                                     <constraint firstItem="Rzd-ln-JLD" firstAttribute="top" secondItem="XPu-b9-Nin" secondAttribute="top" constant="12" id="haw-YK-Mq1"/>
                                                                                     <constraint firstAttribute="bottom" secondItem="uwv-Zq-sRc" secondAttribute="bottom" constant="12" id="rw5-ag-TFA"/>

@@ -366,7 +366,7 @@ extension DatabaseManager {
         name: String,
         amount: Double,
         timestamp: Date = Date(),
-        categoryId: UUID,
+        categoryId: UUID?,
         status: Bool = true,
         expenseType: String = "bill",
         source: TransactionSource = .manual,
@@ -405,7 +405,11 @@ extension DatabaseManager {
         }
         sqlite3_bind_text(stmt, 7, (createdAtString as NSString).utf8String, -1, nil)
         sqlite3_bind_text(stmt, 8, (sourceString(from: source) as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(stmt, 9, (categoryId.uuidString as NSString).utf8String, -1, nil)
+        if let categoryId {
+            sqlite3_bind_text(stmt, 9, (categoryId.uuidString as NSString).utf8String, -1, nil)
+        } else {
+            sqlite3_bind_null(stmt, 9)
+        }
         sqlite3_bind_int(stmt, 10, status ? 1 : 0)
         sqlite3_bind_text(stmt, 11, (expenseType as NSString).utf8String, -1, nil)
 

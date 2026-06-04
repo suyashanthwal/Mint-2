@@ -902,16 +902,12 @@ final class NewBudgetViewController: UIViewController {
     }
 
     private func markSubscriptionAsPaid(_ payment: RecurringPayment) {
-        guard let categoryId = payment.categoryId else {
-            showAlert(title: "Missing Category", message: "This subscription needs a category before it can be marked as paid.")
-            return
-        }
         let db = DatabaseManager.shared
         _ = db.insertExpenseTransaction(
             name: payment.name,
             amount: payment.amount,
-            timestamp: Date(),
-            categoryId: categoryId,
+            timestamp: payment.nextDate,
+            categoryId: payment.categoryId,
             status: true,
             expenseType: "subscription",
             source: .manual,
@@ -933,6 +929,22 @@ final class NewBudgetViewController: UIViewController {
         NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
         NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
         reloadAll()
+    }
+
+    private func canMarkBillAsPaid(_ bill: Bill) -> Bool {
+        guard !bill.isPaid else { return false }
+        return isWithinPaymentWindow(bill.billDate)
+    }
+
+    private func canMarkSubscriptionAsPaid(_ payment: RecurringPayment) -> Bool {
+        isWithinPaymentWindow(payment.nextDate)
+    }
+
+    private func isWithinPaymentWindow(_ dueDate: Date) -> Bool {
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        let paymentWindowEnd = calendar.date(byAdding: .day, value: 7, to: startOfToday) ?? startOfToday
+        return calendar.startOfDay(for: dueDate) <= paymentWindowEnd
     }
 
     private func advancedDate(from date: Date, duration: PaymentDuration) -> Date {
@@ -1085,9 +1097,6 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
             return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
                 switch item {
                 case .subscription(let payment):
-                    let markPaid = UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { [weak self] _ in
-                        self?.markSubscriptionAsPaid(payment)
-                    }
                     let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
                         self?.openEditSubscription(payment: payment)
                     }
@@ -1099,13 +1108,15 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
                             self?.reloadAll()
                         }
                     }
-                    return UIMenu(title: payment.name, children: [markPaid, edit, delete])
-                case .bill(let bill):
-                    let markPaidTitle = bill.isPaid ? "Mark as Not Paid" : "Mark as Paid"
-                    let markPaidImage = bill.isPaid ? "arrow.uturn.backward.circle" : "checkmark.circle"
-                    let markPaid = UIAction(title: markPaidTitle, image: UIImage(systemName: markPaidImage)) { [weak self] _ in
-                        self?.toggleBillPaymentState(for: bill)
+                    var actions: [UIMenuElement] = []
+                    if self?.canMarkSubscriptionAsPaid(payment) == true {
+                        actions.append(UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { [weak self] _ in
+                            self?.markSubscriptionAsPaid(payment)
+                        })
                     }
+                    actions.append(contentsOf: [edit, delete])
+                    return UIMenu(title: payment.name, children: actions)
+                case .bill(let bill):
                     let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
                         self?.openEditBill(bill: bill)
                     }
@@ -1117,7 +1128,14 @@ extension NewBudgetViewController: UICollectionViewDataSource, UICollectionViewD
                             self?.reloadAll()
                         }
                     }
-                    return UIMenu(title: bill.name, children: [markPaid, edit, delete])
+                    var actions: [UIMenuElement] = []
+                    if self?.canMarkBillAsPaid(bill) == true {
+                        actions.append(UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { [weak self] _ in
+                            self?.toggleBillPaymentState(for: bill)
+                        })
+                    }
+                    actions.append(contentsOf: [edit, delete])
+                    return UIMenu(title: bill.name, children: actions)
                 }
             }
         }

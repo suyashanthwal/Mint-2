@@ -1114,16 +1114,11 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func markSubscriptionAsPaid(_ payment: RecurringPayment) {
-        guard let categoryId = payment.categoryId else {
-            showAlert(title: "Missing Category", message: "This subscription needs a category before it can be marked as paid.")
-            return
-        }
-
         _ = db.insertExpenseTransaction(
             name: payment.name,
             amount: payment.amount,
-            timestamp: Date(),
-            categoryId: categoryId,
+            timestamp: payment.nextDate,
+            categoryId: payment.categoryId,
             status: true,
             expenseType: "subscription",
             source: .manual,
@@ -1148,6 +1143,22 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
         NotificationCenter.default.post(name: .budgetDataDidChange, object: nil)
         NotificationCenter.default.post(name: .transactionDataDidChange, object: nil)
         loadDataFromDatabase()
+    }
+
+    private func canMarkBillAsPaid(_ bill: Bill) -> Bool {
+        guard !bill.isPaid else { return false }
+        return isWithinPaymentWindow(bill.billDate)
+    }
+
+    private func canMarkSubscriptionAsPaid(_ payment: RecurringPayment) -> Bool {
+        isWithinPaymentWindow(payment.nextDate)
+    }
+
+    private func isWithinPaymentWindow(_ dueDate: Date) -> Bool {
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        let paymentWindowEnd = calendar.date(byAdding: .day, value: 7, to: startOfToday) ?? startOfToday
+        return calendar.startOfDay(for: dueDate) <= paymentWindowEnd
     }
 
     private func openEditSubscription(payment: RecurringPayment) {
@@ -1545,11 +1556,9 @@ extension HomeViewController {
 
             switch upcomingItems[indexPath.item] {
             case .bill(let bill):
+                guard canMarkBillAsPaid(bill) else { return nil }
                 return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
-                    let title = bill.isPaid ? "Mark as Not Paid" : "Mark as Paid"
-                    let imageName = bill.isPaid ? "arrow.uturn.backward.circle" : "checkmark.circle"
-
-                    let toggleAction = UIAction(title: title, image: UIImage(systemName: imageName)) { _ in
+                    let toggleAction = UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { _ in
                         self?.toggleBillPaymentState(for: bill.id)
                     }
 
@@ -1558,10 +1567,6 @@ extension HomeViewController {
 
             case .subscription(let payment):
                 return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
-                    let markPaid = UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { _ in
-                        self?.markSubscriptionAsPaid(payment)
-                    }
-
                     let edit = UIAction(title: "Edit", image: UIImage(systemName: "pencil")) { _ in
                         self?.openEditSubscription(payment: payment)
                     }
@@ -1570,7 +1575,14 @@ extension HomeViewController {
                         self?.confirmDeleteSubscription(payment)
                     }
 
-                    return UIMenu(title: payment.name, children: [markPaid, edit, delete])
+                    var actions: [UIMenuElement] = []
+                    if self?.canMarkSubscriptionAsPaid(payment) == true {
+                        actions.append(UIAction(title: "Mark as Paid", image: UIImage(systemName: "checkmark.circle")) { _ in
+                            self?.markSubscriptionAsPaid(payment)
+                        })
+                    }
+                    actions.append(contentsOf: [edit, delete])
+                    return UIMenu(title: payment.name, children: actions)
                 }
             }
         }
