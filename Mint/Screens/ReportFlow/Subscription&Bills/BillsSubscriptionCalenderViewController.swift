@@ -6,24 +6,38 @@ private enum CVTag {
     static let activeSubs = 3
 }
 
+private enum BillStatusFilter: Int {
+    case upcoming = 0
+    case overdue = 1
+    case paid = 2
+
+    var title: String {
+        switch self {
+        case .upcoming:
+            return "Upcoming"
+        case .overdue:
+            return "Overdue"
+        case .paid:
+            return "Paid"
+        }
+    }
+}
+
 class BillsSubscriptionCalenderViewController: UIViewController {
 
-    @IBOutlet weak var UpcomingcollectionViewHeight: NSLayoutConstraint!
-    @IBOutlet weak var ActivecollectionViewHeight: NSLayoutConstraint!
-
+    @IBOutlet weak var AllBillsCollectionViewHeight: NSLayoutConstraint!
+    
     @IBOutlet weak var CalenderView: UIView!
     @IBOutlet weak var previousMonthButton: UIButton!
     @IBOutlet weak var MonthLabel: UILabel!
     @IBOutlet weak var nextMonthButton: UIButton!
     @IBOutlet weak var CalenderCollectionView: UICollectionView!
 
-    @IBOutlet weak var UpcomingBillsCollectionView: UICollectionView!
-    @IBOutlet weak var UpcomingBillsTitleLabel: UILabel!
-    @IBOutlet weak var UpcomingBillsTotalAmountLabel: UILabel!
-    @IBOutlet weak var ActiveSubscriptionCollectionView: UICollectionView!
-    @IBOutlet weak var ActiveSubscriptionTitleLabel: UILabel!
-    @IBOutlet weak var ActiveSubscriptionTotalAmountLabel: UILabel!
-
+    @IBOutlet weak var AllBillsCollectionView: UICollectionView!
+    @IBOutlet weak var ThisMonthLabel: UILabel!
+    @IBOutlet weak var TotalAmountLabel: UILabel!
+    @IBOutlet weak var SegmentedControl: UISegmentedControl!
+    
     private let db = DatabaseManager.shared
 
     private var todayComponents: DateComponents {
@@ -33,11 +47,11 @@ class BillsSubscriptionCalenderViewController: UIViewController {
     private var currentYear: Int = Calendar.current.component(.year, from: Date())
     private var currentMonth: Int = Calendar.current.component(.month, from: Date())
     private var calendarCells: [CalendarDay] = []
-    private var selectedDay: Int? = Calendar.current.component(.day, from: Date())
+    private var selectedBillStatus: BillStatusFilter = .upcoming
 
     private var allBills: [Bill] = []
     private var allSubscriptions: [RecurringPayment] = []
-    private var filteredUpcomingBills: [Bill] = []
+    private var filteredBills: [Bill] = []
 
     private var displayedSubscriptions: [RecurringPayment] {
         allSubscriptions.filter {
@@ -67,8 +81,8 @@ class BillsSubscriptionCalenderViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        UpcomingcollectionViewHeight.constant = UpcomingBillsCollectionView.contentSize.height
-        ActivecollectionViewHeight.constant = ActiveSubscriptionCollectionView.contentSize.height
+        AllBillsCollectionViewHeight.constant = AllBillsCollectionView.contentSize.height
+
     }
 
     deinit {
@@ -99,10 +113,11 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         CalenderView.applyShadow()
 
         MonthLabel.textColor = AppColors.textPrimary
-        UpcomingBillsTitleLabel.textColor = AppColors.textPrimary
-        UpcomingBillsTotalAmountLabel.textColor = AppColors.textPrimary
-        ActiveSubscriptionTitleLabel.textColor = AppColors.textPrimary
-        ActiveSubscriptionTotalAmountLabel.textColor = AppColors.textPrimary
+        ThisMonthLabel.textColor = AppColors.textPrimary
+        TotalAmountLabel.textColor = AppColors.textPrimary
+        SegmentedControl.selectedSegmentIndex = selectedBillStatus.rawValue
+        SegmentedControl.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
+ 
     }
 
     private func applyReportBackgroundTheme(to parent: UIView) {
@@ -152,29 +167,28 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         CalenderCollectionView.collectionViewLayout = makeCalendarLayout()
         CalenderCollectionView.backgroundColor = .clear
         CalenderCollectionView.isScrollEnabled = false
+        CalenderCollectionView.allowsSelection = false
         CalenderCollectionView.delegate = self
         CalenderCollectionView.dataSource = self
     }
 
     private func setupBillsCollectionViews() {
-        UpcomingBillsCollectionView.tag = CVTag.upcomingBills
-        ActiveSubscriptionCollectionView.tag = CVTag.activeSubs
+        AllBillsCollectionView.tag = CVTag.upcomingBills
+
 
         let nib = UINib(nibName: "SubsAndBillsCollectionViewCell", bundle: nil)
-        UpcomingBillsCollectionView.register(nib, forCellWithReuseIdentifier: billCellId)
-        ActiveSubscriptionCollectionView.register(nib, forCellWithReuseIdentifier: subsCellId)
+        AllBillsCollectionView.register(nib, forCellWithReuseIdentifier: billCellId)
 
-        UpcomingBillsCollectionView.collectionViewLayout = makeBillsLayout()
-        ActiveSubscriptionCollectionView.collectionViewLayout = makeBillsLayout()
 
-        UpcomingBillsCollectionView.backgroundColor = .clear
-        ActiveSubscriptionCollectionView.backgroundColor = .clear
+        AllBillsCollectionView.collectionViewLayout = makeBillsLayout()
 
-        UpcomingBillsCollectionView.delegate = self
-        UpcomingBillsCollectionView.dataSource = self
-        ActiveSubscriptionCollectionView.delegate = self
-        ActiveSubscriptionCollectionView.dataSource = self
-    }
+
+        AllBillsCollectionView.backgroundColor = .clear
+
+
+        AllBillsCollectionView.delegate = self
+        AllBillsCollectionView.dataSource = self
+}
 
     private func makeCalendarLayout() -> UICollectionViewLayout {
         UICollectionViewCompositionalLayout { _, environment in
@@ -225,30 +239,26 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         allSubscriptions = db.fetchRecurringPayments().filter { $0.isActive && !$0.isIncome }
 
         reloadCalendar()
-        refreshSelectedDayContent()
-        ActiveSubscriptionCollectionView.reloadData()
-        updateSubscriptionTotal()
+        refreshMonthContent()
 
         DispatchQueue.main.async {
             self.relayoutDynamicViews()
         }
     }
 
-    private func refreshSelectedDayContent() {
-        if let day = selectedDay, let date = makeDate(day: day) {
-            filterBills(for: date)
-        } else {
-            filteredUpcomingBills = []
-            UpcomingBillsTotalAmountLabel.text = AppFormatters.currency(0)
-            UpcomingBillsCollectionView.reloadData()
-            relayoutDynamicViews()
-        }
+    private func refreshMonthContent() {
+        filteredBills = billsForSelectedMonthAndStatus()
+
+        let total = filteredBills.reduce(0) { $0 + $1.amount }
+        ThisMonthLabel.text = "\(selectedBillStatus.title) Bills"
+        TotalAmountLabel.text = AppFormatters.currency(total)
+        AllBillsCollectionView.reloadData()
+        relayoutDynamicViews()
     }
 
     private func reloadCalendar() {
         let dataSource = CalendarDataSource(year: currentYear, month: currentMonth)
-        let unpaidBills = allBills.filter { !$0.isPaid }
-        let eventIcons = calendarEventIcons(unpaidBills: unpaidBills, subscriptions: displayedSubscriptions)
+        let eventIcons = calendarEventIcons(bills: billsForSelectedMonthAndStatus(), subscriptions: displayedSubscriptions)
 
         calendarCells = dataSource.days(eventIcons: eventIcons)
         MonthLabel.text = dataSource.displayTitle
@@ -268,18 +278,20 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         previousMonthButton.alpha = 1.0
     }
 
-    private func calendarEventIcons(unpaidBills: [Bill], subscriptions: [RecurringPayment]) -> [Int: String] {
+    private func calendarEventIcons(bills: [Bill], subscriptions: [RecurringPayment]) -> [Int: String] {
         var iconsByDay: [Int: String] = [:]
 
-        for subscription in subscriptions {
-            let eventDays = subscriptionEventDays(for: subscription, year: currentYear, month: currentMonth)
-            let iconName = normalizedCalendarIconName(subscription.icon, fallback: "creditcard.fill")
-            for day in eventDays where iconsByDay[day] == nil {
-                iconsByDay[day] = iconName
+        if selectedBillStatus == .upcoming {
+            for subscription in subscriptions {
+                let eventDays = subscriptionEventDays(for: subscription, year: currentYear, month: currentMonth)
+                let iconName = normalizedCalendarIconName(subscription.icon, fallback: "creditcard.fill")
+                for day in eventDays where iconsByDay[day] == nil {
+                    iconsByDay[day] = iconName
+                }
             }
         }
 
-        for bill in unpaidBills {
+        for bill in bills {
             let components = Calendar.current.dateComponents([.year, .month, .day], from: bill.billDate)
             guard components.year == currentYear,
                   components.month == currentMonth,
@@ -300,6 +312,13 @@ class BillsSubscriptionCalenderViewController: UIViewController {
     }
 
     @IBAction
+    @objc func segmentChanged(_ sender: UISegmentedControl) {
+        selectedBillStatus = BillStatusFilter(rawValue: sender.selectedSegmentIndex) ?? .upcoming
+        reloadCalendar()
+        refreshMonthContent()
+    }
+
+    @IBAction
     @objc func previousMonthTapped(_ sender: UIButton) {
         if currentMonth == 1 {
             currentMonth = 12
@@ -308,9 +327,8 @@ class BillsSubscriptionCalenderViewController: UIViewController {
             currentMonth -= 1
         }
 
-        selectedDay = nil
         reloadCalendar()
-        refreshSelectedDayContent()
+        refreshMonthContent()
     }
 
     @IBAction
@@ -322,36 +340,35 @@ class BillsSubscriptionCalenderViewController: UIViewController {
             currentMonth += 1
         }
 
-        selectedDay = nil
         reloadCalendar()
-        refreshSelectedDayContent()
+        refreshMonthContent()
     }
 
-    private func filterBills(for date: Date) {
+    private func billsForSelectedMonthAndStatus() -> [Bill] {
         let calendar = Calendar.current
-        filteredUpcomingBills = allBills.filter {
-            !$0.isPaid && calendar.isDate($0.billDate, inSameDayAs: date)
+        return allBills.filter { bill in
+            guard calendar.component(.year, from: bill.billDate) == currentYear,
+                  calendar.component(.month, from: bill.billDate) == currentMonth
+            else { return false }
+
+            return billStatus(for: bill) == selectedBillStatus
+        }
+        .sorted { $0.billDate < $1.billDate }
+    }
+
+    private func billStatus(for bill: Bill) -> BillStatusFilter {
+        if bill.isPaid {
+            return .paid
         }
 
-        let total = filteredUpcomingBills.reduce(0) { $0 + $1.amount }
-        UpcomingBillsTotalAmountLabel.text = AppFormatters.currency(total)
-        UpcomingBillsCollectionView.reloadData()
-        relayoutDynamicViews()
-    }
-
-    private func updateSubscriptionTotal() {
-        let total = displayedSubscriptions.reduce(0) { $0 + $1.amount }
-        ActiveSubscriptionTotalAmountLabel.text = AppFormatters.currency(total)
+        let startOfToday = Calendar.current.startOfDay(for: Date())
+        return bill.billDate < startOfToday ? .overdue : .upcoming
     }
 
     private func relayoutDynamicViews() {
         DispatchQueue.main.async {
-            self.UpcomingBillsCollectionView.collectionViewLayout.invalidateLayout()
-            self.ActiveSubscriptionCollectionView.collectionViewLayout.invalidateLayout()
-            self.UpcomingBillsCollectionView.layoutIfNeeded()
-            self.ActiveSubscriptionCollectionView.layoutIfNeeded()
-            self.UpcomingcollectionViewHeight.constant = self.calculatedListHeight(itemCount: self.filteredUpcomingBills.count)
-            self.ActivecollectionViewHeight.constant = self.calculatedListHeight(itemCount: self.displayedSubscriptions.count)
+            self.AllBillsCollectionView.collectionViewLayout.invalidateLayout()
+            self.AllBillsCollectionViewHeight.constant = self.calculatedListHeight(itemCount: self.filteredBills.count)
             self.view.layoutIfNeeded()
         }
     }
@@ -361,14 +378,6 @@ class BillsSubscriptionCalenderViewController: UIViewController {
         let rowHeight: CGFloat = 72
         let spacing: CGFloat = 8
         return CGFloat(itemCount) * rowHeight + CGFloat(max(itemCount - 1, 0)) * spacing
-    }
-
-    private func makeDate(day: Int) -> Date? {
-        var components = DateComponents()
-        components.year = currentYear
-        components.month = currentMonth
-        components.day = day
-        return Calendar.current.date(from: components)
     }
 
     private func subscriptionEventDays(for subscription: RecurringPayment, year: Int, month: Int) -> Set<Int> {
@@ -436,7 +445,7 @@ extension BillsSubscriptionCalenderViewController: UICollectionViewDataSource {
         case CVTag.calendar:
             return calendarCells.count
         case CVTag.upcomingBills:
-            return filteredUpcomingBills.count
+            return filteredBills.count
         case CVTag.activeSubs:
             return displayedSubscriptions.count
         default:
@@ -458,11 +467,10 @@ extension BillsSubscriptionCalenderViewController: UICollectionViewDataSource {
             let item = calendarCells[indexPath.item]
             let isCurrentMonth = currentYear == todayComponents.year && currentMonth == todayComponents.month
             let isToday = isCurrentMonth && item.isToday
-            let isSelected = item.day == selectedDay && !item.isPadding
             cell.configure(
                 day: item.day,
                 isToday: isToday,
-                isSelected: isSelected,
+                isSelected: false,
                 isPadding: item.isPadding,
                 eventIconName: item.eventIconName
             )
@@ -475,7 +483,7 @@ extension BillsSubscriptionCalenderViewController: UICollectionViewDataSource {
             ) as? SubsAndBillsCollectionViewCell else {
                 return UICollectionViewCell()
             }
-            cell.configureBill(with: filteredUpcomingBills[indexPath.row])
+            cell.configureBill(with: filteredBills[indexPath.row])
             return cell
 
         case CVTag.activeSubs:
@@ -497,20 +505,6 @@ extension BillsSubscriptionCalenderViewController: UICollectionViewDataSource {
 extension BillsSubscriptionCalenderViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard collectionView.tag == CVTag.calendar else { return }
-
-        let item = calendarCells[indexPath.item]
-        guard let day = item.day, !item.isPadding else { return }
-
-        selectedDay = day
-        CalenderCollectionView.reloadData()
-
-        if let date = makeDate(day: day) {
-            filterBills(for: date)
-        } else {
-            filteredUpcomingBills = []
-            UpcomingBillsCollectionView.reloadData()
-            relayoutDynamicViews()
-        }
+        guard collectionView.tag != CVTag.calendar else { return }
     }
 }
