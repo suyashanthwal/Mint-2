@@ -231,8 +231,8 @@ def clean_sentence(value: Any) -> str:
     cleaned = " ".join(value.replace("\n", " ").split()).strip()
     if not cleaned:
         return ""
-    lowered = cleaned.lower()
-    if lowered.startswith(("could not", "n/a", "none", "null", "no insight")):
+    normalized = normalize_insight_text(cleaned)
+    if normalized.startswith(("couldnot", "na", "none", "null", "noinsight")):
         return ""
     return cleaned
 
@@ -241,12 +241,30 @@ def empty_insights(fields: list[str]) -> dict[str, str]:
     return {field: "" for field in fields}
 
 
+def normalize_insight_text(text: str) -> str:
+    return "".join(ch for ch in text.lower() if ch.isalnum())
+
+
 def is_low_value_insight(text: str) -> bool:
     """
     Reject sentences that just restate a number already visible on screen.
     The model is instructed not to produce these, but this is a safety net.
     """
     lowered = text.lower()
+    normalized = normalize_insight_text(text)
+
+    placeholder_keys = {
+        "home",
+        "homedigest",
+        "summary",
+        "categorybreakdown",
+        "categoryhighlight",
+        "subscriptionsbills",
+        "subsandbills",
+        "goalinsight",
+    }
+    if normalized in placeholder_keys:
+        return True
 
     # Raw data regurgitation (chart/card already shows these)
     obvious_markers = (
@@ -272,6 +290,18 @@ def is_low_value_insight(text: str) -> bool:
     # Due-date announcements with no action attached
     due_markers = (" is due today.", " is due tomorrow.", " is due in ")
     if any(m in lowered for m in due_markers) and "set aside" not in lowered and "plan" not in lowered and "transfer" not in lowered:
+        return True
+
+    blocked_prompt_fragments = (
+        "budget pace",
+        "concrete next action",
+        "behavioral pattern",
+        "small rule to try",
+        "bill prep",
+        "urgent bill prep",
+        "subscription audit opportunity",
+    )
+    if any(normalize_insight_text(fragment) in normalized for fragment in blocked_prompt_fragments):
         return True
 
     return False

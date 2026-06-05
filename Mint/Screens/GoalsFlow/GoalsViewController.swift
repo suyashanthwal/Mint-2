@@ -91,7 +91,6 @@ final class GoalsViewController: UIViewController {
         profileButton.tintColor = AppColors.background
         profileButton.backgroundColor = AppColors.textPrimary
         profileButton.layer.cornerRadius = 17
-        profileButton.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
         
         
     }

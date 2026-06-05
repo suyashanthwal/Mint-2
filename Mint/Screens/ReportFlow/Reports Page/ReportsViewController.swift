@@ -339,7 +339,6 @@ class ReportsViewController: UIViewController {
         profileButton.tintColor = AppColors.background
         profileButton.backgroundColor = AppColors.textPrimary
         profileButton.layer.cornerRadius = 17
-        profileButton.addTarget(self, action: #selector(showProfile), for: .touchUpInside)
 
         
         configureInsightCard(summaryInsightVIew, label: summaryInsightLabel)
@@ -893,89 +892,9 @@ class ReportsViewController: UIViewController {
     }
 
     private func updateInsight(view: UIView, label: UILabel, text: String?) {
-        let cleanedText = sanitizeInsight(text)
+        let cleanedText = InsightTextSanitizer.sanitize(text)
         label.text = cleanedText
         view.isHidden = cleanedText.isEmpty
-    }
-
-    private func sanitizeInsight(_ text: String?) -> String {
-        let cleanedText = text?
-            .replacingOccurrences(of: "\n", with: " ")
-            .split(whereSeparator: \.isWhitespace)
-            .joined(separator: " ") ?? ""
-
-        let lowercaseText = cleanedText.lowercased()
-        let blockedPrefixes = [
-            "could not",
-            "no insight",
-            "n/a",
-            "none",
-            "null"
-        ]
-        let blockedExactValues = [
-            "home digest",
-            "home_digest",
-            "summary",
-            "category highlight",
-            "category_highlight",
-            "subs and bills",
-            "subs_and_bills",
-            "goal insight",
-            "goal_insight"
-        ]
-        let blockedPromptFragments = [
-            "budget pace",
-            "concrete next action",
-            "behavioral pattern",
-            "small rule to try",
-            "bill prep",
-            "urgent bill prep",
-            "subscription audit opportunity"
-        ]
-
-        if cleanedText.isEmpty ||
-            blockedPrefixes.contains(where: { lowercaseText.hasPrefix($0) }) ||
-            blockedExactValues.contains(lowercaseText) ||
-            blockedPromptFragments.contains(where: { lowercaseText.contains($0) }) ||
-            isLowValueInsight(lowercaseText)
-        {
-            return ""
-        }
-
-        return cleanedText
-    }
-
-    private func isLowValueInsight(_ lowercaseText: String) -> Bool {
-        let obviousMarkers = [
-            "spend is ",
-            "spending is ",
-            "spending stands at ",
-            "peaked on day ",
-            "leads spending at ",
-            "upcoming unpaid bills currently add up to ",
-            "active subscriptions total "
-        ]
-
-        if obviousMarkers.contains(where: { lowercaseText.contains($0) }) {
-            return true
-        }
-
-        let dueDateOnlyMarkers = [
-            " is due today.",
-            " is due tomorrow.",
-            " is due in "
-        ]
-
-        if dueDateOnlyMarkers.contains(where: { lowercaseText.contains($0) }) &&
-            !lowercaseText.contains("set aside") &&
-            !lowercaseText.contains("plan") &&
-            !lowercaseText.contains("buffer") &&
-            !lowercaseText.contains("keep")
-        {
-            return true
-        }
-
-        return false
     }
 
     private func cachedInsightsResponse(for envelope: ReportsInsightsEnvelope) -> ReportsInsightsResponse? {
@@ -1035,9 +954,9 @@ class ReportsViewController: UIViewController {
     }
 
     private func hasUsableInsights(_ response: ReportsInsightsResponse) -> Bool {
-        !sanitizeInsight(response.summary).isEmpty ||
-        !sanitizeInsight(response.categoryHighlight).isEmpty ||
-        !sanitizeInsight(response.subsAndBills).isEmpty
+        !InsightTextSanitizer.sanitize(response.summary).isEmpty ||
+        !InsightTextSanitizer.sanitize(response.categoryHighlight).isEmpty ||
+        !InsightTextSanitizer.sanitize(response.subsAndBills).isEmpty
     }
 
     private func clearCachedInsightsResponse() {

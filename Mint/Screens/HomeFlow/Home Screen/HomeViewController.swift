@@ -977,100 +977,12 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func applyInsights(_ response: HomeInsightsResponse?) {
-        let cleanedText = sanitizeInsight(response?.homeDigest)
+        let cleanedText = InsightTextSanitizer.sanitize(response?.homeDigest)
         insightsLabel?.text = cleanedText
         insightViewCard?.isHidden = cleanedText.isEmpty
         insightViewOuterCard?.isHidden = cleanedText.isEmpty
     }
     
-
-    private func sanitizeInsight(_ text: String?) -> String {
-        let cleanedText = text?
-            .replacingOccurrences(of: "\n", with: " ")
-            .split(whereSeparator: \.isWhitespace)
-            .joined(separator: " ") ?? ""
-
-        let lowercaseText = cleanedText.lowercased()
-        let blockedPrefixes = [
-            "could not",
-            "no insight",
-            "n/a",
-            "none",
-            "null"
-        ]
-        let blockedExactValues = [
-            "home digest",
-            "home_digest",
-            "summary",
-            "category highlight",
-            "category_highlight",
-            "subs and bills",
-            "subs_and_bills",
-            "goal insight",
-            "goal_insight"
-        ]
-        let blockedPromptFragments = [
-            "budget pace",
-            "concrete next action",
-            "behavioral pattern",
-            "small rule to try",
-            "bill prep",
-            "urgent bill prep",
-            "subscription audit opportunity"
-        ]
-
-        if cleanedText.isEmpty ||
-            blockedPrefixes.contains(where: { lowercaseText.hasPrefix($0) }) ||
-            blockedExactValues.contains(lowercaseText) ||
-            blockedPromptFragments.contains(where: { lowercaseText.contains($0) }) ||
-            isLowValueInsight(lowercaseText)
-        {
-            return ""
-        }
-
-        return cleanedText
-    }
-
-    private func isLowValueInsight(_ lowercaseText: String) -> Bool {
-        let obviousMarkers = [
-            "spend is ",
-            "spending is ",
-            "spending stands at ",
-            "peaked on day ",
-            "leads spending at ",
-            "upcoming unpaid bills currently add up to ",
-            "active subscriptions total ",
-            "your total expense",
-            "you have spent",
-            "you spent a total",
-            "total spending for",
-            "goal is % complete",
-            "you have saved",
-            "subscriptions cost",
-            "bills total"
-        ]
-
-        if obviousMarkers.contains(where: { lowercaseText.contains($0) }) {
-            return true
-        }
-
-        let dueDateOnlyMarkers = [
-            " is due today.",
-            " is due tomorrow.",
-            " is due in "
-        ]
-
-        if dueDateOnlyMarkers.contains(where: { lowercaseText.contains($0) }) &&
-            !lowercaseText.contains("set aside") &&
-            !lowercaseText.contains("plan") &&
-            !lowercaseText.contains("buffer") &&
-            !lowercaseText.contains("transfer")
-        {
-            return true
-        }
-
-        return false
-    }
 
     private func cachedInsightsResponse(for envelope: HomeInsightsEnvelope) -> HomeInsightsResponse? {
         guard let defaultsKey = insightsCacheKey,
@@ -1129,7 +1041,7 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private func hasUsableInsights(_ response: HomeInsightsResponse) -> Bool {
-        !sanitizeInsight(response.homeDigest).isEmpty
+        !InsightTextSanitizer.sanitize(response.homeDigest).isEmpty
     }
 
     private func clearCachedInsightsResponse() {

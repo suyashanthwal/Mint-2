@@ -154,41 +154,7 @@ final class LocalInsightsService {
     }
 
     private func clean(_ text: String) -> String {
-        let cleaned = text
-            .replacingOccurrences(of: "\n", with: " ")
-            .split(whereSeparator: \.isWhitespace)
-            .joined(separator: " ")
-        let lowered = cleaned.lowercased()
-        let blockedPrefixes = ["could not", "no insight", "n/a", "none", "null"]
-        let blockedExactValues = [
-            "home digest",
-            "home_digest",
-            "summary",
-            "category highlight",
-            "category_highlight",
-            "subs and bills",
-            "subs_and_bills",
-            "goal insight",
-            "goal_insight"
-        ]
-        let blockedPromptFragments = [
-            "budget pace",
-            "concrete next action",
-            "behavioral pattern",
-            "small rule to try",
-            "bill prep",
-            "urgent bill prep",
-            "subscription audit opportunity"
-        ]
-
-        if cleaned.isEmpty ||
-            blockedPrefixes.contains(where: { lowered.hasPrefix($0) }) ||
-            blockedExactValues.contains(lowered) ||
-            blockedPromptFragments.contains(where: { lowered.contains($0) }) {
-            return ""
-        }
-
-        return cleaned
+        InsightTextSanitizer.sanitize(text)
     }
 }
 
