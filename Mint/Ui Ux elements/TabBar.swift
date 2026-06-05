@@ -146,7 +146,7 @@ final class CustomTabBarController: UITabBarController {
     private func layoutBar() {
         let width = view.bounds.width - 32
         let x: CGFloat = 16
-        let y = view.bounds.height - barHeight - 16
+        let y = view.bounds.height - barHeight - 8
 
         barView.frame   = CGRect(x: x, y: y, width: width, height: barHeight)
         stackView.frame = barView.bounds

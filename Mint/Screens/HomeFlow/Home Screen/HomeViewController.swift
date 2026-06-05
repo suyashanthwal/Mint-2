@@ -1009,10 +1009,20 @@ class HomeViewController: UIViewController, UICollectionViewDelegate {
             "goal insight",
             "goal_insight"
         ]
+        let blockedPromptFragments = [
+            "budget pace",
+            "concrete next action",
+            "behavioral pattern",
+            "small rule to try",
+            "bill prep",
+            "urgent bill prep",
+            "subscription audit opportunity"
+        ]
 
         if cleanedText.isEmpty ||
             blockedPrefixes.contains(where: { lowercaseText.hasPrefix($0) }) ||
             blockedExactValues.contains(lowercaseText) ||
+            blockedPromptFragments.contains(where: { lowercaseText.contains($0) }) ||
             isLowValueInsight(lowercaseText)
         {
             return ""
